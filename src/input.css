@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for Antoinette's Pastries */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors duration-200 shadow-lg hover:shadow-xl;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300;
+  }
+  
+  .section-padding {
+    @apply py-16;
+  }
+  
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Extended Background Styles */
+  .bg-extended {
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 25%, #fdba74 50%, #fb923c 75%, #f97316 100%);
+    min-height: 100vh;
+  }
+  
+  .bg-pattern {
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(251, 146, 60, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(251, 191, 36, 0.05) 0%, transparent 50%);
+  }
+  
+  .bg-floating-elements {
+    position: relative;
+  }
+  
+  .bg-floating-elements::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 25% 25%, rgba(251, 146, 60, 0.08) 0%, transparent 30%),
+      radial-gradient(circle at 75% 75%, rgba(245, 158, 11, 0.08) 0%, transparent 30%),
+      radial-gradient(circle at 50% 10%, rgba(251, 191, 36, 0.04) 0%, transparent 30%);
+    pointer-events: none;
+  }
+  
+  .bg-hero-extended {
+    background: linear-gradient(135deg, 
+      rgba(254, 243, 199, 0.8) 0%, 
+      rgba(254, 215, 170, 0.6) 25%, 
+      rgba(253, 186, 116, 0.4) 50%, 
+      rgba(251, 146, 60, 0.3) 75%, 
+      rgba(249, 115, 22, 0.2) 100%);
+    position: relative;
+  }
+  
+  .bg-hero-extended::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20% 20%, rgba(251, 146, 60, 0.1) 0%, transparent 30%),
+      radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 30%),
+      radial-gradient(circle at 40% 60%, rgba(251, 191, 36, 0.05) 0%, transparent 30%);
+    pointer-events: none;
+  }
+  
+  /* Force mobile menu to be hidden on desktop */
+  @media (min-width: 768px) {
+    #mobile-menu-button,
+    #mobile-menu,
+    .mobile-menu-container {
+      display: none !important;
+    }
+    
+    /* Ensure desktop menu is visible on desktop */
+    .desktop-menu {
+      display: flex !important;
+    }
+  }
+  
+  /* Ensure mobile menu is visible on mobile */
+  @media (max-width: 767px) {
+    .desktop-menu {
+      display: none !important;
+    }
+    
+    .mobile-menu-container {
+      display: flex !important;
+    }
+  }
+}

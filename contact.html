@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Antoinette's Pastries</title>
+    <meta name="description" content="Get in touch with Antoinette's Pastries. Visit our bakery, call us, or send us a message. We're here to help with your pastry needs.">
+    <link href="css/output.css" rel="stylesheet">
+    <link href="assets/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-extended bg-pattern bg-floating-elements">
+    <!-- Navigation -->
+    <div id="navigation-container"></div>
+
+    <!-- Page Header -->
+    <section class="bg-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Contact Us</h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    We'd love to hear from you! Get in touch with us for orders, questions, or just to say hello
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Information -->
+    <section class="py-16 bg-gradient-to-r from-amber-50 to-orange-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center p-6 bg-white rounded-lg shadow-sm">
+                    <i class="fas fa-map-marker-alt text-4xl text-amber-600 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Visit Our Bakery</h3>
+                    <p class="text-gray-600 mb-4">123 Sweet Street<br>Pastry District, City 12345</p>
+                    <a href="https://maps.google.com" target="_blank" class="text-amber-600 hover:text-amber-700 font-semibold">
+                        <i class="fas fa-directions mr-2"></i>Get Directions
+                    </a>
+                </div>
+                <div class="text-center p-6 bg-white rounded-lg shadow-sm">
+                    <i class="fas fa-phone text-4xl text-amber-600 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Call Us</h3>
+                    <p class="text-gray-600 mb-4">(555) 123-PASTRY<br>hello@antoinettes.com</p>
+                    <a href="tel:+15551234567" class="text-amber-600 hover:text-amber-700 font-semibold">
+                        <i class="fas fa-phone mr-2"></i>Call Now
+                    </a>
+                </div>
+                <div class="text-center p-6 bg-white rounded-lg shadow-sm">
+                    <i class="fas fa-clock text-4xl text-amber-600 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Business Hours</h3>
+                    <p class="text-gray-600 mb-4">Mon-Fri: 7AM-7PM<br>Sat-Sun: 8AM-6PM</p>
+                    <p class="text-sm text-amber-600 font-semibold">
+                        <i class="fas fa-info-circle mr-1"></i>Closed on Holidays
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form and Map -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Contact Form -->
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Send Us a Message</h2>
+                    <form id="contact-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="first-name" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                                <input type="text" id="first-name" name="first_name" required
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label for="last-name" class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                                <input type="text" id="last-name" name="last_name" required
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                            <input type="email" id="email" name="email" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                            <input type="tel" id="phone" name="phone"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">Subject *</label>
+                            <select id="subject" name="subject" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                                <option value="">Select a subject</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="order">Custom Order</option>
+                                <option value="catering">Catering Services</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="complaint">Complaint</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Message *</label>
+                            <textarea id="message" name="message" rows="5" required
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                      placeholder="Tell us how we can help you..."></textarea>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="newsletter" name="newsletter"
+                                   class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
+                            <label for="newsletter" class="ml-2 block text-sm text-gray-700">
+                                Subscribe to our newsletter for updates and special offers
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-amber-600 text-white py-3 px-6 rounded-lg hover:bg-amber-700 transition-colors font-semibold">
+                            <i class="fas fa-paper-plane mr-2"></i>Send Message
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Map and Additional Info -->
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Find Us</h2>
+                    
+                    <!-- Map Placeholder -->
+                    <div class="bg-gray-200 rounded-lg h-64 mb-6 flex items-center justify-center">
+                        <div class="text-center text-gray-500">
+                            <i class="fas fa-map text-4xl mb-2"></i>
+                            <p>Interactive Map</p>
+                            <p class="text-sm">123 Sweet Street, Pastry District</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Special Announcements -->
+                    <div class="bg-amber-50 p-6 rounded-lg mb-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">
+                            <i class="fas fa-bullhorn text-amber-600 mr-2"></i>Special Announcements
+                        </h3>
+                        <ul class="space-y-2 text-gray-600">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                <span>We're now accepting custom cake orders for the holiday season!</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                <span>New sourdough bread available every Tuesday and Friday</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                <span>Free delivery within 5 miles for orders over ₱1,250</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Social Media -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">
+                            <i class="fas fa-share-alt text-amber-600 mr-2"></i>Follow Us
+                        </h3>
+                        <div class="flex space-x-4">
+                            <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors">
+                                <i class="fab fa-facebook text-2xl"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-pink-600 transition-colors">
+                                <i class="fab fa-instagram text-2xl"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
+                                <i class="fab fa-twitter text-2xl"></i>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-red-600 transition-colors">
+                                <i class="fab fa-youtube text-2xl"></i>
+                            </a>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-3">Stay updated with our latest creations and special offers!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-16 bg-gradient-to-r from-amber-50 to-orange-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Frequently Asked Questions</h2>
+                <p class="text-lg text-gray-600">Quick answers to common questions</p>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Do you take custom orders?</h3>
+                    <p class="text-gray-600">Yes! We love creating custom cakes and pastries for special occasions. Please contact us at least 48 hours in advance for custom orders.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Do you offer delivery?</h3>
+                    <p class="text-gray-600">We offer free delivery within 5 miles for orders over ₱1,250. Delivery fees apply for longer distances.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Are your products suitable for people with allergies?</h3>
+                    <p class="text-gray-600">We offer gluten-free and vegan options. Please inform us of any allergies when placing your order so we can accommodate your needs.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">How far in advance should I order for special events?</h3>
+                    <p class="text-gray-600">For large orders or special events, we recommend placing your order at least one week in advance to ensure availability.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top" class="fixed bottom-6 right-6 bg-amber-600 text-white p-3 rounded-full shadow-lg hover:bg-amber-700 transition-all duration-300 opacity-0 invisible z-50">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="js/shared.js"></script>
+    <script src="js/contact.js"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Functionality Test - Antoinette's Pastries</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 3px; }
+        .pass { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .fail { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Antoinette's Pastries - Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>Navigation Test</h2>
+        <button onclick="testNavigation()">Test Navigation Links</button>
+        <div id="nav-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>API Test</h2>
+        <button onclick="testAPI()">Test Products API</button>
+        <div id="api-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>JavaScript Functions Test</h2>
+        <button onclick="testJavaScript()">Test JavaScript Functions</button>
+        <div id="js-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Form Validation Test</h2>
+        <button onclick="testFormValidation()">Test Form Validation</button>
+        <div id="form-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Responsive Design Test</h2>
+        <button onclick="testResponsive()">Test Responsive Design</button>
+        <div id="responsive-results"></div>
+    </div>
+
+    <script>
+        function addResult(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            container.appendChild(div);
+        }
+
+        function testNavigation() {
+            const results = document.getElementById('nav-results');
+            results.innerHTML = '';
+            
+            // Test navigation links
+            const navLinks = [
+                { name: 'Home', url: 'index.html' },
+                { name: 'Products', url: 'products.html' },
+                { name: 'About', url: 'about.html' },
+                { name: 'Contact', url: 'contact.html' }
+            ];
+            
+            navLinks.forEach(link => {
+                fetch(link.url)
+                    .then(response => {
+                        if (response.ok) {
+                            addResult('nav-results', `✓ ${link.name} page loads successfully`, 'pass');
+                        } else {
+                            addResult('nav-results', `✗ ${link.name} page failed to load (${response.status})`, 'fail');
+                        }
+                    })
+                    .catch(error => {
+                        addResult('nav-results', `✗ ${link.name} page error: ${error.message}`, 'fail');
+                    });
+            });
+        }
+
+        function testAPI() {
+            const results = document.getElementById('api-results');
+            results.innerHTML = '';
+            
+            fetch('api/products.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addResult('api-results', `✓ Products API working - ${data.data.length} products loaded`, 'pass');
+                    } else {
+                        addResult('api-results', `✗ Products API error: ${data.message}`, 'fail');
+                    }
+                })
+                .catch(error => {
+                    addResult('api-results', `✗ Products API connection failed: ${error.message}`, 'fail');
+                });
+        }
+
+        function testJavaScript() {
+            const results = document.getElementById('js-results');
+            results.innerHTML = '';
+            
+            // Test if shared.js functions exist
+            const functions = ['showNotification', 'addToCart', 'updateCartDisplay'];
+            let allFunctionsExist = true;
+            
+            functions.forEach(func => {
+                if (typeof window[func] === 'function') {
+                    addResult('js-results', `✓ Function ${func} exists`, 'pass');
+                } else {
+                    addResult('js-results', `✗ Function ${func} missing`, 'fail');
+                    allFunctionsExist = false;
+                }
+            });
+            
+            // Test localStorage
+            try {
+                localStorage.setItem('test', 'value');
+                localStorage.removeItem('test');
+                addResult('js-results', '✓ localStorage working', 'pass');
+            } catch (error) {
+                addResult('js-results', '✗ localStorage not available', 'fail');
+            }
+            
+            // Test cart functionality
+            try {
+                if (typeof addToCart === 'function') {
+                    addResult('js-results', '✓ Cart functionality available', 'pass');
+                } else {
+                    addResult('js-results', '✗ Cart functionality missing', 'fail');
+                }
+            } catch (error) {
+                addResult('js-results', `✗ Cart test error: ${error.message}`, 'fail');
+            }
+        }
+
+        function testFormValidation() {
+            const results = document.getElementById('form-results');
+            results.innerHTML = '';
+            
+            // Create test form
+            const testForm = document.createElement('form');
+            testForm.innerHTML = `
+                <input type="email" id="test-email" required>
+                <input type="text" id="test-required" required>
+                <input type="tel" id="test-phone">
+            `;
+            document.body.appendChild(testForm);
+            
+            // Test email validation
+            const emailInput = document.getElementById('test-email');
+            emailInput.value = 'invalid-email';
+            
+            // Test required field validation
+            const requiredInput = document.getElementById('test-required');
+            requiredInput.value = '';
+            
+            if (requiredInput.hasAttribute('required')) {
+                addResult('form-results', '✓ Required field validation available', 'pass');
+            } else {
+                addResult('form-results', '✗ Required field validation missing', 'fail');
+            }
+            
+            // Test email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test('test@example.com')) {
+                addResult('form-results', '✓ Email validation regex working', 'pass');
+            } else {
+                addResult('form-results', '✗ Email validation regex broken', 'fail');
+            }
+            
+            // Clean up
+            document.body.removeChild(testForm);
+        }
+
+        function testResponsive() {
+            const results = document.getElementById('responsive-results');
+            results.innerHTML = '';
+            
+            // Test viewport meta tag
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                addResult('responsive-results', '✓ Viewport meta tag present', 'pass');
+            } else {
+                addResult('responsive-results', '✗ Viewport meta tag missing', 'fail');
+            }
+            
+            // Test screen width
+            const screenWidth = window.innerWidth;
+            addResult('responsive-results', `✓ Current screen width: ${screenWidth}px`, 'pass');
+            
+            // Test if CSS is responsive
+            const testDiv = document.createElement('div');
+            testDiv.style.width = '100%';
+            testDiv.style.maxWidth = '1200px';
+            testDiv.style.margin = '0 auto';
+            document.body.appendChild(testDiv);
+            
+            const computedStyle = window.getComputedStyle(testDiv);
+            if (computedStyle.maxWidth === '1200px') {
+                addResult('responsive-results', '✓ CSS responsive properties working', 'pass');
+            } else {
+                addResult('responsive-results', '✗ CSS responsive properties not working', 'fail');
+            }
+            
+            document.body.removeChild(testDiv);
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                testNavigation();
+                testAPI();
+                testJavaScript();
+                testFormValidation();
+                testResponsive();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

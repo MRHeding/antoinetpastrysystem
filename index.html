@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antoinette's Pastries - Delicious Artisanal Treats</title>
+    <meta name="description" content="Experience the finest handcrafted pastries, baked fresh daily with premium ingredients and traditional techniques at Antoinette's Pastries.">
+    <link href="css/output.css" rel="stylesheet">
+    <link href="assets/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-extended bg-pattern bg-floating-elements">
+    <!-- Navigation -->
+    <div id="navigation-container"></div>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative py-20 overflow-hidden bg-hero-extended">
+        <!-- Enhanced Background decoration -->
+        <div class="absolute inset-0 bg-gradient-to-br from-amber-100/40 to-orange-200/40"></div>
+        <div class="absolute top-10 left-10 w-20 h-20 bg-amber-200 rounded-full opacity-30 animate-pulse"></div>
+        <div class="absolute bottom-10 right-10 w-32 h-32 bg-orange-200 rounded-full opacity-30 animate-pulse"></div>
+        <div class="absolute top-1/2 left-1/4 w-16 h-16 bg-yellow-200 rounded-full opacity-30 animate-bounce"></div>
+        <div class="absolute top-1/4 right-1/3 w-24 h-24 bg-amber-300 rounded-full opacity-20 animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute bottom-1/4 left-1/3 w-28 h-28 bg-orange-300 rounded-full opacity-25 animate-bounce" style="animation-delay: 2s;"></div>
+        <div class="absolute top-3/4 right-1/4 w-20 h-20 bg-yellow-300 rounded-full opacity-20 animate-pulse" style="animation-delay: 0.5s;"></div>
+        
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="mb-6">
+                    <i class="fas fa-birthday-cake text-6xl text-amber-600 mb-4 animate-bounce-slow"></i>
+                </div>
+                <h2 class="text-5xl md:text-6xl font-bold text-gray-800 mb-6 text-shadow">
+                    Artisanal Pastries<br>
+                    <span class="text-amber-600">Made with Love</span>
+                </h2>
+                <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    Experience the finest handcrafted pastries, baked fresh daily with premium ingredients and traditional techniques passed down through generations.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="products.html" class="btn-primary">
+                        <i class="fas fa-utensils mr-2"></i>Explore Our Menu
+                    </a>
+                    <a href="contact.html" class="btn-secondary">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Visit Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products Preview -->
+    <section id="featured-products" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-bold text-gray-800 mb-4">Our Signature Pastries</h3>
+                <p class="text-lg text-gray-600">Handpicked favorites that will delight your taste buds</p>
+            </div>
+            
+            <div id="featured-products-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Featured products will be loaded here via JavaScript -->
+                <div class="text-center text-gray-500">
+                    <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+                    <p>Loading delicious pastries...</p>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="products.html" class="btn-primary">
+                    <i class="fas fa-utensils mr-2"></i>View All Products
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Preview Section -->
+    <section id="about-preview" class="py-16 bg-gradient-to-r from-amber-50 to-orange-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-4xl font-bold text-gray-800 mb-6">About Antoinette's</h3>
+                    <p class="text-lg text-gray-600 mb-6">
+                        For over 20 years, Antoinette's Pastries has been crafting exceptional baked goods using time-honored recipes and the finest ingredients. Our passion for perfection drives us to create pastries that not only taste amazing but also bring joy to every occasion.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+                            <i class="fas fa-award text-3xl text-amber-600 mb-2"></i>
+                            <h4 class="font-semibold text-gray-800">Award Winning</h4>
+                            <p class="text-sm text-gray-600">Best Bakery 2023</p>
+                        </div>
+                        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+                            <i class="fas fa-leaf text-3xl text-green-600 mb-2"></i>
+                            <h4 class="font-semibold text-gray-800">Fresh Daily</h4>
+                            <p class="text-sm text-gray-600">Baked Every Morning</p>
+                        </div>
+                    </div>
+                    <a href="about.html" class="btn-primary">
+                        <i class="fas fa-info-circle mr-2"></i>Learn More About Us
+                    </a>
+                </div>
+                <div class="text-center">
+                    <div class="card p-8">
+                        <i class="fas fa-birthday-cake text-8xl text-amber-600 mb-4"></i>
+                        <h4 class="text-2xl font-bold text-gray-800 mb-2">Made with Love</h4>
+                        <p class="text-gray-600">Every pastry is crafted with care and attention to detail</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Preview Section -->
+    <section id="contact-preview" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-bold text-gray-800 mb-4">Visit Us Today</h3>
+                <p class="text-lg text-gray-600">We'd love to serve you our delicious pastries</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <div class="text-center p-6 bg-amber-50 rounded-lg">
+                    <i class="fas fa-map-marker-alt text-3xl text-amber-600 mb-4"></i>
+                    <h4 class="text-xl font-semibold text-gray-800 mb-2">Location</h4>
+                    <p class="text-gray-600">123 Sweet Street<br>Pastry District, City 12345</p>
+                </div>
+                <div class="text-center p-6 bg-amber-50 rounded-lg">
+                    <i class="fas fa-clock text-3xl text-amber-600 mb-4"></i>
+                    <h4 class="text-xl font-semibold text-gray-800 mb-2">Hours</h4>
+                    <p class="text-gray-600">Mon-Fri: 7AM-7PM<br>Sat-Sun: 8AM-6PM</p>
+                </div>
+                <div class="text-center p-6 bg-amber-50 rounded-lg">
+                    <i class="fas fa-phone text-3xl text-amber-600 mb-4"></i>
+                    <h4 class="text-xl font-semibold text-gray-800 mb-2">Contact</h4>
+                    <p class="text-gray-600">(555) 123-PASTRY<br>hello@antoinettes.com</p>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <a href="contact.html" class="btn-primary">
+                    <i class="fas fa-envelope mr-2"></i>Get In Touch
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top" class="fixed bottom-6 right-6 bg-amber-600 text-white p-3 rounded-full shadow-lg hover:bg-amber-700 transition-all duration-300 opacity-0 invisible z-50">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="js/shared.js"></script>
+    <script src="js/home.js"></script>
+</body>
+</html>
