@@ -46,7 +46,7 @@ function displayFeaturedProducts(products) {
     container.innerHTML = products.map(product => `
         <div class="card group">
             <div class="h-48 bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center relative overflow-hidden">
-                <i class="fas fa-birthday-cake text-6xl text-amber-600 group-hover:scale-110 transition-transform duration-300"></i>
+                <img src="Logo.png" alt="Antoinette's Pastries Logo" class="h-16 w-16 object-contain group-hover:scale-110 transition-transform duration-300">
                 <div class="absolute top-2 right-2 bg-amber-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
                     ${product.category}
                 </div>

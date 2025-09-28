@@ -93,6 +93,8 @@ CREATE TABLE IF NOT EXISTS users (
     role ENUM('customer', 'admin') DEFAULT 'customer',
     is_active BOOLEAN DEFAULT TRUE,
     email_verified BOOLEAN DEFAULT FALSE,
+    email_verification_token VARCHAR(255) NULL,
+    email_verification_expires TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

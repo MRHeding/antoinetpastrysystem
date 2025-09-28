@@ -305,8 +305,11 @@ async function logout() {
         const result = await response.json();
         
         if (result.success) {
+            // Clear cart when user logs out
+            localStorage.removeItem('cart');
             showNotification('Logged out successfully', 'success');
             showLoginButton();
+            updateCartDisplay();
         } else {
             showNotification('Logout failed', 'error');
         }
@@ -317,33 +320,81 @@ async function logout() {
 }
 
 // Cart functionality
-function addToCart(productId) {
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find(item => item.id === productId);
-    
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({ id: productId, quantity: 1 });
+async function addToCart(productId) {
+    // Check if user is logged in first
+    try {
+        const response = await fetch('api/auth.php?action=check');
+        const data = await response.json();
+        
+        if (!data.success) {
+            showNotification('Please log in to add items to your cart', 'error');
+            // Redirect to login page
+            setTimeout(() => {
+                window.location.href = 'auth.html';
+            }, 2000);
+            return;
+        }
+        
+        // User is logged in, proceed with adding to cart
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existingItem = cart.find(item => item.id === productId);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({ id: productId, quantity: 1 });
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartDisplay();
+        
+        // Show success message
+        showNotification('Product added to cart!', 'success');
+    } catch (error) {
+        console.error('Error checking authentication:', error);
+        showNotification('Please log in to add items to your cart', 'error');
+        setTimeout(() => {
+            window.location.href = 'auth.html';
+        }, 2000);
     }
-    
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartDisplay();
-    
-    // Show success message
-    showNotification('Product added to cart!', 'success');
 }
 
-function updateCartDisplay() {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    
-    const cartButtons = document.querySelectorAll('button[class*="bg-amber-600"]');
-    cartButtons.forEach(button => {
-        if (button.innerHTML.includes('Cart')) {
-            button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (${totalItems})`;
+async function updateCartDisplay() {
+    // Check if user is logged in
+    try {
+        const response = await fetch('api/auth.php?action=check');
+        const data = await response.json();
+        
+        if (data.success) {
+            // User is logged in, show cart items
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            const cartButtons = document.querySelectorAll('a[class*="bg-amber-600"], button[class*="bg-amber-600"]');
+            cartButtons.forEach(button => {
+                if (button.innerHTML.includes('Cart')) {
+                    button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (${totalItems})`;
+                }
+            });
+        } else {
+            // User is not logged in, show empty cart
+            const cartButtons = document.querySelectorAll('a[class*="bg-amber-600"], button[class*="bg-amber-600"]');
+            cartButtons.forEach(button => {
+                if (button.innerHTML.includes('Cart')) {
+                    button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (0)`;
+                }
+            });
         }
-    });
+    } catch (error) {
+        console.error('Error checking authentication for cart display:', error);
+        // Show empty cart on error
+        const cartButtons = document.querySelectorAll('a[class*="bg-amber-600"], button[class*="bg-amber-600"]');
+        cartButtons.forEach(button => {
+            if (button.innerHTML.includes('Cart')) {
+                button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (0)`;
+            }
+        });
+    }
 }
 
 // Scroll to top functionality

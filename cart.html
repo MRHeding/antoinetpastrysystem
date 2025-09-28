@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Antoinette's Pastries</title>
+    <meta name="description" content="Review your selected pastries and proceed to checkout at Antoinette's Pastries.">
+    <link href="css/output.css" rel="stylesheet">
+    <link href="assets/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-extended bg-pattern bg-floating-elements">
+    <!-- Navigation -->
+    <div id="navigation-container"></div>
+
+    <!-- Page Header -->
+    <section class="bg-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Shopping Cart</h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Review your selected pastries and proceed to checkout
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cart Content -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Cart Items -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <div id="cart-items-container">
+                    <!-- Cart items will be loaded here via JavaScript -->
+                    <div class="text-center text-gray-500 py-12">
+                        <i class="fas fa-shopping-cart text-6xl mb-4"></i>
+                        <h3 class="text-2xl font-semibold mb-2">Your cart is empty</h3>
+                        <p class="text-gray-600 mb-6">Add some delicious pastries to get started!</p>
+                        <a href="products.html" class="btn-primary">
+                            <i class="fas fa-utensils mr-2"></i>Browse Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div id="cart-summary" class="bg-white rounded-lg shadow-lg p-8 hidden">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Order Summary</h3>
+                
+                <div class="space-y-4 mb-6">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal:</span>
+                        <span id="cart-subtotal" class="font-semibold">₱0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Tax (12%):</span>
+                        <span id="cart-tax" class="font-semibold">₱0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Delivery Fee:</span>
+                        <span id="cart-delivery" class="font-semibold">₱50.00</span>
+                    </div>
+                    <hr class="border-gray-200">
+                    <div class="flex justify-between text-xl">
+                        <span class="font-bold text-gray-800">Total:</span>
+                        <span id="cart-total" class="font-bold text-amber-600">₱0.00</span>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <button id="checkout-btn" class="w-full bg-amber-600 text-white py-3 px-6 rounded-md hover:bg-amber-700 transition duration-200 font-semibold">
+                        <i class="fas fa-credit-card mr-2"></i>Proceed to Checkout
+                    </button>
+                    <a href="products.html" class="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-md hover:bg-gray-200 transition duration-200 font-semibold text-center block">
+                        <i class="fas fa-arrow-left mr-2"></i>Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top" class="fixed bottom-6 right-6 bg-amber-600 text-white p-3 rounded-full shadow-lg hover:bg-amber-700 transition-all duration-300 opacity-0 invisible z-50">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Notification Container -->
+    <div id="notification" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-4 max-w-sm">
+            <div class="flex items-center">
+                <div id="notification-icon" class="mr-3"></div>
+                <div>
+                    <p id="notification-message" class="text-sm font-medium"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/shared.js"></script>
+    <script src="js/cart.js"></script>
+</body>
+</html>

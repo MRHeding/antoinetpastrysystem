@@ -70,7 +70,12 @@ async function handleLogin(e) {
                 }
             }, 1000);
         } else {
-            showNotification(result.message, 'error');
+            // Check if it's an email verification issue
+            if (result.email_verified === false) {
+                showEmailVerificationMessage(result.message);
+            } else {
+                showNotification(result.message, 'error');
+            }
         }
     } catch (error) {
         console.error('Login error:', error);
@@ -117,7 +122,11 @@ async function handleRegister(e) {
         const result = await response.json();
         
         if (result.success) {
-            showNotification('Registration successful! Please log in.', 'success');
+            if (result.email_sent) {
+                showEmailVerificationMessage(result.message);
+            } else {
+                showNotification(result.message, 'warning');
+            }
             showLoginForm();
             e.target.reset();
         } else {
@@ -187,4 +196,63 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         notification.remove();
     }, 5000);
+}
+
+// Show email verification message with resend option
+function showEmailVerificationMessage(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 bg-amber-500 text-white max-w-md';
+    notification.innerHTML = `
+        <div class="flex items-start">
+            <i class="fas fa-envelope mr-3 mt-1"></i>
+            <div class="flex-1">
+                <p class="font-semibold mb-2">Email Verification Required</p>
+                <p class="text-sm mb-3">${message}</p>
+                <div class="flex space-x-2">
+                    <button onclick="resendVerificationEmail()" class="bg-white text-amber-600 px-3 py-1 rounded text-xs font-semibold hover:bg-gray-100">
+                        Resend Email
+                    </button>
+                    <button onclick="this.parentElement.parentElement.parentElement.parentElement.remove()" class="bg-amber-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-amber-700">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 10 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 10000);
+}
+
+// Resend verification email
+async function resendVerificationEmail() {
+    const email = prompt('Please enter your email address to resend the verification email:');
+    
+    if (!email) return;
+    
+    try {
+        const response = await fetch('api/auth.php?action=resend-verification', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: email })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('Verification email sent successfully! Please check your email.', 'success');
+        } else {
+            showNotification('Error: ' + result.message, 'error');
+        }
+    } catch (error) {
+        showNotification('An error occurred. Please try again.', 'error');
+    }
 }
