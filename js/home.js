@@ -35,18 +35,25 @@ function displayFeaturedProducts(products) {
     
     if (!products || products.length === 0) {
         container.innerHTML = `
-            <div class="col-span-full text-center text-gray-500">
-                <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
-                <p>No featured products available at the moment.</p>
+            <div class="col-span-full text-center py-8">
+                <i class="fas fa-cookie-bite text-4xl text-amber-300 mb-4"></i>
+                <p class="text-gray-600">No featured products available</p>
             </div>
         `;
         return;
     }
     
-    container.innerHTML = products.map(product => `
+    container.innerHTML = products.map(product => {
+        // Determine image source
+        const imageSrc = product.image_url 
+            ? product.image_url 
+            : 'Logo.png';
+            
+        return `
         <div class="card group">
             <div class="h-48 bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center relative overflow-hidden">
-                <img src="Logo.png" alt="Antoinette's Pastries Logo" class="h-16 w-16 object-contain group-hover:scale-110 transition-transform duration-300">
+                <img src="${imageSrc}" alt="${product.name}" class="h-full w-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-br from-amber-100/40 to-orange-200/40"></div>
                 <div class="absolute top-2 right-2 bg-amber-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
                     ${product.category}
                 </div>
@@ -67,7 +74,7 @@ function displayFeaturedProducts(products) {
                 </div>
                 <div class="flex space-x-2">
                     <button onclick="addToCart(${product.id})" 
-                            class="flex-1 bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
+                            class="w-32 bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-cart-plus mr-2"></i>Add to Cart
                     </button>
                     <button onclick="viewProduct(${product.id})" 
@@ -77,7 +84,8 @@ function displayFeaturedProducts(products) {
                 </div>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Display error message for featured products

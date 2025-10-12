@@ -18,7 +18,54 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize pagination
     initPagination();
+    
+    // Initialize modal controls
+    initModalControls();
 });
+
+// Initialize modal controls
+function initModalControls() {
+    // Close modal when clicking the close button
+    const closeBtn = document.getElementById('close-product-modal');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', hideProductModal);
+    }
+    
+    // Close modal when clicking outside the modal content
+    const modal = document.getElementById('product-details-modal');
+    if (modal) {
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                hideProductModal();
+            }
+        });
+    }
+    
+    // Initialize quantity controls
+    const decreaseBtn = document.getElementById('decrease-quantity');
+    const increaseBtn = document.getElementById('increase-quantity');
+    const quantityInput = document.getElementById('product-quantity');
+    
+    if (decreaseBtn && increaseBtn && quantityInput) {
+        decreaseBtn.addEventListener('click', function() {
+            const currentValue = parseInt(quantityInput.value);
+            if (currentValue > 1) {
+                quantityInput.value = currentValue - 1;
+            }
+        });
+        
+        increaseBtn.addEventListener('click', function() {
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+        });
+        
+        // Ensure quantity is always at least 1
+        quantityInput.addEventListener('change', function() {
+            if (this.value < 1 || !this.value) {
+                this.value = 1;
+            }
+        });
+    }
+}
 
 // Load products from backend
 async function loadProducts() {
@@ -130,10 +177,16 @@ function displayProducts() {
         return;
     }
     
-    container.innerHTML = productsToShow.map(product => `
+    container.innerHTML = productsToShow.map(product => {
+        // Determine image source
+        const imageSrc = product.image_url 
+            ? product.image_url 
+            : 'Logo.png';
+            
+        return `
         <div class="card group" id="product-${product.id}">
-            <div class="h-48 bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center relative overflow-hidden">
-                <img src="Logo.png" alt="Antoinette's Pastries Logo" class="h-16 w-16 object-contain group-hover:scale-110 transition-transform duration-300">
+            <div class="h-48 bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center relative overflow-hidden cursor-pointer" onclick="viewProductDetails(${product.id})">
+                <img src="${imageSrc}" alt="${product.name}" class="h-full w-full object-cover">
                 <div class="absolute top-2 right-2 bg-amber-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
                     ${product.category}
                 </div>
@@ -142,10 +195,10 @@ function displayProducts() {
                 </div>
             </div>
             <div class="p-6">
-                <h4 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-amber-600 transition-colors">${product.name}</h4>
+                <h4 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-amber-600 transition-colors cursor-pointer" onclick="viewProductDetails(${product.id})">${product.name}</h4>
                 <p class="text-gray-600 mb-4 line-clamp-3">${product.description}</p>
                 <div class="flex justify-between items-center mb-4">
-                    <span class="text-2xl font-bold text-amber-600">₱${product.price}</span>
+                    <span class="text-2xl font-bold text-amber-600">$${product.price}</span>
                     <div class="flex items-center text-yellow-500">
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
@@ -157,7 +210,7 @@ function displayProducts() {
                 </div>
                 <div class="flex space-x-2">
                     <button onclick="addToCart(${product.id})" 
-                            class="flex-1 bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
+                            class="w-32 bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-cart-plus mr-2"></i>Add to Cart
                     </button>
                     <button onclick="viewProductDetails(${product.id})" 
@@ -167,7 +220,8 @@ function displayProducts() {
                 </div>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Initialize pagination
@@ -265,9 +319,96 @@ function displayError(message) {
     `;
 }
 
-// View product details (placeholder for future modal or detail page)
-function viewProductDetails(productId) {
-    showNotification('Product details coming soon!', 'info');
+// View product details
+async function viewProductDetails(productId) {
+    try {
+        // Find product in already loaded products first
+        let product = allProducts.find(p => p.id == productId);
+        
+        // If not found or we need fresh data, fetch from API
+        if (!product) {
+            const response = await fetch(`api/products.php?id=${productId}`);
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                product = result.data;
+            } else {
+                showNotification('Error loading product details', 'error');
+                return;
+            }
+        }
+        
+        // Populate modal with product details
+        document.getElementById('modal-product-name').textContent = product.name;
+        document.getElementById('modal-product-category').textContent = product.category;
+        document.getElementById('modal-product-price').textContent = product.price;
+        document.getElementById('modal-product-description').textContent = product.description;
+        
+        // Set product image
+        const modalImage = document.getElementById('modal-product-image');
+        modalImage.src = product.image_url ? product.image_url : 'Logo.png';
+        modalImage.alt = product.name;
+        
+        // Reset quantity to 1
+        document.getElementById('product-quantity').value = 1;
+        
+        // Set up add to cart button
+        const addToCartBtn = document.getElementById('add-to-cart-btn');
+        addToCartBtn.onclick = function() {
+            const quantity = parseInt(document.getElementById('product-quantity').value);
+            addToCartWithQuantity(productId, quantity);
+            hideProductModal();
+        };
+        
+        // Show modal
+        document.getElementById('product-details-modal').classList.remove('hidden');
+        
+    } catch (error) {
+        console.error('Error fetching product details:', error);
+        showNotification('Network error loading product details', 'error');
+    }
+}
+
+// Hide product details modal
+function hideProductModal() {
+    document.getElementById('product-details-modal').classList.add('hidden');
+}
+
+// Add to cart with quantity
+function addToCartWithQuantity(productId, quantity) {
+    const product = allProducts.find(p => p.id == productId);
+    
+    if (!product) {
+        showNotification('Product not found', 'error');
+        return;
+    }
+    
+    // Get existing cart or initialize new one
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    
+    // Check if product already in cart
+    const existingItem = cart.find(item => item.id == productId);
+    
+    if (existingItem) {
+        existingItem.quantity += quantity;
+    } else {
+        cart.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.image_url || 'Logo.png',
+            quantity: quantity
+        });
+    }
+    
+    // Save updated cart
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // Update cart count
+    updateCartDisplay();
+    
+    // Show notification
+    showNotification(`${quantity} ${product.name} added to cart!`, 'success');
 }
 
 // Handle URL hash for direct product linking

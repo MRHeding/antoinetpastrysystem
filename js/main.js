@@ -118,7 +118,7 @@ function displayProducts(products) {
                 </div>
                 <div class="flex space-x-2">
                     <button onclick="addToCart(${product.id})" 
-                            class="flex-1 bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
+                            class="w-32 bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-cart-plus mr-2"></i>Add to Cart
                     </button>
                     <button onclick="viewProduct(${product.id})" 

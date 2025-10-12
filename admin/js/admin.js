@@ -59,16 +59,27 @@ function displayProducts(products) {
         return;
     }
     
-    container.innerHTML = products.map(product => `
+    container.innerHTML = products.map(product => {
+        // Determine image source
+        const imageSrc = product.image_url 
+            ? `../${product.image_url}` 
+            : 'https://via.placeholder.com/150?text=No+Image';
+            
+        return `
         <div class="border border-gray-200 rounded-lg p-4 mb-4 hover:shadow-md transition-shadow">
             <div class="flex justify-between items-start">
-                <div class="flex-1">
-                    <h3 class="text-lg font-semibold text-gray-900">${product.name}</h3>
-                    <p class="text-sm text-gray-600 mb-2">${product.description}</p>
-                    <div class="flex items-center space-x-4 text-sm text-gray-500">
-                        <span><i class="fas fa-tag mr-1"></i>$${product.price}</span>
-                        <span><i class="fas fa-folder mr-1"></i>${product.category}</span>
-                        <span><i class="fas fa-calendar mr-1"></i>${new Date(product.created_at).toLocaleDateString()}</span>
+                <div class="flex-1 flex">
+                    <div class="mr-4">
+                        <img src="${imageSrc}" alt="${product.name}" class="w-20 h-20 object-cover rounded-md border border-gray-200">
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">${product.name}</h3>
+                        <p class="text-sm text-gray-600 mb-2">${product.description}</p>
+                        <div class="flex items-center space-x-4 text-sm text-gray-500">
+                            <span><i class="fas fa-tag mr-1"></i>$${product.price}</span>
+                            <span><i class="fas fa-folder mr-1"></i>${product.category}</span>
+                            <span><i class="fas fa-calendar mr-1"></i>${new Date(product.created_at).toLocaleDateString()}</span>
+                        </div>
                     </div>
                 </div>
                 <div class="flex space-x-2 ml-4">
@@ -81,7 +92,8 @@ function displayProducts(products) {
                 </div>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Load recent orders (mock data for now)
@@ -122,6 +134,12 @@ function loadRecentOrders() {
 // Show add product modal
 function showAddProductModal() {
     document.getElementById('add-product-modal').classList.remove('hidden');
+    // Reset the image preview when opening the modal
+    const imagePreviewContainer = document.getElementById('image-preview-container');
+    if (imagePreviewContainer) {
+        imagePreviewContainer.classList.add('hidden');
+    }
+    document.getElementById('file-name-display').textContent = 'No file selected';
 }
 
 // Hide add product modal
@@ -135,21 +153,36 @@ async function handleAddProduct(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
-    const productData = {
-        name: formData.get('name'),
-        description: formData.get('description'),
-        price: parseFloat(formData.get('price')),
-        category: formData.get('category')
-    };
+    
+    // Check if we have an image file
+    const hasImageFile = formData.get('product_image') && formData.get('product_image').size > 0;
     
     try {
-        const response = await fetch('../api/products.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(productData)
-        });
+        let response;
+        
+        if (hasImageFile) {
+            // Use FormData directly for file upload
+            response = await fetch('../api/products.php', {
+                method: 'POST',
+                body: formData // FormData automatically sets the correct Content-Type
+            });
+        } else {
+            // No image, use JSON as before
+            const productData = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                price: parseFloat(formData.get('price')),
+                category: formData.get('category')
+            };
+            
+            response = await fetch('../api/products.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            });
+        }
         
         const result = await response.json();
         
@@ -167,9 +200,179 @@ async function handleAddProduct(e) {
     }
 }
 
+// Initialize image preview functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup form submission - ensure this is properly attached
+    const addProductForm = document.getElementById('add-product-form');
+    if (addProductForm) {
+        addProductForm.addEventListener('submit', handleAddProduct);
+    } else {
+        console.error('Add product form not found!');
+    }
+    
+    // Setup edit product form submission
+    const editProductForm = document.getElementById('edit-product-form');
+    if (editProductForm) {
+        editProductForm.addEventListener('submit', handleEditProduct);
+    } else {
+        console.error('Edit product form not found!');
+    }
+    
+    // Setup image preview
+    initImagePreview();
+});
+
+// Initialize image preview functionality
+function initImagePreview() {
+    const imageInput = document.getElementById('product-image-input');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const imagePreviewContainer = document.getElementById('image-preview-container');
+    const imagePreview = document.getElementById('image-preview');
+    
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                fileNameDisplay.textContent = file.name;
+                
+                // Show image preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                fileNameDisplay.textContent = 'No file selected';
+                imagePreviewContainer.classList.add('hidden');
+            }
+        });
+    }
+}
+
 // Edit product
-function editProduct(productId) {
-    showNotification('Edit functionality coming soon!', 'info');
+async function editProduct(productId) {
+    try {
+        const response = await fetch(`../api/products.php?id=${productId}`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            const product = result.data;
+            
+            // Populate form fields
+            document.getElementById('edit-product-id').value = product.id;
+            document.getElementById('edit-product-name').value = product.name;
+            document.getElementById('edit-product-description').value = product.description;
+            document.getElementById('edit-product-price').value = product.price;
+            document.getElementById('edit-product-category').value = product.category;
+            
+            // Handle image preview
+            const imagePreview = document.getElementById('edit-image-preview');
+            if (product.image_url) {
+                imagePreview.src = `../${product.image_url}`;
+                document.getElementById('edit-image-preview-container').classList.remove('hidden');
+                document.getElementById('edit-file-name-display').textContent = product.image_url.split('/').pop();
+            } else {
+                imagePreview.src = 'https://via.placeholder.com/150?text=No+Image';
+                document.getElementById('edit-file-name-display').textContent = 'No image';
+            }
+            
+            // Show modal
+            document.getElementById('edit-product-modal').classList.remove('hidden');
+            
+            // Setup image preview for new uploads
+            initEditImagePreview();
+        } else {
+            showNotification('Error loading product details', 'error');
+        }
+    } catch (error) {
+        console.error('Error fetching product details:', error);
+        showNotification('Network error loading product details', 'error');
+    }
+}
+
+// Initialize edit image preview functionality
+function initEditImagePreview() {
+    const imageInput = document.getElementById('edit-product-image-input');
+    const fileNameDisplay = document.getElementById('edit-file-name-display');
+    const imagePreviewContainer = document.getElementById('edit-image-preview-container');
+    const imagePreview = document.getElementById('edit-image-preview');
+    
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                fileNameDisplay.textContent = file.name;
+                
+                // Show image preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+}
+
+// Hide edit product modal
+function hideEditProductModal() {
+    document.getElementById('edit-product-modal').classList.add('hidden');
+}
+
+// Handle edit product form submission
+async function handleEditProduct(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const productId = formData.get('product_id');
+    
+    // Check if we have an image file
+    const hasImageFile = formData.get('product_image') && formData.get('product_image').size > 0;
+    
+    try {
+        let response;
+        
+        if (hasImageFile) {
+            // Use FormData directly for file upload
+            formData.append('_method', 'PUT'); // Simulate PUT request
+            response = await fetch(`../api/products.php?id=${productId}`, {
+                method: 'POST',
+                body: formData // FormData automatically sets the correct Content-Type
+            });
+        } else {
+            // No image, use JSON as before
+            const productData = {
+                id: productId,
+                name: formData.get('name'),
+                description: formData.get('description'),
+                price: parseFloat(formData.get('price')),
+                category: formData.get('category')
+            };
+            
+            response = await fetch(`../api/products.php?id=${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            });
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('Product updated successfully!', 'success');
+            hideEditProductModal();
+            loadProducts();
+        } else {
+            showNotification('Error updating product: ' + result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error updating product:', error);
+        showNotification('Network error updating product', 'error');
+    }
 }
 
 // Delete product

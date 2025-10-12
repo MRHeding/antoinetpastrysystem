@@ -90,12 +90,19 @@
                     <div class="px-3 py-2 text-gray-600 text-sm">
                         <i class="fas fa-user mr-2"></i>Welcome, <span id="mobile-user-name">User</span>
                     </div>
-                    <a href="#" class="text-gray-800 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-user mr-2"></i>Profile
+                    <!-- Admin dashboard link (hidden by default) -->
+                    <a id="mobile-dashboard-link" href="admin/index.php" class="hidden text-gray-800 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
                     </a>
-                    <a href="#" class="text-gray-800 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-shopping-bag mr-2"></i>Orders
-                    </a>
+                    <!-- Regular user dropdown (shown by default) -->
+                    <div id="mobile-user-dropdown">
+                        <a href="#" class="text-gray-800 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
+                            <i class="fas fa-user mr-2"></i>Profile
+                        </a>
+                        <a href="#" class="text-gray-800 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
+                            <i class="fas fa-shopping-bag mr-2"></i>Orders
+                        </a>
+                    </div>
                     <a href="cart.html" class="text-gray-800 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-shopping-cart mr-2"></i>Cart
                     </a>

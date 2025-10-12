@@ -236,20 +236,35 @@ function showUserMenu(user) {
         userLoggedIn.classList.add('flex');
         userName.textContent = user.first_name;
         
-        // Setup user dropdown
-        const dropdownBtn = document.getElementById('user-dropdown-btn');
-        const dropdown = document.getElementById('user-dropdown');
-        
-        if (dropdownBtn && dropdown) {
-            dropdownBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                dropdown.classList.toggle('hidden');
-            });
+        // Check if user is admin
+        if (user.role === 'admin') {
+            // Replace dropdown with dashboard link
+            const dropdownBtn = document.getElementById('user-dropdown-btn');
+            const dropdown = document.getElementById('user-dropdown');
             
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function() {
-                dropdown.classList.add('hidden');
-            });
+            if (dropdownBtn && dropdown) {
+                // Change button to dashboard link
+                dropdownBtn.innerHTML = '<i class="fas fa-tachometer-alt mr-2"></i>Dashboard';
+                dropdownBtn.onclick = function() {
+                    window.location.href = 'admin/index.php';
+                };
+            }
+        } else {
+            // Setup user dropdown for regular users
+            const dropdownBtn = document.getElementById('user-dropdown-btn');
+            const dropdown = document.getElementById('user-dropdown');
+            
+            if (dropdownBtn && dropdown) {
+                dropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function() {
+                    dropdown.classList.add('hidden');
+                });
+            }
         }
     }
     
@@ -258,6 +273,20 @@ function showUserMenu(user) {
         mobileUserMenu.classList.add('hidden');
         mobileUserLoggedIn.classList.remove('hidden');
         mobileUserName.textContent = user.first_name;
+        
+        // Check if user is admin for mobile menu
+        if (user.role === 'admin') {
+            const mobileDashboardLink = document.getElementById('mobile-dashboard-link');
+            const mobileDropdown = document.getElementById('mobile-user-dropdown');
+            
+            if (mobileDashboardLink && mobileDropdown) {
+                mobileDropdown.classList.add('hidden');
+                mobileDashboardLink.classList.remove('hidden');
+                mobileDashboardLink.onclick = function() {
+                    window.location.href = 'admin/index.php';
+                };
+            }
+        }
     }
 }
 
