@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 27, 2025 at 02:16 AM
+-- Generation Time: Oct 12, 2025 at 06:09 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -134,7 +134,9 @@ INSERT INTO `products` (`id`, `name`, `description`, `price`, `category`, `image
 (7, 'Sourdough Bread', 'Traditional sourdough bread with a crispy crust and tangy flavor.', 5.00, 'Bread', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:31'),
 (8, 'Apple Cinnamon Roll', 'Soft cinnamon roll filled with spiced apples and topped with cream cheese glaze.', 4.50, 'Seasonal', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:32'),
 (9, 'Pumpkin Spice Muffin', 'Seasonal pumpkin muffin with warm spices and cream cheese filling.', 3.75, 'Seasonal', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:36'),
-(10, 'Strawberry Shortcake', 'Light sponge cake layered with fresh strawberries and whipped cream.', 22.00, 'Cakes', NULL, 1, '2025-09-21 16:01:40', '2025-09-21 16:01:40');
+(10, 'Strawberry Shortcake', 'Light sponge cake layered with fresh strawberries and whipped cream.', 22.00, 'Cakes', NULL, 0, '2025-09-21 16:01:40', '2025-10-11 16:11:49'),
+(11, 'Testing Product', 'For Testing', 1.00, 'Cookies', NULL, 0, '2025-10-11 15:58:22', '2025-10-11 15:59:11'),
+(12, 'Yummy Cookie', 'Delicioso', 50.00, 'Cookies', 'uploads/products/1760198544_2ChocolateChipCookies.jpg', 1, '2025-10-11 16:02:24', '2025-10-11 16:11:09');
 
 -- --------------------------------------------------------
 
@@ -158,16 +160,19 @@ CREATE TABLE `users` (
   `is_active` tinyint(1) DEFAULT 1,
   `email_verified` tinyint(1) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `email_verification_token` varchar(255) DEFAULT NULL,
+  `email_verification_expires` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `first_name`, `last_name`, `phone`, `address`, `city`, `state`, `zip_code`, `role`, `is_active`, `email_verified`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'admin@antoinettes.com', '$2y$10$1DyuW6YdQqK.tAhHzfJy8.AaVdltnycowD4Gb2crbp6wJEAjuVqCG', 'Admin', 'User', NULL, NULL, NULL, NULL, NULL, 'admin', 1, 0, '2025-09-21 16:01:40', '2025-09-21 16:11:27'),
-(2, 'juan1999', 'juan1999@gmail.com', '$2y$10$wxnZ.ujO75DbbV4FbzfOGOfLKg4BXGZO2qjr4dvwxXfatH1.cI5FO', 'Juan', 'Cruz', '09918195487', NULL, NULL, NULL, NULL, 'customer', 1, 0, '2025-09-24 15:44:39', '2025-09-24 15:44:39');
+INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `first_name`, `last_name`, `phone`, `address`, `city`, `state`, `zip_code`, `role`, `is_active`, `email_verified`, `created_at`, `updated_at`, `email_verification_token`, `email_verification_expires`) VALUES
+(1, 'admin', 'admin@antoinettes.com', '$2y$10$1DyuW6YdQqK.tAhHzfJy8.AaVdltnycowD4Gb2crbp6wJEAjuVqCG', 'Admin', 'User', NULL, NULL, NULL, NULL, NULL, 'admin', 1, 1, '2025-09-21 16:01:40', '2025-09-28 13:02:20', NULL, NULL),
+(2, 'juan1999', 'juan1999@gmail.com', '$2y$10$wxnZ.ujO75DbbV4FbzfOGOfLKg4BXGZO2qjr4dvwxXfatH1.cI5FO', 'Juan', 'Cruz', '09918195487', NULL, NULL, NULL, NULL, 'customer', 1, 1, '2025-09-24 15:44:39', '2025-09-28 13:02:20', NULL, NULL),
+(7, 'Juan', 'teronash23@gmail.com', '$2y$10$.wLheNcKs8jA1daj2dTmk.yqXO9rhiVJZ.x9IZx.dUkhh.Z8d62Lq', 'Juan', 'Cruz', '09918195487', NULL, NULL, NULL, NULL, 'customer', 1, 1, '2025-09-28 13:31:18', '2025-09-28 13:31:27', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -233,7 +238,9 @@ ALTER TABLE `products`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `idx_users_verification_token` (`email_verification_token`),
+  ADD KEY `idx_users_email_verified` (`email_verified`);
 
 --
 -- Indexes for table `user_sessions`
@@ -275,19 +282,19 @@ ALTER TABLE `order_items`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `user_sessions`
 --
 ALTER TABLE `user_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Constraints for dumped tables
