@@ -5,7 +5,6 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 require_once '../config/database.php';
-require_once 'email-service-smtp.php';
 
 // Start session
 session_start();
@@ -26,11 +25,11 @@ switch ($method) {
             case 'logout':
                 logoutUser();
                 break;
-            case 'verify-email':
-                verifyEmail();
+            case 'update_profile':
+                updateProfile();
                 break;
-            case 'resend-verification':
-                resendVerificationEmail();
+            case 'change_password':
+                changePassword();
                 break;
             default:
                 echo json_encode(['success' => false, 'message' => 'Invalid action']);
@@ -45,6 +44,12 @@ switch ($method) {
                 break;
             case 'profile':
                 getProfile();
+                break;
+            case 'update_profile':
+                updateProfile();
+                break;
+            case 'change_password':
+                changePassword();
                 break;
             default:
                 echo json_encode(['success' => false, 'message' => 'Invalid action']);
@@ -66,11 +71,6 @@ function registerUser() {
         return;
     }
     
-    // Validate email format
-    if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
-        echo json_encode(['success' => false, 'message' => 'Invalid email format']);
-        return;
-    }
     
     // Validate password strength
     if (strlen($input['password']) < 6) {
@@ -94,14 +94,10 @@ function registerUser() {
         // Hash password
         $password_hash = password_hash($input['password'], PASSWORD_DEFAULT);
         
-        // Generate verification token
-        $verification_token = bin2hex(random_bytes(32));
-        $verification_expires = date('Y-m-d H:i:s', strtotime('+24 hours'));
-        
-        // Insert new user
+        // Insert new user (automatically verified)
         $stmt = $db->prepare("
-            INSERT INTO users (username, email, password_hash, first_name, last_name, phone, address, city, state, zip_code, email_verification_token, email_verification_expires) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (username, email, password_hash, first_name, last_name, phone, address, city, state, zip_code, email_verified) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
         ");
         
         $stmt->execute([
@@ -114,32 +110,16 @@ function registerUser() {
             $input['address'] ?? null,
             $input['city'] ?? null,
             $input['state'] ?? null,
-            $input['zip_code'] ?? null,
-            $verification_token,
-            $verification_expires
+            $input['zip_code'] ?? null
         ]);
         
         $user_id = $db->lastInsertId();
         
-        // Send verification email
-                $emailService = new SMTPEmailService();
-        $email_sent = $emailService->sendVerificationEmail($input['email'], $input['first_name'], $verification_token);
-        
-        if ($email_sent) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'Registration successful! Please check your email to verify your account.',
-                'user_id' => $user_id,
-                'email_sent' => true
-            ]);
-        } else {
-            echo json_encode([
-                'success' => true,
-                'message' => 'Registration successful! However, we could not send the verification email. Please contact support.',
-                'user_id' => $user_id,
-                'email_sent' => false
-            ]);
-        }
+        echo json_encode([
+            'success' => true,
+            'message' => 'Registration successful! You can now log in to your account.',
+            'user_id' => $user_id
+        ]);
         
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Registration failed: ' . $e->getMessage()]);
@@ -172,15 +152,6 @@ function loginUser() {
             return;
         }
         
-        // Check if email is verified
-        if (!$user['email_verified']) {
-            echo json_encode([
-                'success' => false, 
-                'message' => 'Please verify your email address before logging in. Check your email for the verification link.',
-                'email_verified' => false
-            ]);
-            return;
-        }
         
         // Generate session token
         $session_token = bin2hex(random_bytes(32));
@@ -309,126 +280,134 @@ function getProfile() {
     }
 }
 
-function verifyEmail() {
-    $token = $_GET['token'] ?? '';
-    
-    if (empty($token)) {
-        echo json_encode(['success' => false, 'message' => 'Verification token is required']);
-        return;
-    }
-    
+function updateProfile() {
     try {
+        $session_token = $_COOKIE['session_token'] ?? '';
+        
+        if (!$session_token) {
+            echo json_encode(['success' => false, 'message' => 'Authentication required']);
+            return;
+        }
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        // Validate required fields
+        if (!isset($input['first_name']) || !isset($input['last_name'])) {
+            echo json_encode(['success' => false, 'message' => 'First name and last name are required']);
+            return;
+        }
+        
         $database = new Database();
         $db = $database->getConnection();
         
-        // Find user with valid token
+        // Verify session and get user ID
         $stmt = $db->prepare("
-            SELECT id, email, first_name, email_verification_expires 
-            FROM users 
-            WHERE email_verification_token = ? AND email_verified = 0
+            SELECT u.id FROM users u
+            JOIN user_sessions s ON u.id = s.user_id
+            WHERE s.session_token = ? AND s.expires_at > NOW() AND u.is_active = 1
         ");
-        $stmt->execute([$token]);
+        $stmt->execute([$session_token]);
         $user = $stmt->fetch();
         
         if (!$user) {
-            echo json_encode(['success' => false, 'message' => 'Invalid or expired verification token']);
+            echo json_encode(['success' => false, 'message' => 'Authentication required']);
             return;
         }
         
-        // Check if token is expired
-        if (strtotime($user['email_verification_expires']) < time()) {
-            echo json_encode(['success' => false, 'message' => 'Verification token has expired. Please request a new one.']);
-            return;
-        }
-        
-        // Update user as verified
+        // Update user profile
         $stmt = $db->prepare("
             UPDATE users 
-            SET email_verified = 1, email_verification_token = NULL, email_verification_expires = NULL 
+            SET first_name = ?, last_name = ?, phone = ?, address = ?, 
+                city = ?, state = ?, zip_code = ?, updated_at = NOW()
             WHERE id = ?
         ");
-        $stmt->execute([$user['id']]);
         
-        // Send welcome email
-                $emailService = new SMTPEmailService();
-        $emailService->sendWelcomeEmail($user['email'], $user['first_name']);
+        $stmt->execute([
+            $input['first_name'],
+            $input['last_name'],
+            $input['phone'] ?? null,
+            $input['address'] ?? null,
+            $input['city'] ?? null,
+            $input['state'] ?? null,
+            $input['zip_code'] ?? null,
+            $user['id']
+        ]);
         
         echo json_encode([
             'success' => true,
-            'message' => 'Email verified successfully! You can now log in to your account.',
-            'user' => [
-                'id' => $user['id'],
-                'email' => $user['email'],
-                'first_name' => $user['first_name']
-            ]
+            'message' => 'Profile updated successfully'
         ]);
         
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => 'Verification failed: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Failed to update profile: ' . $e->getMessage()]);
     }
 }
 
-function resendVerificationEmail() {
-    $input = json_decode(file_get_contents('php://input'), true);
-    
-    if (!isset($input['email'])) {
-        echo json_encode(['success' => false, 'message' => 'Email is required']);
-        return;
-    }
-    
+function changePassword() {
     try {
+        $session_token = $_COOKIE['session_token'] ?? '';
+        
+        if (!$session_token) {
+            echo json_encode(['success' => false, 'message' => 'Authentication required']);
+            return;
+        }
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        // Validate input
+        if (!isset($input['current_password']) || !isset($input['new_password'])) {
+            echo json_encode(['success' => false, 'message' => 'Current password and new password are required']);
+            return;
+        }
+        
+        // Validate password strength
+        if (strlen($input['new_password']) < 6) {
+            echo json_encode(['success' => false, 'message' => 'New password must be at least 6 characters']);
+            return;
+        }
+        
         $database = new Database();
         $db = $database->getConnection();
         
-        // Find user
+        // Get user and verify current password
         $stmt = $db->prepare("
-            SELECT id, email, first_name, email_verified 
-            FROM users 
-            WHERE email = ? AND is_active = 1
+            SELECT u.id, u.password_hash FROM users u
+            JOIN user_sessions s ON u.id = s.user_id
+            WHERE s.session_token = ? AND s.expires_at > NOW() AND u.is_active = 1
         ");
-        $stmt->execute([$input['email']]);
+        $stmt->execute([$session_token]);
         $user = $stmt->fetch();
         
         if (!$user) {
-            echo json_encode(['success' => false, 'message' => 'No account found with this email address']);
+            echo json_encode(['success' => false, 'message' => 'Authentication required']);
             return;
         }
         
-        if ($user['email_verified']) {
-            echo json_encode(['success' => false, 'message' => 'Email is already verified']);
+        // Verify current password
+        if (!password_verify($input['current_password'], $user['password_hash'])) {
+            echo json_encode(['success' => false, 'message' => 'Current password is incorrect']);
             return;
         }
         
-        // Generate new verification token
-        $verification_token = bin2hex(random_bytes(32));
-        $verification_expires = date('Y-m-d H:i:s', strtotime('+24 hours'));
+        // Hash new password
+        $new_password_hash = password_hash($input['new_password'], PASSWORD_DEFAULT);
         
-        // Update user with new token
+        // Update password
         $stmt = $db->prepare("
             UPDATE users 
-            SET email_verification_token = ?, email_verification_expires = ? 
+            SET password_hash = ?, updated_at = NOW()
             WHERE id = ?
         ");
-        $stmt->execute([$verification_token, $verification_expires, $user['id']]);
+        $stmt->execute([$new_password_hash, $user['id']]);
         
-        // Send verification email
-                $emailService = new SMTPEmailService();
-        $email_sent = $emailService->sendVerificationEmail($user['email'], $user['first_name'], $verification_token);
-        
-        if ($email_sent) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'Verification email sent successfully! Please check your email.'
-            ]);
-        } else {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Failed to send verification email. Please try again later.'
-            ]);
-        }
+        echo json_encode([
+            'success' => true,
+            'message' => 'Password changed successfully'
+        ]);
         
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => 'Failed to resend verification email: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Failed to change password: ' . $e->getMessage()]);
     }
 }
+
 ?>

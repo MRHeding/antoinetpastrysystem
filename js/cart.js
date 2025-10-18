@@ -273,24 +273,19 @@ function clearCart() {
  * Proceed to checkout
  */
 function proceedToCheckout() {
-    // Check if user is logged in
+    // Check if cart is empty
+    if (cart.length === 0) {
+        showNotification('Your cart is empty', 'warning');
+        return;
+    }
+    
+    // Check if user is logged in first
     fetch('api/auth.php?action=check')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // User is logged in, proceed to checkout
-                if (cart.length === 0) {
-                    showNotification('Your cart is empty', 'warning');
-                    return;
-                }
-                
-                // For now, just show a success message
-                // In a real application, this would redirect to a checkout page
-                showNotification('Checkout functionality coming soon!', 'info');
-                
-                // You could redirect to a checkout page here:
-                // window.location.href = 'checkout.html';
-                
+                // User is logged in, show checkout modal
+                showCheckoutModal();
             } else {
                 // User is not logged in, redirect to login
                 showNotification('Please log in to proceed with checkout', 'warning');
@@ -306,6 +301,187 @@ function proceedToCheckout() {
                 window.location.href = 'auth.html';
             }, 2000);
         });
+}
+
+/**
+ * Show checkout confirmation modal
+ */
+function showCheckoutModal() {
+    const modal = document.getElementById('checkout-modal');
+    const summary = document.getElementById('checkout-summary');
+    
+    // Calculate totals
+    const subtotal = cart.reduce((sum, item) => {
+        const product = products.find(p => p.id === item.id);
+        return sum + (product ? product.price * item.quantity : 0);
+    }, 0);
+    const tax = subtotal * 0.12;
+    const delivery = 50.00;
+    const total = subtotal + tax + delivery;
+    
+    // Generate summary HTML
+    let summaryHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="space-y-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-900 mb-3">Order Items</h4>
+                    <div class="space-y-2">
+    `;
+    
+    cart.forEach(item => {
+        const product = products.find(p => p.id === item.id);
+        if (product) {
+            summaryHTML += `
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                    <div class="flex-1">
+                        <p class="font-medium text-gray-900">${product.name}</p>
+                        <p class="text-sm text-gray-600">Quantity: ${item.quantity}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-medium">₱${(product.price * item.quantity).toFixed(2)}</p>
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    summaryHTML += `
+                </div>
+            </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-900 mb-3">Order Summary</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Subtotal:</span>
+                            <span class="font-medium">₱${subtotal.toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Tax (12%):</span>
+                            <span class="font-medium">₱${tax.toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Delivery Fee:</span>
+                            <span class="font-medium">₱${delivery.toFixed(2)}</span>
+                        </div>
+                        <hr class="border-gray-300">
+                        <div class="flex justify-between text-lg font-bold">
+                            <span class="text-gray-900">Total:</span>
+                            <span class="text-amber-600">₱${total.toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    summary.innerHTML = summaryHTML;
+    modal.classList.remove('hidden');
+}
+
+/**
+ * Close checkout modal
+ */
+function closeCheckoutModal() {
+    document.getElementById('checkout-modal').classList.add('hidden');
+}
+
+/**
+ * Confirm checkout and place order
+ */
+async function confirmCheckout() {
+    // Check if user is logged in
+    try {
+        const authResponse = await fetch('api/auth.php?action=check');
+        const authData = await authResponse.json();
+        
+        if (!authData.success) {
+            showNotification('Please log in to proceed with checkout', 'warning');
+            closeCheckoutModal();
+            setTimeout(() => {
+                window.location.href = 'auth.html';
+            }, 2000);
+            return;
+        }
+        
+        // Show loading state
+        const confirmBtn = document.querySelector('button[onclick="confirmCheckout()"]');
+        const originalText = confirmBtn.innerHTML;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+        confirmBtn.disabled = true;
+        
+        // Prepare order data
+        const orderItems = cart.map(item => {
+            const product = products.find(p => p.id === item.id);
+            return {
+                product_id: item.id,
+                quantity: item.quantity,
+                unit_price: product ? product.price : 0
+            };
+        });
+        
+        // Calculate totals
+        let subtotal = 0;
+        cart.forEach(item => {
+            const product = products.find(p => p.id === item.id);
+            if (product) {
+                subtotal += product.price * item.quantity;
+            }
+        });
+        
+        const tax = subtotal * 0.12; // 12% tax
+        const delivery = 50.00;
+        const total = subtotal + tax + delivery;
+        
+        // Create order
+        const orderData = {
+            items: orderItems,
+            notes: `Order total: ₱${total.toFixed(2)} (Subtotal: ₱${subtotal.toFixed(2)}, Tax: ₱${tax.toFixed(2)}, Delivery: ₱${delivery.toFixed(2)})`
+        };
+        
+        const orderResponse = await fetch('api/orders.php?action=create_order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        });
+        
+        const orderResult = await orderResponse.json();
+        
+        if (orderResult.success) {
+            // Close modal
+            closeCheckoutModal();
+            
+            // Clear cart after successful order
+            clearCart();
+            
+            // Show success message
+            showNotification(`Order placed successfully! Order #${orderResult.order_number}`, 'success');
+            
+            // Redirect to orders page after a short delay
+            setTimeout(() => {
+                window.location.href = 'orders.html';
+            }, 3000);
+            
+        } else {
+            showNotification(`Failed to create order: ${orderResult.message}`, 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error during checkout:', error);
+        showNotification('An error occurred during checkout. Please try again.', 'error');
+    } finally {
+        // Restore button state
+        const confirmBtn = document.querySelector('button[onclick="confirmCheckout()"]');
+        if (confirmBtn) {
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+        }
+    }
 }
 
 // Add event listener for checkout button

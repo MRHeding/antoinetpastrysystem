@@ -147,15 +147,10 @@
             // Create test form
             const testForm = document.createElement('form');
             testForm.innerHTML = `
-                <input type="email" id="test-email" required>
                 <input type="text" id="test-required" required>
                 <input type="tel" id="test-phone">
             `;
             document.body.appendChild(testForm);
-            
-            // Test email validation
-            const emailInput = document.getElementById('test-email');
-            emailInput.value = 'invalid-email';
             
             // Test required field validation
             const requiredInput = document.getElementById('test-required');
@@ -165,14 +160,6 @@
                 addResult('form-results', '✓ Required field validation available', 'pass');
             } else {
                 addResult('form-results', '✗ Required field validation missing', 'fail');
-            }
-            
-            // Test email format
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (emailRegex.test('test@example.com')) {
-                addResult('form-results', '✓ Email validation regex working', 'pass');
-            } else {
-                addResult('form-results', '✗ Email validation regex broken', 'fail');
             }
             
             // Clean up

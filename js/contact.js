@@ -103,14 +103,6 @@ function validateField(e) {
         return false;
     }
     
-    // Email validation
-    if (fieldName === 'email' && value) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) {
-            showFieldError(field, 'Please enter a valid email address');
-            return false;
-        }
-    }
     
     // Phone validation
     if (fieldName === 'phone' && value) {
