@@ -120,21 +120,37 @@ function displayCartItems() {
         return;
     }
     
+    // If products aren't loaded yet, show loading state
+    if (products.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-gray-500 py-12">
+                <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+                <p class="text-lg">Loading cart items...</p>
+            </div>
+        `;
+        summary.classList.add('hidden');
+        return;
+    }
+    
     let html = '<div class="space-y-6">';
+    let hasValidItems = false;
     
     cart.forEach((item, index) => {
+        // Handle both old format (id, quantity) and new format (id, name, price, image, quantity)
         const product = products.find(p => p.id === item.id);
         console.log(`Looking for product ID ${item.id}, found:`, product);
+        
         if (product) {
+            hasValidItems = true;
             html += `
                 <div class="flex items-center space-x-6 p-6 border border-gray-200 rounded-lg">
                     <div class="flex-shrink-0">
-                        <img src="Logo.png" alt="${product.name}" class="h-20 w-20 object-contain rounded-lg">
+                        <img src="${product.image_url || 'Logo.png'}" alt="${product.name}" class="h-20 w-20 object-contain rounded-lg">
                     </div>
                     <div class="flex-1">
                         <h3 class="text-xl font-semibold text-gray-800">${product.name}</h3>
                         <p class="text-gray-600">${product.description}</p>
-                        <p class="text-amber-600 font-bold text-lg">₱${product.price.toFixed(2)}</p>
+                        <p class="text-amber-600 font-bold text-lg">₱${parseFloat(product.price).toFixed(2)}</p>
                     </div>
                     <div class="flex items-center space-x-3">
                         <button onclick="updateQuantity(${index}, ${item.quantity - 1})" 
@@ -148,7 +164,40 @@ function displayCartItems() {
                         </button>
                     </div>
                     <div class="text-right">
-                        <p class="text-xl font-bold text-gray-800">₱${(product.price * item.quantity).toFixed(2)}</p>
+                        <p class="text-xl font-bold text-gray-800">₱${(parseFloat(product.price) * item.quantity).toFixed(2)}</p>
+                        <button onclick="removeFromCart(${index})" 
+                                class="text-red-600 hover:text-red-800 transition duration-200 mt-2">
+                            <i class="fas fa-trash mr-1"></i>Remove
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else if (item.name) {
+            // Handle cart items with stored product data (from products.js)
+            hasValidItems = true;
+            html += `
+                <div class="flex items-center space-x-6 p-6 border border-gray-200 rounded-lg">
+                    <div class="flex-shrink-0">
+                        <img src="${item.image || 'Logo.png'}" alt="${item.name}" class="h-20 w-20 object-contain rounded-lg">
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold text-gray-800">${item.name}</h3>
+                        <p class="text-gray-600">Product details</p>
+                        <p class="text-amber-600 font-bold text-lg">₱${parseFloat(item.price).toFixed(2)}</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="updateQuantity(${index}, ${item.quantity - 1})" 
+                                class="w-8 h-8 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition duration-200">
+                            <i class="fas fa-minus text-sm"></i>
+                        </button>
+                        <span class="w-12 text-center font-semibold">${item.quantity}</span>
+                        <button onclick="updateQuantity(${index}, ${item.quantity + 1})" 
+                                class="w-8 h-8 bg-amber-600 text-white rounded-full hover:bg-amber-700 transition duration-200">
+                            <i class="fas fa-plus text-sm"></i>
+                        </button>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xl font-bold text-gray-800">₱${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
                         <button onclick="removeFromCart(${index})" 
                                 class="text-red-600 hover:text-red-800 transition duration-200 mt-2">
                             <i class="fas fa-trash mr-1"></i>Remove
@@ -157,41 +206,32 @@ function displayCartItems() {
                 </div>
             `;
         } else {
-            // Fallback for when product data isn't loaded yet
-            html += `
-                <div class="flex items-center space-x-6 p-6 border border-gray-200 rounded-lg">
-                    <div class="flex-shrink-0">
-                        <img src="Logo.png" alt="Product" class="h-20 w-20 object-contain rounded-lg">
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-xl font-semibold text-gray-800">Product ID: ${item.id}</h3>
-                        <p class="text-gray-600">Loading product details...</p>
-                        <p class="text-amber-600 font-bold text-lg">₱0.00</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <button onclick="updateQuantity(${index}, ${item.quantity - 1})" 
-                                class="w-8 h-8 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition duration-200">
-                            <i class="fas fa-minus text-sm"></i>
-                        </button>
-                        <span class="w-12 text-center font-semibold">${item.quantity}</span>
-                        <button onclick="updateQuantity(${index}, ${item.quantity + 1})" 
-                                class="w-8 h-8 bg-amber-600 text-white rounded-full hover:bg-amber-700 transition duration-200">
-                            <i class="fas fa-plus text-sm"></i>
-                        </button>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xl font-bold text-gray-800">₱0.00</p>
-                        <button onclick="removeFromCart(${index})" 
-                                class="text-red-600 hover:text-red-800 transition duration-200 mt-2">
-                            <i class="fas fa-trash mr-1"></i>Remove
-                        </button>
-                    </div>
-                </div>
-            `;
+            // Remove invalid cart items (products that no longer exist)
+            console.log(`Removing invalid cart item with ID ${item.id}`);
+            cart.splice(index, 1);
         }
     });
     
     html += '</div>';
+    
+    // If no valid items remain, clear the cart
+    if (!hasValidItems) {
+        cart = [];
+        saveCart();
+        container.innerHTML = `
+            <div class="text-center text-gray-500 py-12">
+                <i class="fas fa-shopping-cart text-6xl mb-4"></i>
+                <h3 class="text-2xl font-semibold mb-2">Your cart is empty</h3>
+                <p class="text-gray-600 mb-6">Add some delicious pastries to get started!</p>
+                <a href="products.html" class="btn-primary">
+                    <i class="fas fa-utensils mr-2"></i>Browse Products
+                </a>
+            </div>
+        `;
+        summary.classList.add('hidden');
+        return;
+    }
+    
     container.innerHTML = html;
     summary.classList.remove('hidden');
 }
@@ -232,9 +272,16 @@ function updateCartSummary() {
     let subtotal = 0;
     
     cart.forEach(item => {
-        const product = products.find(p => p.id === item.id);
-        if (product) {
-            subtotal += product.price * item.quantity;
+        // Handle both old format (id, quantity) and new format (id, name, price, image, quantity)
+        if (item.price) {
+            // Cart item has stored price data
+            subtotal += parseFloat(item.price) * item.quantity;
+        } else {
+            // Cart item only has id, need to find product
+            const product = products.find(p => p.id === item.id);
+            if (product) {
+                subtotal += parseFloat(product.price) * item.quantity;
+            }
         }
     });
     
@@ -312,8 +359,14 @@ function showCheckoutModal() {
     
     // Calculate totals
     const subtotal = cart.reduce((sum, item) => {
-        const product = products.find(p => p.id === item.id);
-        return sum + (product ? product.price * item.quantity : 0);
+        if (item.price) {
+            // Cart item has stored price data
+            return sum + (parseFloat(item.price) * item.quantity);
+        } else {
+            // Cart item only has id, need to find product
+            const product = products.find(p => p.id === item.id);
+            return sum + (product ? parseFloat(product.price) * item.quantity : 0);
+        }
     }, 0);
     const tax = subtotal * 0.12;
     const delivery = 50.00;
@@ -329,19 +382,35 @@ function showCheckoutModal() {
     `;
     
     cart.forEach(item => {
-        const product = products.find(p => p.id === item.id);
-        if (product) {
+        if (item.name) {
+            // Cart item has stored product data
             summaryHTML += `
                 <div class="flex justify-between items-center py-2 border-b border-gray-200">
                     <div class="flex-1">
-                        <p class="font-medium text-gray-900">${product.name}</p>
+                        <p class="font-medium text-gray-900">${item.name}</p>
                         <p class="text-sm text-gray-600">Quantity: ${item.quantity}</p>
                     </div>
                     <div class="text-right">
-                        <p class="font-medium">₱${(product.price * item.quantity).toFixed(2)}</p>
+                        <p class="font-medium">₱${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
                     </div>
                 </div>
             `;
+        } else {
+            // Cart item only has id, need to find product
+            const product = products.find(p => p.id === item.id);
+            if (product) {
+                summaryHTML += `
+                    <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-900">${product.name}</p>
+                            <p class="text-sm text-gray-600">Quantity: ${item.quantity}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-medium">₱${(parseFloat(product.price) * item.quantity).toFixed(2)}</p>
+                        </div>
+                    </div>
+                `;
+            }
         }
     });
     
@@ -415,20 +484,36 @@ async function confirmCheckout() {
         
         // Prepare order data
         const orderItems = cart.map(item => {
-            const product = products.find(p => p.id === item.id);
-            return {
-                product_id: item.id,
-                quantity: item.quantity,
-                unit_price: product ? product.price : 0
-            };
+            if (item.price) {
+                // Cart item has stored price data
+                return {
+                    product_id: item.id,
+                    quantity: item.quantity,
+                    unit_price: parseFloat(item.price)
+                };
+            } else {
+                // Cart item only has id, need to find product
+                const product = products.find(p => p.id === item.id);
+                return {
+                    product_id: item.id,
+                    quantity: item.quantity,
+                    unit_price: product ? parseFloat(product.price) : 0
+                };
+            }
         });
         
         // Calculate totals
         let subtotal = 0;
         cart.forEach(item => {
-            const product = products.find(p => p.id === item.id);
-            if (product) {
-                subtotal += product.price * item.quantity;
+            if (item.price) {
+                // Cart item has stored price data
+                subtotal += parseFloat(item.price) * item.quantity;
+            } else {
+                // Cart item only has id, need to find product
+                const product = products.find(p => p.id === item.id);
+                if (product) {
+                    subtotal += parseFloat(product.price) * item.quantity;
+                }
             }
         });
         
@@ -499,10 +584,16 @@ function updateCartDisplay() {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     
-    const cartButtons = document.querySelectorAll('a[class*="bg-amber-600"], button[class*="bg-amber-600"]');
+    // Update all cart buttons
+    const cartButtons = document.querySelectorAll('a[href="cart.html"]');
     cartButtons.forEach(button => {
         if (button.innerHTML.includes('Cart')) {
-            button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (${totalItems})`;
+            // Check if it's the mobile button with different structure
+            if (button.innerHTML.includes('mr-1')) {
+                button.innerHTML = `<i class="fas fa-shopping-cart mr-1"></i><span class="hidden sm:inline">Cart (${totalItems})</span>`;
+            } else {
+                button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (${totalItems})`;
+            }
         }
     });
 }

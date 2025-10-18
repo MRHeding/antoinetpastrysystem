@@ -11,20 +11,30 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load dashboard statistics
 async function loadDashboardData() {
     try {
-        // In a real app, you'd have separate API endpoints for these stats
-        const response = await fetch('../api/products.php');
+        const response = await fetch('../api/admin-stats.php');
         const data = await response.json();
         
         if (data.success) {
-            document.getElementById('total-products').textContent = data.data.length;
+            const stats = data.data;
+            document.getElementById('total-products').textContent = stats.total_products;
+            document.getElementById('total-orders').textContent = stats.total_orders;
+            document.getElementById('total-customers').textContent = stats.total_customers;
+            document.getElementById('total-revenue').textContent = '₱' + stats.total_revenue.toFixed(2);
+        } else {
+            console.error('Failed to load dashboard data:', data.message);
+            // Fallback to showing dashes if API fails
+            document.getElementById('total-products').textContent = '-';
+            document.getElementById('total-orders').textContent = '-';
+            document.getElementById('total-customers').textContent = '-';
+            document.getElementById('total-revenue').textContent = '-';
         }
-        
-        // Mock data for other stats (in real app, these would come from separate API calls)
-        document.getElementById('total-orders').textContent = '24';
-        document.getElementById('total-customers').textContent = '156';
-        document.getElementById('total-revenue').textContent = '$2,847';
     } catch (error) {
         console.error('Error loading dashboard data:', error);
+        // Fallback to showing dashes if API fails
+        document.getElementById('total-products').textContent = '-';
+        document.getElementById('total-orders').textContent = '-';
+        document.getElementById('total-customers').textContent = '-';
+        document.getElementById('total-revenue').textContent = '-';
     }
 }
 
@@ -76,7 +86,7 @@ function displayProducts(products) {
                         <h3 class="text-lg font-semibold text-gray-900">${product.name}</h3>
                         <p class="text-sm text-gray-600 mb-2">${product.description}</p>
                         <div class="flex items-center space-x-4 text-sm text-gray-500">
-                            <span><i class="fas fa-tag mr-1"></i>$${product.price}</span>
+                            <span><i class="fas fa-tag mr-1"></i>₱${product.price}</span>
                             <span><i class="fas fa-folder mr-1"></i>${product.category}</span>
                             <span><i class="fas fa-calendar mr-1"></i>${new Date(product.created_at).toLocaleDateString()}</span>
                         </div>
@@ -96,32 +106,51 @@ function displayProducts(products) {
     }).join('');
 }
 
-// Load recent orders (mock data for now)
-function loadRecentOrders() {
+// Load recent orders
+async function loadRecentOrders() {
+    try {
+        const response = await fetch('../api/admin-stats.php');
+        const data = await response.json();
+        
+        if (data.success && data.data.recent_orders) {
+            displayRecentOrders(data.data.recent_orders);
+        } else {
+            displayRecentOrdersError('Failed to load recent orders');
+        }
+    } catch (error) {
+        console.error('Error loading recent orders:', error);
+        displayRecentOrdersError('Network error loading orders');
+    }
+}
+
+function displayRecentOrders(orders) {
     const container = document.getElementById('recent-orders');
     
-    // Mock recent orders data
-    const mockOrders = [
-        { id: 1, customer: 'John Doe', total: 24.50, status: 'pending', date: '2024-01-15' },
-        { id: 2, customer: 'Jane Smith', total: 18.75, status: 'confirmed', date: '2024-01-15' },
-        { id: 3, customer: 'Bob Johnson', total: 32.00, status: 'ready', date: '2024-01-14' },
-        { id: 4, customer: 'Alice Brown', total: 15.25, status: 'completed', date: '2024-01-14' },
-        { id: 5, customer: 'Charlie Wilson', total: 28.50, status: 'preparing', date: '2024-01-13' }
-    ];
+    if (!orders || orders.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-gray-500 py-8">
+                <i class="fas fa-shopping-cart text-4xl mb-4"></i>
+                <p>No orders found</p>
+            </div>
+        `;
+        return;
+    }
     
-    container.innerHTML = mockOrders.map(order => `
+    container.innerHTML = orders.map(order => `
         <div class="border-b border-gray-200 pb-3 mb-3 last:border-b-0">
             <div class="flex justify-between items-start">
                 <div>
-                    <p class="font-medium text-gray-900">Order #${order.id}</p>
-                    <p class="text-sm text-gray-600">${order.customer}</p>
-                    <p class="text-sm text-gray-500">$${order.total}</p>
+                    <p class="font-medium text-gray-900">Order #${order.order_number}</p>
+                    <p class="text-sm text-gray-600">${order.customer_name || 'Guest Customer'}</p>
+                    <p class="text-sm text-gray-500">₱${parseFloat(order.total_amount).toFixed(2)}</p>
                 </div>
                 <span class="px-2 py-1 text-xs rounded-full ${
                     order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                     order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
                     order.status === 'preparing' ? 'bg-orange-100 text-orange-800' :
                     order.status === 'ready' ? 'bg-green-100 text-green-800' :
+                    order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                    order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                     'bg-gray-100 text-gray-800'
                 }">
                     ${order.status}
@@ -129,6 +158,19 @@ function loadRecentOrders() {
             </div>
         </div>
     `).join('');
+}
+
+function displayRecentOrdersError(message) {
+    const container = document.getElementById('recent-orders');
+    container.innerHTML = `
+        <div class="text-center text-red-500 py-8">
+            <i class="fas fa-exclamation-circle text-4xl mb-4"></i>
+            <p>${message}</p>
+            <button onclick="loadRecentOrders()" class="mt-4 bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700">
+                Try Again
+            </button>
+        </div>
+    `;
 }
 
 // Show add product modal
@@ -454,7 +496,7 @@ async function adminLogout() {
             if (result.success) {
                 showNotification('Logged out successfully', 'success');
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    window.location.href = '../index.html';
                 }, 1000);
             } else {
                 showNotification('Logout failed', 'error');

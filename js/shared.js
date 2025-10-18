@@ -236,36 +236,8 @@ function showUserMenu(user) {
         userLoggedIn.classList.add('flex');
         userName.textContent = user.first_name;
         
-        // Check if user is admin
-        if (user.role === 'admin') {
-            // Replace dropdown with dashboard link
-            const dropdownBtn = document.getElementById('user-dropdown-btn');
-            const dropdown = document.getElementById('user-dropdown');
-            
-            if (dropdownBtn && dropdown) {
-                // Change button to dashboard link
-                dropdownBtn.innerHTML = '<i class="fas fa-tachometer-alt mr-2"></i>Dashboard';
-                dropdownBtn.onclick = function() {
-                    window.location.href = 'admin/index.php';
-                };
-            }
-        } else {
-            // Setup user dropdown for regular users
-            const dropdownBtn = document.getElementById('user-dropdown-btn');
-            const dropdown = document.getElementById('user-dropdown');
-            
-            if (dropdownBtn && dropdown) {
-                dropdownBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    dropdown.classList.toggle('hidden');
-                });
-                
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function() {
-                    dropdown.classList.add('hidden');
-                });
-            }
-        }
+        // Initialize profile dropdown functionality
+        initProfileDropdown(user);
     }
     
     // Handle mobile menu
@@ -288,6 +260,58 @@ function showUserMenu(user) {
             }
         }
     }
+}
+
+// Initialize profile dropdown functionality
+function initProfileDropdown(user = null) {
+    const dropdownBtn = document.getElementById('user-dropdown-btn');
+    const dropdown = document.getElementById('user-dropdown');
+    
+    if (!dropdownBtn || !dropdown) {
+        console.log('Profile dropdown elements not found');
+        return;
+    }
+    
+    // Remove any existing event listeners to prevent duplicates
+    const newDropdownBtn = dropdownBtn.cloneNode(true);
+    dropdownBtn.parentNode.replaceChild(newDropdownBtn, dropdownBtn);
+    
+    // Get user info if not provided
+    if (!user) {
+        // Try to get user info from the displayed name
+        const userNameElement = document.getElementById('user-name');
+        if (userNameElement && userNameElement.textContent) {
+            // Assume regular user if we can't determine role
+            user = { role: 'user' };
+        } else {
+            console.log('No user info available for dropdown initialization');
+            return;
+        }
+    }
+    
+    // Check if user is admin
+    if (user.role === 'admin') {
+        // Change button to dashboard link
+        newDropdownBtn.innerHTML = '<i class="fas fa-tachometer-alt mr-2"></i>Dashboard';
+        newDropdownBtn.onclick = function() {
+            window.location.href = 'admin/index.php';
+        };
+    } else {
+        // Setup user dropdown for regular users
+        newDropdownBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('hidden');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!newDropdownBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    }
+    
+    console.log('Profile dropdown initialized successfully');
 }
 
 function showLoginButton() {
@@ -399,28 +423,44 @@ async function updateCartDisplay() {
             const cart = JSON.parse(localStorage.getItem('cart') || '[]');
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             
-            const cartButtons = document.querySelectorAll('a[class*="bg-amber-600"], button[class*="bg-amber-600"]');
+            // Update all cart buttons
+            const cartButtons = document.querySelectorAll('a[href="cart.html"]');
             cartButtons.forEach(button => {
                 if (button.innerHTML.includes('Cart')) {
-                    button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (${totalItems})`;
+                    // Check if it's the mobile button with different structure
+                    if (button.innerHTML.includes('mr-1')) {
+                        button.innerHTML = `<i class="fas fa-shopping-cart mr-1"></i><span class="hidden sm:inline">Cart (${totalItems})</span>`;
+                    } else {
+                        button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (${totalItems})`;
+                    }
                 }
             });
         } else {
             // User is not logged in, show empty cart
-            const cartButtons = document.querySelectorAll('a[class*="bg-amber-600"], button[class*="bg-amber-600"]');
+            const cartButtons = document.querySelectorAll('a[href="cart.html"]');
             cartButtons.forEach(button => {
                 if (button.innerHTML.includes('Cart')) {
-                    button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (0)`;
+                    // Check if it's the mobile button with different structure
+                    if (button.innerHTML.includes('mr-1')) {
+                        button.innerHTML = `<i class="fas fa-shopping-cart mr-1"></i><span class="hidden sm:inline">Cart (0)</span>`;
+                    } else {
+                        button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (0)`;
+                    }
                 }
             });
         }
     } catch (error) {
         console.error('Error checking authentication for cart display:', error);
         // Show empty cart on error
-        const cartButtons = document.querySelectorAll('a[class*="bg-amber-600"], button[class*="bg-amber-600"]');
+        const cartButtons = document.querySelectorAll('a[href="cart.html"]');
         cartButtons.forEach(button => {
             if (button.innerHTML.includes('Cart')) {
-                button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (0)`;
+                // Check if it's the mobile button with different structure
+                if (button.innerHTML.includes('mr-1')) {
+                    button.innerHTML = `<i class="fas fa-shopping-cart mr-1"></i><span class="hidden sm:inline">Cart (0)</span>`;
+                } else {
+                    button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (0)`;
+                }
             }
         });
     }
@@ -505,6 +545,8 @@ async function loadComponent(componentPath, targetElementId) {
                 setActiveNavLink();
                 initScrollToTop();
                 initMobileMenu();
+                // Re-initialize profile dropdown functionality
+                initProfileDropdown();
             }, 200);
         }
     } catch (error) {

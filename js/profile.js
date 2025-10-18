@@ -20,8 +20,16 @@ async function loadNavigation() {
         const html = await response.text();
         document.getElementById('navigation-container').innerHTML = html;
         
-        // Initialize navigation functionality
-        initializeNavigation();
+        // Initialize all navigation functionality
+        initNavigation();
+        initAuth();
+        updateCartDisplay();
+        setActiveNavLink();
+        
+        // Initialize mobile menu after a short delay
+        setTimeout(() => {
+            initMobileMenu();
+        }, 200);
     } catch (error) {
         console.error('Error loading navigation:', error);
     }

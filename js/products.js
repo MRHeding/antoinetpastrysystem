@@ -116,14 +116,14 @@ function initSearchAndFilter() {
 // Filter products based on search and category
 function filterProducts() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const category = document.getElementById('category-filter').value.toLowerCase();
+    const category = document.getElementById('category-filter').value;
     
     filteredProducts = allProducts.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
                             product.description.toLowerCase().includes(searchTerm) ||
                             product.category.toLowerCase().includes(searchTerm);
         
-        const matchesCategory = !category || product.category.toLowerCase() === category;
+        const matchesCategory = !category || product.category === category;
         
         return matchesSearch && matchesCategory;
     });
@@ -198,7 +198,7 @@ function displayProducts() {
                 <h4 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-amber-600 transition-colors cursor-pointer" onclick="viewProductDetails(${product.id})">${product.name}</h4>
                 <p class="text-gray-600 mb-4 line-clamp-3">${product.description}</p>
                 <div class="flex justify-between items-center mb-4">
-                    <span class="text-2xl font-bold text-amber-600">$${product.price}</span>
+                    <span class="text-2xl font-bold text-amber-600">₱${product.price}</span>
                     <div class="flex items-center text-yellow-500">
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
@@ -374,6 +374,11 @@ function hideProductModal() {
     document.getElementById('product-details-modal').classList.add('hidden');
 }
 
+// Add to cart function (for direct button clicks)
+function addToCart(productId) {
+    addToCartWithQuantity(productId, 1);
+}
+
 // Add to cart with quantity
 function addToCartWithQuantity(productId, quantity) {
     const product = allProducts.find(p => p.id == productId);
@@ -406,6 +411,20 @@ function addToCartWithQuantity(productId, quantity) {
     
     // Update cart count
     updateCartDisplay();
+    
+    // Also manually update cart display to ensure it works
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const cartButtons = document.querySelectorAll('a[href="cart.html"]');
+    cartButtons.forEach(button => {
+        if (button.innerHTML.includes('Cart')) {
+            // Check if it's the mobile button with different structure
+            if (button.innerHTML.includes('mr-1')) {
+                button.innerHTML = `<i class="fas fa-shopping-cart mr-1"></i><span class="hidden sm:inline">Cart (${totalItems})</span>`;
+            } else {
+                button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (${totalItems})`;
+            }
+        }
+    });
     
     // Show notification
     showNotification(`${quantity} ${product.name} added to cart!`, 'success');

@@ -25,8 +25,16 @@ async function loadNavigation() {
         const html = await response.text();
         document.getElementById('navigation-container').innerHTML = html;
         
-        // Initialize navigation functionality
+        // Initialize all navigation functionality
         initNavigation();
+        initAuth();
+        updateCartDisplay();
+        setActiveNavLink();
+        
+        // Initialize mobile menu after a short delay
+        setTimeout(() => {
+            initMobileMenu();
+        }, 200);
     } catch (error) {
         console.error('Error loading navigation:', error);
     }
@@ -201,7 +209,7 @@ function createOrderCard(order) {
                             ` : ''}
                             <div class="flex items-center">
                                 <i class="fas fa-dollar-sign mr-2 text-gray-400"></i>
-                                <span class="font-semibold text-gray-900">Total: $${(typeof order.total_amount === 'number' ? order.total_amount : parseFloat(order.total_amount)).toFixed(2)}</span>
+                                <span class="font-semibold text-gray-900">Total: ₱${(typeof order.total_amount === 'number' ? order.total_amount : parseFloat(order.total_amount)).toFixed(2)}</span>
                             </div>
                             ${order.notes ? `
                                 <div class="flex items-start col-span-2">
@@ -341,7 +349,7 @@ function displayOrderModal(order) {
                         ` : ''}
                          <div class="flex justify-between">
                              <span class="text-gray-600">Total Amount:</span>
-                             <span class="font-bold text-lg">$${(typeof order.total_amount === 'number' ? order.total_amount : parseFloat(order.total_amount)).toFixed(2)}</span>
+                             <span class="font-bold text-lg">₱${(typeof order.total_amount === 'number' ? order.total_amount : parseFloat(order.total_amount)).toFixed(2)}</span>
                          </div>
                     </div>
                 </div>
@@ -372,8 +380,8 @@ function displayOrderModal(order) {
                                     <h5 class="font-semibold text-gray-900 text-lg mb-1">${item.product_name}</h5>
                                     <p class="text-sm text-gray-600 mb-2">Quantity: ${item.quantity}</p>
                                     <div class="flex items-center justify-between">
-                                        <span class="text-sm text-gray-500">Unit Price: $${(typeof item.unit_price === 'number' ? item.unit_price : parseFloat(item.unit_price)).toFixed(2)}</span>
-                                        <span class="font-bold text-lg text-gray-900">$${(typeof item.total_price === 'number' ? item.total_price : parseFloat(item.total_price)).toFixed(2)}</span>
+                                        <span class="text-sm text-gray-500">Unit Price: ₱${(typeof item.unit_price === 'number' ? item.unit_price : parseFloat(item.unit_price)).toFixed(2)}</span>
+                                        <span class="font-bold text-lg text-gray-900">₱${(typeof item.total_price === 'number' ? item.total_price : parseFloat(item.total_price)).toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
