@@ -100,7 +100,11 @@ async function handleRegister(e) {
         password: password,
         first_name: formData.get('first_name'),
         last_name: formData.get('last_name'),
-        phone: formData.get('phone')
+        phone: formData.get('phone'),
+        address: formData.get('address'),
+        city: formData.get('city'),
+        state: formData.get('state'),
+        zip_code: formData.get('zip_code')
     };
     
     showLoading(true);

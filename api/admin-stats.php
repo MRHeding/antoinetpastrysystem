@@ -21,7 +21,7 @@ if (!$session_token) {
 }
 
 try {
-    $database = new Database();
+    $database = Database::getInstance();
     $db = $database->getConnection();
     
     // Check session validity and admin role

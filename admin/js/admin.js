@@ -6,12 +6,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Setup form submission
     document.getElementById('add-product-form').addEventListener('submit', handleAddProduct);
+    
+    // Initialize mobile menu
+    initAdminMobileMenu();
 });
 
 // Load dashboard statistics
 async function loadDashboardData() {
     try {
-        const response = await fetch('../api/admin-stats.php');
+        const response = await fetch('../api/admin-stats.php', {
+            credentials: 'include'
+        });
         const data = await response.json();
         
         if (data.success) {
@@ -41,7 +46,9 @@ async function loadDashboardData() {
 // Load products for management
 async function loadProducts() {
     try {
-        const response = await fetch('../api/products.php');
+        const response = await fetch('../api/products.php', {
+            credentials: 'include'
+        });
         const data = await response.json();
         
         if (data.success) {
@@ -76,27 +83,27 @@ function displayProducts(products) {
             : 'https://via.placeholder.com/150?text=No+Image';
             
         return `
-        <div class="border border-gray-200 rounded-lg p-4 mb-4 hover:shadow-md transition-shadow">
+        <div class="border border-gray-200 rounded-lg p-6 mb-4 hover:shadow-md transition-shadow bg-white">
             <div class="flex justify-between items-start">
-                <div class="flex-1 flex">
-                    <div class="mr-4">
-                        <img src="${imageSrc}" alt="${product.name}" class="w-20 h-20 object-cover rounded-md border border-gray-200">
+                <div class="flex-1 flex space-x-6">
+                    <div class="flex-shrink-0">
+                        <img src="${imageSrc}" alt="${product.name}" class="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
                     </div>
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">${product.name}</h3>
-                        <p class="text-sm text-gray-600 mb-2">${product.description}</p>
-                        <div class="flex items-center space-x-4 text-sm text-gray-500">
-                            <span><i class="fas fa-tag mr-1"></i>₱${product.price}</span>
-                            <span><i class="fas fa-folder mr-1"></i>${product.category}</span>
-                            <span><i class="fas fa-calendar mr-1"></i>${new Date(product.created_at).toLocaleDateString()}</span>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">${product.name}</h3>
+                        <p class="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">${product.description}</p>
+                        <div class="flex items-center space-x-6 text-sm text-gray-500">
+                            <span class="flex items-center"><i class="fas fa-tag mr-2"></i>₱${product.price}</span>
+                            <span class="flex items-center"><i class="fas fa-folder mr-2"></i>${product.category}</span>
+                            <span class="flex items-center"><i class="fas fa-calendar mr-2"></i>${new Date(product.created_at).toLocaleDateString()}</span>
                         </div>
                     </div>
                 </div>
-                <div class="flex space-x-2 ml-4">
-                    <button onclick="editProduct(${product.id})" class="text-blue-600 hover:text-blue-800">
+                <div class="flex space-x-3 ml-6">
+                    <button onclick="editProduct(${product.id})" class="text-blue-600 hover:text-blue-800 p-2 rounded-md hover:bg-blue-50 transition-colors">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button onclick="deleteProduct(${product.id})" class="text-red-600 hover:text-red-800">
+                    <button onclick="deleteProduct(${product.id})" class="text-red-600 hover:text-red-800 p-2 rounded-md hover:bg-red-50 transition-colors">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -109,7 +116,9 @@ function displayProducts(products) {
 // Load recent orders
 async function loadRecentOrders() {
     try {
-        const response = await fetch('../api/admin-stats.php');
+        const response = await fetch('../api/admin-stats.php', {
+            credentials: 'include'
+        });
         const data = await response.json();
         
         if (data.success && data.data.recent_orders) {
@@ -206,6 +215,7 @@ async function handleAddProduct(e) {
             // Use FormData directly for file upload
             response = await fetch('../api/products.php', {
                 method: 'POST',
+                credentials: 'include',
                 body: formData // FormData automatically sets the correct Content-Type
             });
         } else {
@@ -222,6 +232,7 @@ async function handleAddProduct(e) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify(productData)
             });
         }
@@ -295,7 +306,9 @@ function initImagePreview() {
 // Edit product
 async function editProduct(productId) {
     try {
-        const response = await fetch(`../api/products.php?id=${productId}`);
+        const response = await fetch(`../api/products.php?id=${productId}`, {
+            credentials: 'include'
+        });
         const result = await response.json();
         
         if (result.success && result.data) {
@@ -381,6 +394,7 @@ async function handleEditProduct(e) {
             formData.append('_method', 'PUT'); // Simulate PUT request
             response = await fetch(`../api/products.php?id=${productId}`, {
                 method: 'POST',
+                credentials: 'include',
                 body: formData // FormData automatically sets the correct Content-Type
             });
         } else {
@@ -398,6 +412,7 @@ async function handleEditProduct(e) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify(productData)
             });
         }
@@ -425,7 +440,8 @@ async function deleteProduct(productId) {
     
     try {
         const response = await fetch(`../api/products.php?id=${productId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            credentials: 'include'
         });
         
         const result = await response.json();
@@ -488,7 +504,8 @@ async function adminLogout() {
     if (confirm('Are you sure you want to logout from the admin panel?')) {
         try {
             const response = await fetch('../api/auth.php?action=logout', {
-                method: 'POST'
+                method: 'POST',
+                credentials: 'include'
             });
             
             const result = await response.json();
@@ -505,6 +522,71 @@ async function adminLogout() {
             console.error('Logout error:', error);
             showNotification('Logout failed', 'error');
         }
+    }
+}
+
+// Admin mobile menu functionality
+function initAdminMobileMenu() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleAdminMobileMenu();
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!mobileMenuButton.contains(e.target) && !mobileMenu.contains(e.target)) {
+                closeAdminMobileMenu();
+            }
+        });
+        
+        // Close mobile menu when window is resized to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                closeAdminMobileMenu();
+            }
+        });
+    }
+}
+
+function toggleAdminMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    
+    if (mobileMenu && mobileMenuButton) {
+        const isHidden = mobileMenu.classList.contains('hidden');
+        
+        if (isHidden) {
+            openAdminMobileMenu();
+        } else {
+            closeAdminMobileMenu();
+        }
+    }
+}
+
+function openAdminMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    
+    if (mobileMenu && mobileMenuButton) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenuButton.innerHTML = '<i class="fas fa-times text-xl"></i>';
+        mobileMenuButton.setAttribute('aria-expanded', 'true');
+    }
+}
+
+function closeAdminMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    
+    if (mobileMenu && mobileMenuButton) {
+        mobileMenu.classList.add('hidden');
+        mobileMenuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+        mobileMenuButton.setAttribute('aria-expanded', 'false');
     }
 }
 

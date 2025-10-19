@@ -2,32 +2,8 @@
 
 // Initialize common functionality on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize navigation
-    initNavigation();
-    
-    // Initialize authentication
-    initAuth();
-    
-    // Initialize cart display
-    updateCartDisplay();
-    
-    // Initialize scroll to top
+    // Initialize scroll to top (doesn't depend on navigation)
     initScrollToTop();
-    
-    // Set active navigation link
-    setActiveNavLink();
-    
-    // Initialize mobile menu after a short delay to ensure components are loaded
-    setTimeout(() => {
-        initMobileMenu();
-    }, 500);
-    
-    // Also try to initialize mobile menu when the page is fully loaded
-    window.addEventListener('load', function() {
-        setTimeout(() => {
-            initMobileMenu();
-        }, 100);
-    });
     
     // Handle window resize to reinitialize mobile menu when switching between desktop/mobile
     window.addEventListener('resize', function() {
@@ -363,6 +339,11 @@ async function logout() {
             showNotification('Logged out successfully', 'success');
             showLoginButton();
             updateCartDisplay();
+            
+            // Redirect to home page after successful logout
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
         } else {
             showNotification('Logout failed', 'error');
         }
@@ -399,6 +380,8 @@ async function addToCart(productId) {
         }
         
         localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Update cart display immediately
         updateCartDisplay();
         
         // Show success message
@@ -412,58 +395,23 @@ async function addToCart(productId) {
     }
 }
 
-async function updateCartDisplay() {
-    // Check if user is logged in
-    try {
-        const response = await fetch('api/auth.php?action=check');
-        const data = await response.json();
-        
-        if (data.success) {
-            // User is logged in, show cart items
-            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            
-            // Update all cart buttons
-            const cartButtons = document.querySelectorAll('a[href="cart.html"]');
-            cartButtons.forEach(button => {
-                if (button.innerHTML.includes('Cart')) {
-                    // Check if it's the mobile button with different structure
-                    if (button.innerHTML.includes('mr-1')) {
-                        button.innerHTML = `<i class="fas fa-shopping-cart mr-1"></i><span class="hidden sm:inline">Cart (${totalItems})</span>`;
-                    } else {
-                        button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (${totalItems})`;
-                    }
-                }
-            });
-        } else {
-            // User is not logged in, show empty cart
-            const cartButtons = document.querySelectorAll('a[href="cart.html"]');
-            cartButtons.forEach(button => {
-                if (button.innerHTML.includes('Cart')) {
-                    // Check if it's the mobile button with different structure
-                    if (button.innerHTML.includes('mr-1')) {
-                        button.innerHTML = `<i class="fas fa-shopping-cart mr-1"></i><span class="hidden sm:inline">Cart (0)</span>`;
-                    } else {
-                        button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (0)`;
-                    }
-                }
-            });
-        }
-    } catch (error) {
-        console.error('Error checking authentication for cart display:', error);
-        // Show empty cart on error
-        const cartButtons = document.querySelectorAll('a[href="cart.html"]');
-        cartButtons.forEach(button => {
-            if (button.innerHTML.includes('Cart')) {
-                // Check if it's the mobile button with different structure
-                if (button.innerHTML.includes('mr-1')) {
-                    button.innerHTML = `<i class="fas fa-shopping-cart mr-1"></i><span class="hidden sm:inline">Cart (0)</span>`;
-                } else {
-                    button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (0)`;
-                }
+function updateCartDisplay() {
+    // Get cart from localStorage and update display
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    
+    // Update all cart buttons
+    const cartButtons = document.querySelectorAll('a[href="cart.html"]');
+    cartButtons.forEach(button => {
+        if (button.innerHTML.includes('Cart')) {
+            // Check if it's the mobile button with different structure
+            if (button.innerHTML.includes('mr-1')) {
+                button.innerHTML = `<i class="fas fa-shopping-cart mr-1"></i><span class="hidden sm:inline">Cart (${totalItems})</span>`;
+            } else {
+                button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (${totalItems})`;
             }
-        });
-    }
+        }
+    });
 }
 
 // Scroll to top functionality
@@ -528,6 +476,23 @@ window.initMobileMenuManually = function() {
     }
 };
 
+// Global function to manually initialize navigation (for debugging)
+window.initNavigationManually = function() {
+    console.log('Manually initializing navigation...');
+    initializeNavigationFunctionality();
+};
+
+// Fallback: Try to initialize navigation after a longer delay if it hasn't been initialized
+setTimeout(() => {
+    // Check if navigation container exists and has content
+    const navContainer = document.getElementById('navigation-container');
+    if (navContainer && navContainer.innerHTML.trim() && !navContainer.hasAttribute('data-initialized')) {
+        console.log('Fallback: Initializing navigation after delay');
+        initializeNavigationFunctionality();
+        navContainer.setAttribute('data-initialized', 'true');
+    }
+}, 1000);
+
 // Utility function to load HTML components
 async function loadComponent(componentPath, targetElementId) {
     try {
@@ -538,18 +503,42 @@ async function loadComponent(componentPath, targetElementId) {
         if (targetElement) {
             targetElement.innerHTML = html;
             
-            // Re-initialize shared functionality after loading components
+            // Initialize shared functionality after loading components
+            // Use a longer delay to ensure DOM is fully updated
             setTimeout(() => {
-                initAuth();
-                updateCartDisplay();
-                setActiveNavLink();
-                initScrollToTop();
-                initMobileMenu();
-                // Re-initialize profile dropdown functionality
-                initProfileDropdown();
-            }, 200);
+                initializeNavigationFunctionality();
+            }, 300);
         }
     } catch (error) {
         console.error('Error loading component:', error);
     }
+}
+
+// Initialize all navigation-related functionality
+function initializeNavigationFunctionality() {
+    // Initialize navigation
+    initNavigation();
+    
+    // Initialize authentication
+    initAuth();
+    
+    // Initialize cart display
+    updateCartDisplay();
+    
+    // Set active navigation link
+    setActiveNavLink();
+    
+    // Initialize mobile menu
+    initMobileMenu();
+    
+    // Re-initialize profile dropdown functionality
+    initProfileDropdown();
+    
+    // Mark navigation container as initialized
+    const navContainer = document.getElementById('navigation-container');
+    if (navContainer) {
+        navContainer.setAttribute('data-initialized', 'true');
+    }
+    
+    console.log('Navigation functionality initialized successfully');
 }

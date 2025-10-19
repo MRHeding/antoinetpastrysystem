@@ -143,30 +143,30 @@ function displayCartItems() {
         if (product) {
             hasValidItems = true;
             html += `
-                <div class="flex items-center space-x-6 p-6 border border-gray-200 rounded-lg">
+                <div class="flex items-center space-x-6 p-6 border border-gray-200 rounded-lg bg-white shadow-sm">
                     <div class="flex-shrink-0">
-                        <img src="${product.image_url || 'Logo.png'}" alt="${product.name}" class="h-20 w-20 object-contain rounded-lg">
+                        <img src="${product.image_url || 'Logo.png'}" alt="${product.name}" class="h-24 w-24 object-cover rounded-lg border border-gray-200">
                     </div>
-                    <div class="flex-1">
-                        <h3 class="text-xl font-semibold text-gray-800">${product.name}</h3>
-                        <p class="text-gray-600">${product.description}</p>
-                        <p class="text-amber-600 font-bold text-lg">₱${parseFloat(product.price).toFixed(2)}</p>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">${product.name}</h3>
+                        <p class="text-gray-600 mb-3 line-clamp-2 leading-relaxed">${product.description}</p>
+                        <p class="text-amber-600 font-bold text-lg">₱${parseFloat(product.price).toFixed(2)} each</p>
                     </div>
-                    <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-4">
                         <button onclick="updateQuantity(${index}, ${item.quantity - 1})" 
-                                class="w-8 h-8 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition duration-200">
+                                class="w-10 h-10 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition duration-200 flex items-center justify-center">
                             <i class="fas fa-minus text-sm"></i>
                         </button>
-                        <span class="w-12 text-center font-semibold">${item.quantity}</span>
+                        <span class="w-12 text-center font-semibold text-lg">${item.quantity}</span>
                         <button onclick="updateQuantity(${index}, ${item.quantity + 1})" 
-                                class="w-8 h-8 bg-amber-600 text-white rounded-full hover:bg-amber-700 transition duration-200">
+                                class="w-10 h-10 bg-amber-600 text-white rounded-full hover:bg-amber-700 transition duration-200 flex items-center justify-center">
                             <i class="fas fa-plus text-sm"></i>
                         </button>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xl font-bold text-gray-800">₱${(parseFloat(product.price) * item.quantity).toFixed(2)}</p>
+                    <div class="text-right min-w-0">
+                        <p class="text-xl font-bold text-gray-800 mb-2">₱${(parseFloat(product.price) * item.quantity).toFixed(2)}</p>
                         <button onclick="removeFromCart(${index})" 
-                                class="text-red-600 hover:text-red-800 transition duration-200 mt-2">
+                                class="text-red-600 hover:text-red-800 transition duration-200 text-sm">
                             <i class="fas fa-trash mr-1"></i>Remove
                         </button>
                     </div>
@@ -285,12 +285,10 @@ function updateCartSummary() {
         }
     });
     
-    const tax = subtotal * 0.12; // 12% tax
     const delivery = 50.00;
-    const total = subtotal + tax + delivery;
+    const total = subtotal + delivery;
     
     document.getElementById('cart-subtotal').textContent = `₱${subtotal.toFixed(2)}`;
-    document.getElementById('cart-tax').textContent = `₱${tax.toFixed(2)}`;
     document.getElementById('cart-delivery').textContent = `₱${delivery.toFixed(2)}`;
     document.getElementById('cart-total').textContent = `₱${total.toFixed(2)}`;
 }
@@ -368,9 +366,8 @@ function showCheckoutModal() {
             return sum + (product ? parseFloat(product.price) * item.quantity : 0);
         }
     }, 0);
-    const tax = subtotal * 0.12;
     const delivery = 50.00;
-    const total = subtotal + tax + delivery;
+    const total = subtotal + delivery;
     
     // Generate summary HTML
     let summaryHTML = `
@@ -427,10 +424,6 @@ function showCheckoutModal() {
                         <div class="flex justify-between">
                             <span class="text-gray-600">Subtotal:</span>
                             <span class="font-medium">₱${subtotal.toFixed(2)}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Tax (12%):</span>
-                            <span class="font-medium">₱${tax.toFixed(2)}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Delivery Fee:</span>
@@ -517,14 +510,13 @@ async function confirmCheckout() {
             }
         });
         
-        const tax = subtotal * 0.12; // 12% tax
         const delivery = 50.00;
-        const total = subtotal + tax + delivery;
+        const total = subtotal + delivery;
         
         // Create order
         const orderData = {
             items: orderItems,
-            notes: `Order total: ₱${total.toFixed(2)} (Subtotal: ₱${subtotal.toFixed(2)}, Tax: ₱${tax.toFixed(2)}, Delivery: ₱${delivery.toFixed(2)})`
+            notes: `Order total: ₱${total.toFixed(2)} (Subtotal: ₱${subtotal.toFixed(2)}, Delivery: ₱${delivery.toFixed(2)})`
         };
         
         const orderResponse = await fetch('api/orders.php?action=create_order', {
@@ -579,6 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /**
  * Update cart display in navigation (from cart page)
+ * This function is now consistent with shared.js
  */
 function updateCartDisplay() {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');

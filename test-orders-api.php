@@ -27,7 +27,7 @@ if ($response === false) {
 echo "<h2>Test 2: Database Connection</h2>";
 try {
     require_once 'config/database.php';
-    $database = new Database();
+    $database = Database::getInstance();
     $db = $database->getConnection();
     echo "<p style='color: green;'>✅ Database connection successful</p>";
     

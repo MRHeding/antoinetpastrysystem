@@ -54,32 +54,32 @@ function displayFeaturedProducts(products) {
             <div class="h-48 bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center relative overflow-hidden">
                 <img src="${imageSrc}" alt="${product.name}" class="h-full w-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-br from-amber-100/40 to-orange-200/40"></div>
-                <div class="absolute top-2 right-2 bg-amber-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                <div class="absolute top-3 right-3 bg-amber-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
                     ${product.category}
                 </div>
             </div>
             <div class="p-6">
-                <h4 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-amber-600 transition-colors">${product.name}</h4>
-                <p class="text-gray-600 mb-4 line-clamp-3">${product.description}</p>
-                <div class="flex justify-between items-center mb-4">
+                <h4 class="text-xl font-bold text-gray-800 mb-3 group-hover:text-amber-600 transition-colors">${product.name}</h4>
+                <p class="text-gray-600 mb-5 line-clamp-3 leading-relaxed">${product.description}</p>
+                <div class="flex justify-between items-center mb-5">
                     <span class="text-2xl font-bold text-amber-600">₱${product.price}</span>
-                    <div class="flex items-center text-yellow-500">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <span class="text-gray-500 text-sm ml-1">(4.8)</span>
+                    <div class="flex items-center text-yellow-500 space-x-1">
+                        <i class="fas fa-star text-sm"></i>
+                        <i class="fas fa-star text-sm"></i>
+                        <i class="fas fa-star text-sm"></i>
+                        <i class="fas fa-star text-sm"></i>
+                        <i class="fas fa-star text-sm"></i>
+                        <span class="text-gray-500 text-sm ml-2">(4.8)</span>
                     </div>
                 </div>
-                <div class="flex space-x-2">
+                <div class="flex space-x-3">
                     <button onclick="addToCart(${product.id})" 
-                            class="w-32 bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
+                            class="w-32 bg-amber-600 text-white py-2.5 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-cart-plus mr-2"></i>Add to Cart
                     </button>
                     <button onclick="viewProduct(${product.id})" 
-                            class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors">
-                        <i class="fas fa-eye"></i>
+                            class="bg-gray-200 text-gray-700 py-2.5 px-4 rounded-md hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-eye mr-1"></i>View
                     </button>
                 </div>
             </div>

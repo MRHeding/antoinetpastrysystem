@@ -47,6 +47,30 @@
     overflow: hidden;
   }
   
+  /* Custom scrollbar styles */
+  .modal-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #9ca3af #f3f4f6;
+  }
+  
+  .modal-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .modal-scroll::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+  }
+  
+  .modal-scroll::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 4px;
+  }
+  
+  .modal-scroll::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+  
   /* Extended Background Styles */
   .bg-extended {
     background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 25%, #fdba74 50%, #fb923c 75%, #f97316 100%);

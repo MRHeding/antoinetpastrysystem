@@ -45,12 +45,6 @@ switch ($method) {
             case 'profile':
                 getProfile();
                 break;
-            case 'update_profile':
-                updateProfile();
-                break;
-            case 'change_password':
-                changePassword();
-                break;
             default:
                 echo json_encode(['success' => false, 'message' => 'Invalid action']);
                 break;
@@ -66,8 +60,9 @@ function registerUser() {
     
     // Validate input
     if (!isset($input['username']) || !isset($input['email']) || !isset($input['password']) || 
-        !isset($input['first_name']) || !isset($input['last_name'])) {
-        echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+        !isset($input['first_name']) || !isset($input['last_name']) || !isset($input['address']) ||
+        !isset($input['city']) || !isset($input['state']) || !isset($input['zip_code'])) {
+        echo json_encode(['success' => false, 'message' => 'Missing required fields. All address information is mandatory.']);
         return;
     }
     
@@ -79,7 +74,7 @@ function registerUser() {
     }
     
     try {
-        $database = new Database();
+        $database = Database::getInstance();
         $db = $database->getConnection();
         
         // Check if username or email already exists
@@ -107,10 +102,10 @@ function registerUser() {
             $input['first_name'],
             $input['last_name'],
             $input['phone'] ?? null,
-            $input['address'] ?? null,
-            $input['city'] ?? null,
-            $input['state'] ?? null,
-            $input['zip_code'] ?? null
+            $input['address'],
+            $input['city'],
+            $input['state'],
+            $input['zip_code']
         ]);
         
         $user_id = $db->lastInsertId();
@@ -135,7 +130,7 @@ function loginUser() {
     }
     
     try {
-        $database = new Database();
+        $database = Database::getInstance();
         $db = $database->getConnection();
         
         // Get user by username or email
@@ -187,7 +182,7 @@ function logoutUser() {
         $session_token = $_COOKIE['session_token'] ?? '';
         
         if ($session_token) {
-            $database = new Database();
+            $database = Database::getInstance();
             $db = $database->getConnection();
             
             // Delete session
@@ -214,7 +209,7 @@ function checkAuth() {
             return;
         }
         
-        $database = new Database();
+        $database = Database::getInstance();
         $db = $database->getConnection();
         
         // Check session validity
@@ -251,7 +246,7 @@ function getProfile() {
             return;
         }
         
-        $database = new Database();
+        $database = Database::getInstance();
         $db = $database->getConnection();
         
         // Get user profile
@@ -285,11 +280,14 @@ function updateProfile() {
         $session_token = $_COOKIE['session_token'] ?? '';
         
         if (!$session_token) {
-            echo json_encode(['success' => false, 'message' => 'Authentication required']);
+            echo json_encode(['success' => false, 'message' => 'Authentication required - no session token']);
             return;
         }
         
         $input = json_decode(file_get_contents('php://input'), true);
+        
+        // Log the input for debugging
+        error_log('Profile update input: ' . json_encode($input));
         
         // Validate required fields
         if (!isset($input['first_name']) || !isset($input['last_name'])) {
@@ -297,7 +295,7 @@ function updateProfile() {
             return;
         }
         
-        $database = new Database();
+        $database = Database::getInstance();
         $db = $database->getConnection();
         
         // Verify session and get user ID
@@ -309,8 +307,10 @@ function updateProfile() {
         $stmt->execute([$session_token]);
         $user = $stmt->fetch();
         
+        error_log('Session verification - User found: ' . ($user ? 'Yes' : 'No'));
+        
         if (!$user) {
-            echo json_encode(['success' => false, 'message' => 'Authentication required']);
+            echo json_encode(['success' => false, 'message' => 'Authentication required - invalid session']);
             return;
         }
         
@@ -322,7 +322,7 @@ function updateProfile() {
             WHERE id = ?
         ");
         
-        $stmt->execute([
+        $updateData = [
             $input['first_name'],
             $input['last_name'],
             $input['phone'] ?? null,
@@ -331,12 +331,26 @@ function updateProfile() {
             $input['state'] ?? null,
             $input['zip_code'] ?? null,
             $user['id']
-        ]);
+        ];
         
-        echo json_encode([
-            'success' => true,
-            'message' => 'Profile updated successfully'
-        ]);
+        error_log('Update data: ' . json_encode($updateData));
+        
+        $result = $stmt->execute($updateData);
+        
+        error_log('Update result: ' . ($result ? 'Success' : 'Failed'));
+        error_log('Rows affected: ' . $stmt->rowCount());
+        
+        if ($result && $stmt->rowCount() > 0) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Profile updated successfully'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Profile update failed - no rows affected'
+            ]);
+        }
         
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Failed to update profile: ' . $e->getMessage()]);
@@ -366,7 +380,7 @@ function changePassword() {
             return;
         }
         
-        $database = new Database();
+        $database = Database::getInstance();
         $db = $database->getConnection();
         
         // Get user and verify current password

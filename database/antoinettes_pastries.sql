@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 18, 2025 at 03:18 AM
+-- Generation Time: Oct 18, 2025 at 11:06 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -87,18 +87,6 @@ CREATE TABLE `orders` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`id`, `user_id`, `customer_id`, `order_number`, `total_amount`, `status`, `order_date`, `pickup_date`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 2, NULL, 'ORD-20250101-0001', 15.50, 'completed', '2025-01-01 02:30:00', '2025-01-01', 'Please make sure the croissants are fresh', '2025-01-01 02:30:00', '2025-01-01 02:30:00'),
-(2, 2, NULL, 'ORD-20250102-0002', 28.00, 'preparing', '2025-01-02 06:15:00', '2025-01-03', 'Birthday cake for my daughter', '2025-01-02 06:15:00', '2025-01-02 06:15:00'),
-(3, 7, NULL, 'ORD-20250103-0003', 8.75, 'ready', '2025-01-03 01:45:00', '2025-01-03', NULL, '2025-01-03 01:45:00', '2025-01-03 01:45:00'),
-(4, 2, NULL, 'ORD-20250104-0004', 12.00, 'pending', '2025-01-04 08:20:00', '2025-01-05', 'Gluten-free options please', '2025-01-04 08:20:00', '2025-01-04 08:20:00'),
-(5, 7, NULL, 'ORD-20250105-0005', 6.50, 'cancelled', '2025-01-05 03:10:00', '2025-01-05', 'Changed my mind', '2025-01-05 03:10:00', '2025-01-05 03:10:00'),
-(6, 8, NULL, 'ORD-20251016-6224', 14.00, 'cancelled', '2025-10-16 16:31:09', NULL, 'Order total: ₱65.68 (Subtotal: ₱14.00, Tax: ₱1.68, Delivery: ₱50.00)', '2025-10-16 16:31:09', '2025-10-16 16:42:23');
-
 -- --------------------------------------------------------
 
 --
@@ -114,22 +102,6 @@ CREATE TABLE `order_items` (
   `total_price` decimal(10,2) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `order_items`
---
-
-INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `unit_price`, `total_price`, `created_at`) VALUES
-(1, 1, 1, 2, 3.50, 7.00, '2025-01-01 02:30:00'),
-(2, 1, 5, 3, 2.50, 7.50, '2025-01-01 02:30:00'),
-(3, 1, 8, 1, 4.50, 4.50, '2025-01-01 02:30:00'),
-(4, 2, 4, 1, 28.00, 28.00, '2025-01-02 06:15:00'),
-(5, 3, 2, 1, 4.25, 4.25, '2025-01-03 01:45:00'),
-(6, 3, 3, 1, 4.50, 4.50, '2025-01-03 01:45:00'),
-(7, 4, 5, 4, 2.50, 10.00, '2025-01-04 08:20:00'),
-(8, 4, 9, 1, 3.75, 3.75, '2025-01-04 08:20:00'),
-(9, 5, 6, 1, 6.50, 6.50, '2025-01-05 03:10:00'),
-(10, 6, 12, 1, 14.00, 14.00, '2025-10-16 16:31:09');
 
 -- --------------------------------------------------------
 
@@ -154,18 +126,7 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `description`, `price`, `category`, `image_url`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'Classic Butter Croissant', 'Traditional French croissant made with premium butter, light and flaky with a golden exterior.', 3.50, 'Croissants', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:20'),
-(2, 'Chocolate Croissant', 'Buttery croissant filled with rich dark chocolate, perfect for a sweet breakfast treat.', 4.25, 'Croissants', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:22'),
-(3, 'Almond Croissant', 'Flaky croissant filled with almond cream and topped with sliced almonds.', 4.75, 'Croissants', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:24'),
-(4, 'Red Velvet Cake', 'Moist red velvet cake with cream cheese frosting, perfect for special occasions.', 28.00, 'Cakes', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:25'),
-(5, 'Chocolate Chip Cookies', 'Classic chocolate chip cookies made with premium chocolate chips.', 2.50, 'Cookies', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:27'),
-(6, 'Lemon Tart', 'Tangy lemon curd in a buttery pastry shell, topped with fresh berries.', 6.50, 'Tarts', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:29'),
-(7, 'Sourdough Bread', 'Traditional sourdough bread with a crispy crust and tangy flavor.', 5.00, 'Bread', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:31'),
-(8, 'Apple Cinnamon Roll', 'Soft cinnamon roll filled with spiced apples and topped with cream cheese glaze.', 4.50, 'Seasonal', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:32'),
-(9, 'Pumpkin Spice Muffin', 'Seasonal pumpkin muffin with warm spices and cream cheese filling.', 3.75, 'Seasonal', NULL, 0, '2025-09-21 16:01:40', '2025-09-24 15:56:36'),
-(10, 'Strawberry Shortcake', 'Light sponge cake layered with fresh strawberries and whipped cream.', 22.00, 'Cakes', NULL, 0, '2025-09-21 16:01:40', '2025-10-11 16:11:49'),
-(11, 'Testing Product', 'For Testing', 1.00, 'Cookies', NULL, 0, '2025-10-11 15:58:22', '2025-10-11 15:59:11'),
-(12, 'Yummy Cookie', 'Delicioso', 50.00, 'Cookies', 'uploads/products/1760198544_2ChocolateChipCookies.jpg', 1, '2025-10-11 16:02:24', '2025-10-11 16:11:09');
+(19, 'Hot Pandesal', 'Our best hot pandesal best combine with hot coffee', 2.00, 'Bread', 'uploads/products/1760778180_images (6).jpg', 1, '2025-10-18 09:03:00', '2025-10-18 09:03:00');
 
 -- --------------------------------------------------------
 
@@ -199,10 +160,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `first_name`, `last_name`, `phone`, `address`, `city`, `state`, `zip_code`, `role`, `is_active`, `email_verified`, `created_at`, `updated_at`, `email_verification_token`, `email_verification_expires`) VALUES
-(1, 'admin', 'admin@antoinettes.com', '$2y$10$1DyuW6YdQqK.tAhHzfJy8.AaVdltnycowD4Gb2crbp6wJEAjuVqCG', 'Admin', 'User', NULL, NULL, NULL, NULL, NULL, 'admin', 1, 1, '2025-09-21 16:01:40', '2025-09-28 13:02:20', NULL, NULL),
-(2, 'juan1999', 'juan1999@gmail.com', '$2y$10$wxnZ.ujO75DbbV4FbzfOGOfLKg4BXGZO2qjr4dvwxXfatH1.cI5FO', 'Juan', 'Cruz', '09918195487', NULL, NULL, NULL, NULL, 'customer', 1, 1, '2025-09-24 15:44:39', '2025-09-28 13:02:20', NULL, NULL),
-(7, 'Juan', 'teronash23@gmail.com', '$2y$10$.wLheNcKs8jA1daj2dTmk.yqXO9rhiVJZ.x9IZx.dUkhh.Z8d62Lq', 'Juan', 'Cruz', '09918195487', NULL, NULL, NULL, NULL, 'customer', 1, 1, '2025-09-28 13:31:18', '2025-09-28 13:31:27', NULL, NULL),
-(8, 'joe', 'joe@gmail.com', '$2y$10$.Oi91sWqa1vz3XqvwOo5Qec6WtCR/5VqpeqafqY7zv1ayKP7UGqSy', 'Joe', 'Joe', '09918195487', 'Brgy Putik', 'Zamboanga City', 'Zamboanga Del Sur', '7000', 'customer', 1, 0, '2025-10-16 16:05:41', '2025-10-16 16:16:47', '069bc0e463e32ce1c5f30cfc65ea2d2e1630407782ab5d85150cbf8347e43db8', '2025-10-17 10:05:41');
+(1, 'admin', 'admin@antoinettes.com', '$2y$10$1DyuW6YdQqK.tAhHzfJy8.AaVdltnycowD4Gb2crbp6wJEAjuVqCG', 'Admin', 'User', NULL, NULL, NULL, NULL, NULL, 'admin', 1, 1, '2025-09-21 16:01:40', '2025-09-28 13:02:20', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -217,6 +175,13 @@ CREATE TABLE `user_sessions` (
   `expires_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user_sessions`
+--
+
+INSERT INTO `user_sessions` (`id`, `user_id`, `session_token`, `expires_at`, `created_at`) VALUES
+(25, 1, 'd4e8974c88911f51d70c8eacdca6fbd19245d9496188a46764a51dd4284059d0', '2025-10-25 02:59:48', '2025-10-18 08:59:48');
 
 --
 -- Indexes for dumped tables
@@ -301,31 +266,31 @@ ALTER TABLE `customers`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `user_sessions`
 --
 ALTER TABLE `user_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- Constraints for dumped tables

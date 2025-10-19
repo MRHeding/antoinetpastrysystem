@@ -157,6 +157,8 @@ async function saveProfile() {
     }
     
     try {
+        console.log('Sending profile update request:', profileData);
+        
         const response = await fetch('api/auth.php?action=update_profile', {
             method: 'POST',
             headers: {
@@ -165,7 +167,11 @@ async function saveProfile() {
             body: JSON.stringify(profileData)
         });
         
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
         const result = await response.json();
+        console.log('Response data:', result);
         
         if (result.success) {
             showNotification('Profile updated successfully!', 'success');

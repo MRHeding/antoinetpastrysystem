@@ -55,7 +55,7 @@ function getUserOrders() {
             return;
         }
         
-        $database = new Database();
+        $database = Database::getInstance();
         $db = $database->getConnection();
         
         // Get user ID from session
@@ -111,7 +111,7 @@ function getOrderDetails() {
             return;
         }
         
-        $database = new Database();
+        $database = Database::getInstance();
         $db = $database->getConnection();
         
         // Get user ID from session
@@ -188,7 +188,7 @@ function cancelOrder() {
             return;
         }
         
-        $database = new Database();
+        $database = Database::getInstance();
         $db = $database->getConnection();
         
         // Get user ID from session
@@ -260,7 +260,7 @@ function createOrder() {
             return;
         }
         
-        $database = new Database();
+        $database = Database::getInstance();
         $db = $database->getConnection();
         
         // Get user ID from session

@@ -181,7 +181,10 @@ function showNotification(message, type = 'info') {
 
 // Initialize cart display on page load
 document.addEventListener('DOMContentLoaded', function() {
-    updateCartDisplay();
+    // Only call updateCartDisplay if it exists (from shared.js)
+    if (typeof updateCartDisplay === 'function') {
+        updateCartDisplay();
+    }
     initScrollToTop();
 });
 
@@ -232,25 +235,6 @@ function showLoginButton() {
     });
 }
 
-async function logout() {
-    try {
-        const response = await fetch('api/auth.php?action=logout', {
-            method: 'POST'
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            showNotification('Logged out successfully', 'success');
-            showLoginButton();
-        } else {
-            showNotification('Logout failed', 'error');
-        }
-    } catch (error) {
-        console.error('Logout error:', error);
-        showNotification('Logout failed', 'error');
-    }
-}
 
 // Scroll to top functionality
 function initScrollToTop() {

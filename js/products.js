@@ -21,7 +21,28 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize modal controls
     initModalControls();
+    
+    // Check admin status and disable cart functionality if needed
+    checkAdminStatus();
 });
+
+// Check admin status and update UI accordingly
+async function checkAdminStatus() {
+    try {
+        const response = await fetch('api/auth.php?action=check');
+        const data = await response.json();
+        
+        if (data.success && data.user.role === 'admin') {
+            // Store admin status globally for use in other functions
+            window.isAdmin = true;
+        } else {
+            window.isAdmin = false;
+        }
+    } catch (error) {
+        console.error('Error checking admin status:', error);
+        window.isAdmin = false;
+    }
+}
 
 // Initialize modal controls
 function initModalControls() {
@@ -76,6 +97,9 @@ async function loadProducts() {
         if (products.success) {
             allProducts = products.data;
             filteredProducts = [...allProducts];
+            
+            // Ensure admin status is checked before displaying products
+            await checkAdminStatus();
             displayProducts();
             updatePagination();
         } else {
@@ -187,35 +211,40 @@ function displayProducts() {
         <div class="card group" id="product-${product.id}">
             <div class="h-48 bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center relative overflow-hidden cursor-pointer" onclick="viewProductDetails(${product.id})">
                 <img src="${imageSrc}" alt="${product.name}" class="h-full w-full object-cover">
-                <div class="absolute top-2 right-2 bg-amber-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                <div class="absolute top-3 right-3 bg-amber-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
                     ${product.category}
                 </div>
-                <div class="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                <div class="absolute top-3 left-3 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
                     Fresh
                 </div>
             </div>
             <div class="p-6">
-                <h4 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-amber-600 transition-colors cursor-pointer" onclick="viewProductDetails(${product.id})">${product.name}</h4>
-                <p class="text-gray-600 mb-4 line-clamp-3">${product.description}</p>
-                <div class="flex justify-between items-center mb-4">
+                <h4 class="text-xl font-bold text-gray-800 mb-3 group-hover:text-amber-600 transition-colors cursor-pointer" onclick="viewProductDetails(${product.id})">${product.name}</h4>
+                <p class="text-gray-600 mb-5 line-clamp-3 leading-relaxed">${product.description}</p>
+                <div class="flex justify-between items-center mb-5">
                     <span class="text-2xl font-bold text-amber-600">₱${product.price}</span>
-                    <div class="flex items-center text-yellow-500">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <span class="text-gray-500 text-sm ml-1">(4.8)</span>
+                    <div class="flex items-center text-yellow-500 space-x-1">
+                        <i class="fas fa-star text-sm"></i>
+                        <i class="fas fa-star text-sm"></i>
+                        <i class="fas fa-star text-sm"></i>
+                        <i class="fas fa-star text-sm"></i>
+                        <i class="fas fa-star text-sm"></i>
+                        <span class="text-gray-500 text-sm ml-2">(4.8)</span>
                     </div>
                 </div>
-                <div class="flex space-x-2">
-                    <button onclick="addToCart(${product.id})" 
-                            class="w-32 bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
-                        <i class="fas fa-cart-plus mr-2"></i>Add to Cart
-                    </button>
+                <div class="flex space-x-3">
+                    ${window.isAdmin ? 
+                        `<button disabled class="w-32 bg-gray-400 text-white py-2.5 px-4 rounded-md cursor-not-allowed opacity-50">
+                            <i class="fas fa-ban mr-2"></i>Admin Mode
+                        </button>` :
+                        `<button onclick="addToCart(${product.id})" 
+                                class="w-32 bg-amber-600 text-white py-2.5 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
+                            <i class="fas fa-cart-plus mr-2"></i>Add to Cart
+                        </button>`
+                    }
                     <button onclick="viewProductDetails(${product.id})" 
-                            class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors">
-                        <i class="fas fa-eye"></i>
+                            class="bg-gray-200 text-gray-700 py-2.5 px-4 rounded-md hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-eye mr-1"></i>View
                     </button>
                 </div>
             </div>
@@ -354,11 +383,23 @@ async function viewProductDetails(productId) {
         
         // Set up add to cart button
         const addToCartBtn = document.getElementById('add-to-cart-btn');
-        addToCartBtn.onclick = function() {
-            const quantity = parseInt(document.getElementById('product-quantity').value);
-            addToCartWithQuantity(productId, quantity);
-            hideProductModal();
-        };
+        
+        // Update button appearance and functionality based on admin status
+        if (window.isAdmin) {
+            addToCartBtn.disabled = true;
+            addToCartBtn.innerHTML = '<i class="fas fa-ban mr-2"></i>Admin Mode';
+            addToCartBtn.className = 'flex-1 bg-gray-400 text-white px-6 py-2 rounded-lg cursor-not-allowed opacity-50';
+            addToCartBtn.onclick = null;
+        } else {
+            addToCartBtn.disabled = false;
+            addToCartBtn.innerHTML = 'Add to Cart';
+            addToCartBtn.className = 'flex-1 bg-amber-600 text-white px-6 py-2 rounded-lg hover:bg-amber-700 transition-colors';
+            addToCartBtn.onclick = async function() {
+                const quantity = parseInt(document.getElementById('product-quantity').value);
+                addToCartWithQuantity(productId, quantity);
+                hideProductModal();
+            };
+        }
         
         // Show modal
         document.getElementById('product-details-modal').classList.remove('hidden');
@@ -375,12 +416,42 @@ function hideProductModal() {
 }
 
 // Add to cart function (for direct button clicks)
-function addToCart(productId) {
-    addToCartWithQuantity(productId, 1);
+async function addToCart(productId) {
+    // Check if user is admin
+    try {
+        const response = await fetch('api/auth.php?action=check');
+        const data = await response.json();
+        
+        if (data.success && data.user.role === 'admin') {
+            showNotification('Admin users cannot add items to cart', 'error');
+            return;
+        }
+        
+        // Proceed with adding to cart if not admin
+        addToCartWithQuantity(productId, 1);
+    } catch (error) {
+        console.error('Error checking admin status:', error);
+        // If there's an error checking admin status, proceed normally
+        addToCartWithQuantity(productId, 1);
+    }
 }
 
 // Add to cart with quantity
-function addToCartWithQuantity(productId, quantity) {
+async function addToCartWithQuantity(productId, quantity) {
+    // Check if user is admin
+    try {
+        const response = await fetch('api/auth.php?action=check');
+        const data = await response.json();
+        
+        if (data.success && data.user.role === 'admin') {
+            showNotification('Admin users cannot add items to cart', 'error');
+            return;
+        }
+    } catch (error) {
+        console.error('Error checking admin status:', error);
+        // If there's an error checking admin status, proceed normally
+    }
+    
     const product = allProducts.find(p => p.id == productId);
     
     if (!product) {
@@ -409,22 +480,24 @@ function addToCartWithQuantity(productId, quantity) {
     // Save updated cart
     localStorage.setItem('cart', JSON.stringify(cart));
     
-    // Update cart count
-    updateCartDisplay();
-    
-    // Also manually update cart display to ensure it works
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const cartButtons = document.querySelectorAll('a[href="cart.html"]');
-    cartButtons.forEach(button => {
-        if (button.innerHTML.includes('Cart')) {
-            // Check if it's the mobile button with different structure
-            if (button.innerHTML.includes('mr-1')) {
-                button.innerHTML = `<i class="fas fa-shopping-cart mr-1"></i><span class="hidden sm:inline">Cart (${totalItems})</span>`;
-            } else {
-                button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (${totalItems})`;
+    // Update cart count - call the shared function
+    if (typeof updateCartDisplay === 'function') {
+        updateCartDisplay();
+    } else {
+        // Fallback: manually update cart display
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cartButtons = document.querySelectorAll('a[href="cart.html"]');
+        cartButtons.forEach(button => {
+            if (button.innerHTML.includes('Cart')) {
+                // Check if it's the mobile button with different structure
+                if (button.innerHTML.includes('mr-1')) {
+                    button.innerHTML = `<i class="fas fa-shopping-cart mr-1"></i><span class="hidden sm:inline">Cart (${totalItems})</span>`;
+                } else {
+                    button.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>Cart (${totalItems})`;
+                }
             }
-        }
-    });
+        });
+    }
     
     // Show notification
     showNotification(`${quantity} ${product.name} added to cart!`, 'success');

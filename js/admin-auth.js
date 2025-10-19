@@ -10,7 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // Check if user is already authenticated as admin
 async function checkAdminAuth() {
     try {
-        const response = await fetch('../api/auth.php?action=check');
+        const response = await fetch('../api/auth.php?action=check', {
+            credentials: 'include'
+        });
         const data = await response.json();
         
         if (data.success && data.user.role === 'admin') {
@@ -41,6 +43,7 @@ async function handleAdminLogin(e) {
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify(loginData)
         });
         
