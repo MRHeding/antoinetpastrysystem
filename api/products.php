@@ -22,6 +22,12 @@ if (!$pdo) {
 // Handle different HTTP methods
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Check for status update endpoint
+if ($method === 'PUT' && isset($_GET['action']) && $_GET['action'] === 'status') {
+    updateProductStatus();
+    exit;
+}
+
 switch ($method) {
     case 'GET':
         getProducts();
@@ -50,7 +56,7 @@ function getProducts() {
         // Check if a specific product ID is requested
         if (isset($_GET['id'])) {
             $id = $_GET['id'];
-            $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ? AND is_active = 1");
+            $stmt = $pdo->prepare("SELECT *, availability_status, unavailable_reason, status_updated_at FROM products WHERE id = ? AND is_active = 1");
             $stmt->execute([$id]);
             $product = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -66,8 +72,8 @@ function getProducts() {
                 ]);
             }
         } else {
-            // Get all products
-            $stmt = $pdo->query("SELECT * FROM products WHERE is_active = 1 ORDER BY created_at DESC");
+            // Get all products with availability status
+            $stmt = $pdo->query("SELECT *, availability_status, unavailable_reason, status_updated_at FROM products WHERE is_active = 1 ORDER BY created_at DESC");
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             echo json_encode([
@@ -113,7 +119,17 @@ function createProduct() {
                 $description = $_POST['description'] ?? '';
                 $price = $_POST['price'] ?? 0;
                 $category = $_POST['category'] ?? 'General';
+                $size = $_POST['size'] ?? 'M';
                 $imageUrl = 'uploads/products/' . $fileName; // Relative path for storage
+                
+                // Validate size
+                if (!in_array($size, ['S', 'M', 'L', 'XL'])) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Invalid size. Must be S, M, L, or XL'
+                    ]);
+                    return;
+                }
                 
                 if (empty($name) || empty($description) || empty($price)) {
                     echo json_encode([
@@ -125,8 +141,8 @@ function createProduct() {
                 
                 try {
                     $stmt = $pdo->prepare("
-                        INSERT INTO products (name, description, price, category, image_url, is_active, created_at) 
-                        VALUES (?, ?, ?, ?, ?, 1, NOW())
+                        INSERT INTO products (name, description, price, category, size, image_url, availability_status, is_active, created_at) 
+                        VALUES (?, ?, ?, ?, ?, ?, 'available', 1, NOW())
                     ");
                     
                     $stmt->execute([
@@ -134,6 +150,7 @@ function createProduct() {
                         $description,
                         $price,
                         $category,
+                        $size,
                         $imageUrl
                     ]);
                     
@@ -173,10 +190,20 @@ function createProduct() {
             return;
         }
         
+        // Validate size
+        $size = $input['size'] ?? 'M';
+        if (!in_array($size, ['S', 'M', 'L', 'XL'])) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid size. Must be S, M, L, or XL'
+            ]);
+            return;
+        }
+        
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO products (name, description, price, category, image_url, is_active, created_at) 
-                VALUES (?, ?, ?, ?, ?, 1, NOW())
+                INSERT INTO products (name, description, price, category, size, image_url, availability_status, is_active, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, 'available', 1, NOW())
             ");
             
             $stmt->execute([
@@ -184,6 +211,7 @@ function createProduct() {
                 $input['description'],
                 $input['price'],
                 $input['category'] ?? 'General',
+                $size,
                 $input['image_url'] ?? null
             ]);
             
@@ -239,7 +267,17 @@ function updateProduct() {
                     $description = $_POST['description'] ?? '';
                     $price = $_POST['price'] ?? 0;
                     $category = $_POST['category'] ?? 'General';
+                    $size = $_POST['size'] ?? 'M';
                     $imageUrl = 'uploads/products/' . $fileName; // Relative path for storage
+                    
+                    // Validate size
+                    if (!in_array($size, ['S', 'M', 'L', 'XL'])) {
+                        echo json_encode([
+                            'success' => false,
+                            'message' => 'Invalid size. Must be S, M, L, or XL'
+                        ]);
+                        return;
+                    }
                     
                     if (empty($name) || empty($description) || empty($price)) {
                         echo json_encode([
@@ -252,7 +290,7 @@ function updateProduct() {
                     try {
                         $stmt = $pdo->prepare("
                             UPDATE products 
-                            SET name = ?, description = ?, price = ?, category = ?, image_url = ?, updated_at = NOW()
+                            SET name = ?, description = ?, price = ?, category = ?, size = ?, image_url = ?, updated_at = NOW()
                             WHERE id = ?
                         ");
                         
@@ -261,6 +299,7 @@ function updateProduct() {
                             $description,
                             $price,
                             $category,
+                            $size,
                             $imageUrl,
                             $id
                         ]);
@@ -294,6 +333,16 @@ function updateProduct() {
             $description = $_POST['description'] ?? '';
             $price = $_POST['price'] ?? 0;
             $category = $_POST['category'] ?? 'General';
+            $size = $_POST['size'] ?? 'M';
+            
+            // Validate size
+            if (!in_array($size, ['S', 'M', 'L', 'XL'])) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Invalid size. Must be S, M, L, or XL'
+                ]);
+                return;
+            }
             
             if (empty($name) || empty($description) || empty($price)) {
                 echo json_encode([
@@ -306,7 +355,7 @@ function updateProduct() {
             try {
                 $stmt = $pdo->prepare("
                     UPDATE products 
-                    SET name = ?, description = ?, price = ?, category = ?, updated_at = NOW()
+                    SET name = ?, description = ?, price = ?, category = ?, size = ?, updated_at = NOW()
                     WHERE id = ?
                 ");
                 
@@ -315,6 +364,7 @@ function updateProduct() {
                     $description,
                     $price,
                     $category,
+                    $size,
                     $id
                 ]);
                 
@@ -353,6 +403,18 @@ function updateProduct() {
                 $fields[] = 'category = ?';
                 $values[] = $input['category'];
             }
+            if (isset($input['size'])) {
+                // Validate size
+                if (!in_array($input['size'], ['S', 'M', 'L', 'XL'])) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Invalid size. Must be S, M, L, or XL'
+                    ]);
+                    return;
+                }
+                $fields[] = 'size = ?';
+                $values[] = $input['size'];
+            }
             if (isset($input['image_url'])) {
                 $fields[] = 'image_url = ?';
                 $values[] = $input['image_url'];
@@ -382,6 +444,127 @@ function updateProduct() {
                 'message' => 'Error updating product: ' . $e->getMessage()
             ]);
         }
+    }
+}
+
+function updateProductStatus() {
+    global $pdo;
+    
+    // Check admin authentication
+    session_start();
+    $session_token = $_COOKIE['session_token'] ?? '';
+    
+    if (!$session_token) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Admin authentication required'
+        ]);
+        return;
+    }
+    
+    // Verify admin session and get user ID
+    try {
+        $stmt = $pdo->prepare("
+            SELECT u.id, u.username, u.role
+            FROM users u
+            JOIN user_sessions s ON u.id = s.user_id
+            WHERE s.session_token = ? AND s.expires_at > NOW() AND u.is_active = 1 AND u.role = 'admin'
+        ");
+        $stmt->execute([$session_token]);
+        $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$admin) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Admin authentication required'
+            ]);
+            return;
+        }
+        
+        $userId = $admin['id'];
+        $adminUsername = $admin['username'];
+        
+    } catch (PDOException $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Authentication error'
+        ]);
+        return;
+    }
+    
+    $id = $_GET['id'] ?? null;
+    
+    if (!$id) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Product ID is required'
+        ]);
+        return;
+    }
+    
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (!isset($input['status']) || !in_array($input['status'], ['available', 'unavailable'])) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Valid status (available/unavailable) is required'
+        ]);
+        return;
+    }
+    
+    $status = $input['status'];
+    $reason = $input['reason'] ?? null;
+    
+    try {
+        // Get current status for audit log
+        $stmt = $pdo->prepare("SELECT availability_status FROM products WHERE id = ?");
+        $stmt->execute([$id]);
+        $currentProduct = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$currentProduct) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Product not found'
+            ]);
+            return;
+        }
+        
+        $oldStatus = $currentProduct['availability_status'];
+        
+        // Update product status
+        $stmt = $pdo->prepare("
+            UPDATE products 
+            SET availability_status = ?, 
+                unavailable_reason = ?, 
+                status_updated_at = NOW(), 
+                status_updated_by = ?,
+                updated_at = NOW()
+            WHERE id = ?
+        ");
+        
+        $stmt->execute([$status, $reason, $userId, $id]);
+        
+        // Log the status change in audit table
+        $auditStmt = $pdo->prepare("
+            INSERT INTO product_status_audit (product_id, old_status, new_status, reason, changed_by, changed_at)
+            VALUES (?, ?, ?, ?, ?, NOW())
+        ");
+        $auditStmt->execute([$id, $oldStatus, $status, $reason, $userId]);
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Product status updated successfully',
+            'old_status' => $oldStatus,
+            'new_status' => $status,
+            'changed_by' => $adminUsername,
+            'timestamp' => date('Y-m-d H:i:s')
+        ]);
+        
+    } catch (PDOException $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error updating product status: ' . $e->getMessage()
+        ]);
     }
 }
 

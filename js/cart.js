@@ -142,6 +142,11 @@ function displayCartItems() {
         
         if (product) {
             hasValidItems = true;
+            
+            // Get size display text
+            const sizeMap = { 'S': 'Small', 'M': 'Medium', 'L': 'Large', 'XL': 'Extra Large' };
+            const sizeText = item.size ? sizeMap[item.size] || item.size : 'Medium';
+            
             html += `
                 <div class="flex items-center space-x-6 p-6 border border-gray-200 rounded-lg bg-white shadow-sm">
                     <div class="flex-shrink-0">
@@ -149,6 +154,11 @@ function displayCartItems() {
                     </div>
                     <div class="flex-1 min-w-0">
                         <h3 class="text-xl font-semibold text-gray-800 mb-2">${product.name}</h3>
+                        <div class="flex items-center space-x-3 mb-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                Size: ${sizeText}
+                            </span>
+                        </div>
                         <p class="text-gray-600 mb-3 line-clamp-2 leading-relaxed">${product.description}</p>
                         <p class="text-amber-600 font-bold text-lg">₱${parseFloat(product.price).toFixed(2)} each</p>
                     </div>
@@ -175,6 +185,11 @@ function displayCartItems() {
         } else if (item.name) {
             // Handle cart items with stored product data (from products.js)
             hasValidItems = true;
+            
+            // Get size display text
+            const sizeMap = { 'S': 'Small', 'M': 'Medium', 'L': 'Large', 'XL': 'Extra Large' };
+            const sizeText = item.size ? sizeMap[item.size] || item.size : 'Medium';
+            
             html += `
                 <div class="flex items-center space-x-6 p-6 border border-gray-200 rounded-lg">
                     <div class="flex-shrink-0">
@@ -182,6 +197,11 @@ function displayCartItems() {
                     </div>
                     <div class="flex-1">
                         <h3 class="text-xl font-semibold text-gray-800">${item.name}</h3>
+                        <div class="flex items-center space-x-3 mb-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                Size: ${sizeText}
+                            </span>
+                        </div>
                         <p class="text-gray-600">Product details</p>
                         <p class="text-amber-600 font-bold text-lg">₱${parseFloat(item.price).toFixed(2)}</p>
                     </div>
@@ -379,13 +399,22 @@ function showCheckoutModal() {
     `;
     
     cart.forEach(item => {
+        // Get size display text
+        const sizeMap = { 'S': 'Small', 'M': 'Medium', 'L': 'Large', 'XL': 'Extra Large' };
+        const sizeText = item.size ? sizeMap[item.size] || item.size : 'Medium';
+        
         if (item.name) {
             // Cart item has stored product data
             summaryHTML += `
                 <div class="flex justify-between items-center py-2 border-b border-gray-200">
                     <div class="flex-1">
                         <p class="font-medium text-gray-900">${item.name}</p>
-                        <p class="text-sm text-gray-600">Quantity: ${item.quantity}</p>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
+                                Size: ${sizeText}
+                            </span>
+                            <span class="text-sm text-gray-600">Qty: ${item.quantity}</span>
+                        </div>
                     </div>
                     <div class="text-right">
                         <p class="font-medium">₱${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
@@ -400,7 +429,12 @@ function showCheckoutModal() {
                     <div class="flex justify-between items-center py-2 border-b border-gray-200">
                         <div class="flex-1">
                             <p class="font-medium text-gray-900">${product.name}</p>
-                            <p class="text-sm text-gray-600">Quantity: ${item.quantity}</p>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
+                                    Size: ${sizeText}
+                                </span>
+                                <span class="text-sm text-gray-600">Qty: ${item.quantity}</span>
+                            </div>
                         </div>
                         <div class="text-right">
                             <p class="font-medium">₱${(parseFloat(product.price) * item.quantity).toFixed(2)}</p>

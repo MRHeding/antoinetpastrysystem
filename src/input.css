@@ -26,6 +26,155 @@
     @apply bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300;
   }
   
+  /* Product card specific styling for consistent layout */
+  .product-card {
+    @apply bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300;
+    display: grid;
+    grid-template-rows: 12rem 1fr auto; /* Fixed image height, flexible content, fixed buttons */
+    height: 100%;
+    min-height: 28rem; /* Ensures consistent minimum height */
+  }
+  
+  .product-card-image {
+    @apply bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center relative overflow-hidden cursor-pointer;
+    height: 12rem; /* Fixed height for all images */
+  }
+  
+  .product-card-content {
+    @apply p-6;
+    display: grid;
+    grid-template-rows: auto 1fr auto auto; /* Title, description (flexible), price/rating, buttons */
+    gap: 1rem;
+    min-height: 16rem; /* Ensures consistent content area height */
+  }
+  
+  /* Product size selection styling */
+  .size-selection {
+    @apply mb-4;
+  }
+  
+  .size-selection h4 {
+    @apply text-sm font-semibold text-gray-700 mb-3;
+  }
+  
+  .size-options {
+    @apply grid grid-cols-2 gap-2;
+  }
+  
+  @media (min-width: 640px) {
+    .size-options {
+      @apply grid-cols-4;
+    }
+  }
+  
+  .size-option {
+    @apply relative cursor-pointer;
+  }
+  
+  .size-option input[type="radio"] {
+    @apply sr-only;
+  }
+  
+  .size-option-label {
+    @apply block w-full px-3 py-2 text-center text-sm font-medium border-2 border-gray-200 rounded-lg transition-all duration-200 hover:border-amber-300 hover:bg-amber-50;
+  }
+  
+  .size-option input[type="radio"]:checked + .size-option-label {
+    @apply border-amber-600 bg-amber-100 text-amber-800;
+  }
+  
+  .size-option-label:hover {
+    @apply transform scale-105;
+  }
+  
+  .size-option input[type="radio"]:focus + .size-option-label {
+    @apply ring-2 ring-amber-500 ring-offset-2;
+  }
+  
+  .product-card-title {
+    @apply text-xl font-bold text-gray-800 group-hover:text-amber-600 transition-colors cursor-pointer;
+    line-height: 1.3;
+    min-height: 2.6rem; /* Accommodates up to 2 lines */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  .product-card-description {
+    @apply text-gray-600 leading-relaxed;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+    height: 4.5rem; /* Fixed height for exactly 3 lines */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  .product-card-price-section {
+    @apply flex justify-between items-center;
+    min-height: 2rem;
+    gap: 1rem; /* Ensures spacing between price and rating */
+  }
+  
+  .product-card-buttons {
+    @apply flex space-x-3;
+    margin-top: auto; /* Pushes buttons to bottom */
+    gap: 0.75rem; /* Consistent button spacing */
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .product-card {
+      min-height: 26rem;
+    }
+    
+    .product-card-content {
+      @apply p-4;
+      gap: 0.75rem;
+      min-height: 14rem;
+    }
+    
+    .product-card-title {
+      @apply text-lg;
+      min-height: 2.4rem;
+    }
+    
+    .product-card-description {
+      height: 4rem;
+      font-size: 0.875rem;
+    }
+    
+    .product-card-buttons {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .product-card-buttons button {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .product-card {
+      min-height: 24rem;
+    }
+    
+    .product-card-content {
+      @apply p-3;
+      gap: 0.5rem;
+      min-height: 12rem;
+    }
+    
+    .product-card-price-section {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+  
   .section-padding {
     @apply py-16;
   }

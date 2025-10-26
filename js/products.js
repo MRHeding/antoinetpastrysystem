@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize modal controls
     initModalControls();
     
+    // Initialize size selection
+    initSizeSelection();
+    
     // Check admin status and disable cart functionality if needed
     checkAdminStatus();
 });
@@ -86,6 +89,31 @@ function initModalControls() {
             }
         });
     }
+}
+
+// Initialize size selection functionality
+function initSizeSelection() {
+    // Handle size option clicks
+    document.addEventListener('click', function(event) {
+        if (event.target.closest('.size-option')) {
+            const sizeOption = event.target.closest('.size-option');
+            const radioInput = sizeOption.querySelector('input[type="radio"]');
+            const sizeLabel = sizeOption.querySelector('.size-label');
+            
+            // Remove selected state from all size options
+            document.querySelectorAll('.size-option .size-label').forEach(label => {
+                label.classList.remove('border-amber-500', 'bg-amber-50');
+                label.classList.add('border-gray-300');
+            });
+            
+            // Add selected state to clicked option
+            sizeLabel.classList.remove('border-gray-300');
+            sizeLabel.classList.add('border-amber-500', 'bg-amber-50');
+            
+            // Check the radio button
+            radioInput.checked = true;
+        }
+    });
 }
 
 // Load products from backend
@@ -207,21 +235,27 @@ function displayProducts() {
             ? product.image_url 
             : 'Logo.png';
             
+        // Determine availability status badge
+        const isAvailable = product.availability_status === 'available';
+        const statusBadge = isAvailable 
+            ? '<div class="absolute top-3 left-3 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md flex items-center"><i class="fas fa-check-circle mr-1"></i>Available</div>'
+            : '<div class="absolute top-3 left-3 bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md flex items-center"><i class="fas fa-times-circle mr-1"></i>Unavailable</div>';
+            
         return `
-        <div class="card group" id="product-${product.id}">
-            <div class="h-48 bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center relative overflow-hidden cursor-pointer" onclick="viewProductDetails(${product.id})">
-                <img src="${imageSrc}" alt="${product.name}" class="h-full w-full object-cover">
+        <div class="product-card group ${!isAvailable ? 'opacity-90' : ''}" id="product-${product.id}">
+            <div class="product-card-image" onclick="viewProductDetails(${product.id})">
+                <img src="${imageSrc}" alt="${product.name}" class="h-full w-full object-cover ${!isAvailable ? 'grayscale brightness-75' : ''}">
                 <div class="absolute top-3 right-3 bg-amber-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
                     ${product.category}
                 </div>
-                <div class="absolute top-3 left-3 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
-                    Fresh
-                </div>
+                ${statusBadge}
+                ${!isAvailable ? '<div class="absolute inset-0 bg-gray-900 bg-opacity-10 flex items-center justify-center"><div class="bg-red-600 text-white px-4 py-2 rounded-md font-semibold text-sm shadow-lg">Currently Unavailable</div></div>' : ''}
             </div>
-            <div class="p-6">
-                <h4 class="text-xl font-bold text-gray-800 mb-3 group-hover:text-amber-600 transition-colors cursor-pointer" onclick="viewProductDetails(${product.id})">${product.name}</h4>
-                <p class="text-gray-600 mb-5 line-clamp-3 leading-relaxed">${product.description}</p>
-                <div class="flex justify-between items-center mb-5">
+            <div class="product-card-content">
+                <h4 class="product-card-title" onclick="viewProductDetails(${product.id})">${product.name}</h4>
+                <p class="product-card-description">${product.description}</p>
+                ${!isAvailable && product.unavailable_reason ? `<p class="text-sm text-red-600 mb-2"><i class="fas fa-info-circle mr-1"></i>${product.unavailable_reason}</p>` : ''}
+                <div class="product-card-price-section">
                     <span class="text-2xl font-bold text-amber-600">₱${product.price}</span>
                     <div class="flex items-center text-yellow-500 space-x-1">
                         <i class="fas fa-star text-sm"></i>
@@ -232,10 +266,14 @@ function displayProducts() {
                         <span class="text-gray-500 text-sm ml-2">(4.8)</span>
                     </div>
                 </div>
-                <div class="flex space-x-3">
+                <div class="product-card-buttons">
                     ${window.isAdmin ? 
                         `<button disabled class="w-32 bg-gray-400 text-white py-2.5 px-4 rounded-md cursor-not-allowed opacity-50">
                             <i class="fas fa-ban mr-2"></i>Admin Mode
+                        </button>` :
+                        !isAvailable ?
+                        `<button disabled class="w-32 bg-gray-400 text-white py-2.5 px-4 rounded-md cursor-not-allowed opacity-50">
+                            <i class="fas fa-times mr-2"></i>Unavailable
                         </button>` :
                         `<button onclick="addToCart(${product.id})" 
                                 class="w-32 bg-amber-600 text-white py-2.5 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
@@ -378,16 +416,48 @@ async function viewProductDetails(productId) {
         modalImage.src = product.image_url ? product.image_url : 'Logo.png';
         modalImage.alt = product.name;
         
+        // Add availability status to modal
+        const isAvailable = product.availability_status === 'available';
+        const statusContainer = document.getElementById('modal-product-status') || createStatusContainer();
+        
+        if (isAvailable) {
+            statusContainer.innerHTML = `
+                <div class="flex items-center text-green-600 mb-3">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span class="font-semibold">Available</span>
+                </div>
+            `;
+        } else {
+            statusContainer.innerHTML = `
+                <div class="flex flex-col mb-3">
+                    <div class="flex items-center text-red-600 mb-2">
+                        <i class="fas fa-times-circle mr-2"></i>
+                        <span class="font-semibold">Currently Unavailable</span>
+                    </div>
+                    ${product.unavailable_reason ? `<p class="text-sm text-gray-600 ml-6">${product.unavailable_reason}</p>` : ''}
+                </div>
+            `;
+        }
+        
         // Reset quantity to 1
         document.getElementById('product-quantity').value = 1;
+        
+        // Set product size if available, default to Medium
+        const productSize = product.size || 'M';
+        setProductSize(productSize);
         
         // Set up add to cart button
         const addToCartBtn = document.getElementById('add-to-cart-btn');
         
-        // Update button appearance and functionality based on admin status
+        // Update button appearance and functionality based on admin status and availability
         if (window.isAdmin) {
             addToCartBtn.disabled = true;
             addToCartBtn.innerHTML = '<i class="fas fa-ban mr-2"></i>Admin Mode';
+            addToCartBtn.className = 'flex-1 bg-gray-400 text-white px-6 py-2 rounded-lg cursor-not-allowed opacity-50';
+            addToCartBtn.onclick = null;
+        } else if (!isAvailable) {
+            addToCartBtn.disabled = true;
+            addToCartBtn.innerHTML = '<i class="fas fa-times mr-2"></i>Unavailable';
             addToCartBtn.className = 'flex-1 bg-gray-400 text-white px-6 py-2 rounded-lg cursor-not-allowed opacity-50';
             addToCartBtn.onclick = null;
         } else {
@@ -396,7 +466,8 @@ async function viewProductDetails(productId) {
             addToCartBtn.className = 'flex-1 bg-amber-600 text-white px-6 py-2 rounded-lg hover:bg-amber-700 transition-colors';
             addToCartBtn.onclick = async function() {
                 const quantity = parseInt(document.getElementById('product-quantity').value);
-                addToCartWithQuantity(productId, quantity);
+                const selectedSize = getSelectedSize();
+                addToCartWithQuantity(productId, quantity, selectedSize);
                 hideProductModal();
             };
         }
@@ -408,6 +479,30 @@ async function viewProductDetails(productId) {
         console.error('Error fetching product details:', error);
         showNotification('Network error loading product details', 'error');
     }
+}
+
+// Set product size in the modal
+function setProductSize(size) {
+    // Reset all size options
+    document.querySelectorAll('.size-option .size-label').forEach(label => {
+        label.classList.remove('border-amber-500', 'bg-amber-50');
+        label.classList.add('border-gray-300');
+    });
+    
+    // Set the specified size as selected
+    const sizeInput = document.querySelector(`input[name="product-size"][value="${size}"]`);
+    if (sizeInput) {
+        sizeInput.checked = true;
+        const sizeLabel = sizeInput.closest('.size-option').querySelector('.size-label');
+        sizeLabel.classList.remove('border-gray-300');
+        sizeLabel.classList.add('border-amber-500', 'bg-amber-50');
+    }
+}
+
+// Get selected size from the modal
+function getSelectedSize() {
+    const selectedSizeInput = document.querySelector('input[name="product-size"]:checked');
+    return selectedSizeInput ? selectedSizeInput.value : 'M'; // Default to Medium if none selected
 }
 
 // Hide product details modal
@@ -437,7 +532,7 @@ async function addToCart(productId) {
 }
 
 // Add to cart with quantity
-async function addToCartWithQuantity(productId, quantity) {
+async function addToCartWithQuantity(productId, quantity, size = 'M') {
     // Check if user is admin
     try {
         const response = await fetch('api/auth.php?action=check');
@@ -462,8 +557,8 @@ async function addToCartWithQuantity(productId, quantity) {
     // Get existing cart or initialize new one
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     
-    // Check if product already in cart
-    const existingItem = cart.find(item => item.id == productId);
+    // Check if product already in cart (with same size)
+    const existingItem = cart.find(item => item.id == productId && item.size === size);
     
     if (existingItem) {
         existingItem.quantity += quantity;
@@ -473,7 +568,8 @@ async function addToCartWithQuantity(productId, quantity) {
             name: product.name,
             price: product.price,
             image: product.image_url || 'Logo.png',
-            quantity: quantity
+            quantity: quantity,
+            size: size
         });
     }
     
@@ -532,3 +628,80 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 500);
 });
+
+// Helper function to create status container in modal if it doesn't exist
+function createStatusContainer() {
+    const modal = document.getElementById('product-details-modal');
+    const nameElement = document.getElementById('modal-product-name');
+    
+    // Create status container
+    const statusContainer = document.createElement('div');
+    statusContainer.id = 'modal-product-status';
+    
+    // Insert after product name
+    nameElement.parentNode.insertBefore(statusContainer, nameElement.nextSibling);
+    
+    return statusContainer;
+}
+
+// Listen for real-time status updates from admin
+if (typeof BroadcastChannel !== 'undefined') {
+    const statusChannel = new BroadcastChannel('product_status_updates');
+    statusChannel.addEventListener('message', function(event) {
+        if (event.data.type === 'status_update') {
+            // Update the product in the local array
+            const productIndex = allProducts.findIndex(p => p.id == event.data.productId);
+            if (productIndex !== -1) {
+                allProducts[productIndex].availability_status = event.data.status;
+                allProducts[productIndex].unavailable_reason = event.data.reason || null;
+                allProducts[productIndex].status_updated_at = new Date().toISOString();
+                
+                // Update filtered products as well
+                const filteredIndex = filteredProducts.findIndex(p => p.id == event.data.productId);
+                if (filteredIndex !== -1) {
+                    filteredProducts[filteredIndex].availability_status = event.data.status;
+                    filteredProducts[filteredIndex].unavailable_reason = event.data.reason || null;
+                    filteredProducts[filteredIndex].status_updated_at = new Date().toISOString();
+                }
+                
+                // Refresh the display
+                displayProducts();
+                
+                // Show subtle notification
+                if (event.data.status === 'unavailable') {
+                    showNotification(`A product is now unavailable: ${event.data.reason || 'No reason provided'}`, 'warning');
+                } else {
+                    showNotification('A product is now available again', 'success');
+                }
+            }
+        }
+    });
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-500 text-white' :
+        type === 'error' ? 'bg-red-500 text-white' :
+        type === 'warning' ? 'bg-yellow-500 text-white' :
+        'bg-blue-500 text-white'
+    }`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas ${
+                type === 'success' ? 'fa-check-circle' :
+                type === 'error' ? 'fa-exclamation-circle' :
+                type === 'warning' ? 'fa-exclamation-triangle' :
+                'fa-info-circle'
+            } mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}

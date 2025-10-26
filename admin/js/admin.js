@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize mobile menu
     initAdminMobileMenu();
+    
+    // Setup status change handlers
+    setupStatusChangeHandlers();
 });
 
 // Load dashboard statistics
@@ -81,6 +84,11 @@ function displayProducts(products) {
         const imageSrc = product.image_url 
             ? `../${product.image_url}` 
             : 'https://via.placeholder.com/150?text=No+Image';
+        
+        // Determine status badge
+        const statusBadge = product.availability_status === 'available' 
+            ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1"></i>Available</span>'
+            : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"><i class="fas fa-times-circle mr-1"></i>Unavailable</span>';
             
         return `
         <div class="border border-gray-200 rounded-lg p-6 mb-4 hover:shadow-md transition-shadow bg-white">
@@ -90,8 +98,12 @@ function displayProducts(products) {
                         <img src="${imageSrc}" alt="${product.name}" class="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm">
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">${product.name}</h3>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-lg font-semibold text-gray-900">${product.name}</h3>
+                            ${statusBadge}
+                        </div>
                         <p class="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">${product.description}</p>
+                        ${product.unavailable_reason ? `<p class="text-sm text-red-600 mb-2"><i class="fas fa-info-circle mr-1"></i>Reason: ${product.unavailable_reason}</p>` : ''}
                         <div class="flex items-center space-x-6 text-sm text-gray-500">
                             <span class="flex items-center"><i class="fas fa-tag mr-2"></i>₱${product.price}</span>
                             <span class="flex items-center"><i class="fas fa-folder mr-2"></i>${product.category}</span>
@@ -99,13 +111,23 @@ function displayProducts(products) {
                         </div>
                     </div>
                 </div>
-                <div class="flex space-x-3 ml-6">
-                    <button onclick="editProduct(${product.id})" class="text-blue-600 hover:text-blue-800 p-2 rounded-md hover:bg-blue-50 transition-colors">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button onclick="deleteProduct(${product.id})" class="text-red-600 hover:text-red-800 p-2 rounded-md hover:bg-red-50 transition-colors">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                <div class="flex flex-col space-y-2 ml-6">
+                    <div class="flex space-x-2">
+                        <button onclick="toggleProductStatus(${product.id}, '${product.availability_status}')" 
+                                class="px-3 py-1 text-xs font-medium rounded-md transition-colors ${product.availability_status === 'available' ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}"
+                                title="${product.availability_status === 'available' ? 'Mark as Unavailable' : 'Mark as Available'}">
+                            <i class="fas ${product.availability_status === 'available' ? 'fa-times' : 'fa-check'} mr-1"></i>
+                            ${product.availability_status === 'available' ? 'Unavailable' : 'Available'}
+                        </button>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="editProduct(${product.id})" class="text-blue-600 hover:text-blue-800 p-2 rounded-md hover:bg-blue-50 transition-colors">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteProduct(${product.id})" class="text-red-600 hover:text-red-800 p-2 rounded-md hover:bg-red-50 transition-colors">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -224,8 +246,15 @@ async function handleAddProduct(e) {
                 name: formData.get('name'),
                 description: formData.get('description'),
                 price: parseFloat(formData.get('price')),
-                category: formData.get('category')
+                category: formData.get('category'),
+                availability_status: formData.get('availability_status')
             };
+            
+            // Add unavailable reason if status is unavailable
+            const status = formData.get('availability_status');
+            if (status === 'unavailable') {
+                productData.unavailable_reason = formData.get('unavailable_reason');
+            }
             
             response = await fetch('../api/products.php', {
                 method: 'POST',
@@ -321,6 +350,23 @@ async function editProduct(productId) {
             document.getElementById('edit-product-price').value = product.price;
             document.getElementById('edit-product-category').value = product.category;
             
+            // Set availability status
+            const statusSelect = document.getElementById('edit-product-status');
+            if (statusSelect) {
+                statusSelect.value = product.availability_status || 'available';
+            }
+            
+            // Handle unavailable reason
+            const reasonField = document.getElementById('edit-unavailable-reason-container');
+            const reasonInput = document.getElementById('edit-product-reason');
+            if (product.availability_status === 'unavailable') {
+                if (reasonField) reasonField.style.display = 'block';
+                if (reasonInput) reasonInput.value = product.unavailable_reason || '';
+            } else {
+                if (reasonField) reasonField.style.display = 'none';
+                if (reasonInput) reasonInput.value = '';
+            }
+            
             // Handle image preview
             const imagePreview = document.getElementById('edit-image-preview');
             if (product.image_url) {
@@ -404,8 +450,15 @@ async function handleEditProduct(e) {
                 name: formData.get('name'),
                 description: formData.get('description'),
                 price: parseFloat(formData.get('price')),
-                category: formData.get('category')
+                category: formData.get('category'),
+                availability_status: formData.get('availability_status')
             };
+            
+            // Add unavailable reason if status is unavailable
+            const status = formData.get('availability_status');
+            if (status === 'unavailable') {
+                productData.unavailable_reason = formData.get('unavailable_reason');
+            }
             
             response = await fetch(`../api/products.php?id=${productId}`, {
                 method: 'PUT',
@@ -588,6 +641,133 @@ function closeAdminMobileMenu() {
         mobileMenuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
         mobileMenuButton.setAttribute('aria-expanded', 'false');
     }
+}
+
+// Setup status change handlers
+function setupStatusChangeHandlers() {
+    // Handle status dropdown changes in modals
+    const addStatusSelect = document.getElementById('add-availability-status');
+    const editStatusSelect = document.getElementById('edit-availability-status');
+    
+    if (addStatusSelect) {
+        addStatusSelect.addEventListener('change', function() {
+            const reasonField = document.getElementById('add-unavailable-reason-field');
+            if (this.value === 'unavailable') {
+                reasonField.classList.remove('hidden');
+            } else {
+                reasonField.classList.add('hidden');
+                document.getElementById('add-unavailable-reason').value = '';
+            }
+        });
+    }
+    
+    if (editStatusSelect) {
+        editStatusSelect.addEventListener('change', function() {
+            const reasonField = document.getElementById('edit-unavailable-reason-field');
+            if (this.value === 'unavailable') {
+                reasonField.classList.remove('hidden');
+            } else {
+                reasonField.classList.add('hidden');
+                document.getElementById('edit-unavailable-reason').value = '';
+            }
+        });
+    }
+}
+
+// Toggle product status
+async function toggleProductStatus(productId, currentStatus) {
+    const newStatus = currentStatus === 'available' ? 'unavailable' : 'available';
+    let reason = '';
+    
+    // If marking as unavailable, prompt for reason
+    if (newStatus === 'unavailable') {
+        reason = prompt('Please provide a reason for marking this product as unavailable:');
+        if (reason === null) return; // User cancelled
+        if (!reason.trim()) {
+            showNotification('Please provide a reason for unavailability', 'error');
+            return;
+        }
+    }
+    
+    // Show loading state
+    const statusButton = document.querySelector(`[onclick="toggleProductStatus(${productId}, '${currentStatus}')"]`);
+    const originalText = statusButton ? statusButton.innerHTML : '';
+    if (statusButton) {
+        statusButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Updating...';
+        statusButton.disabled = true;
+    }
+    
+    try {
+        const requestData = {
+            status: newStatus
+        };
+        if (reason) {
+            requestData.reason = reason;
+        }
+        
+        const response = await fetch(`../api/products.php?id=${productId}&action=status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData),
+            credentials: 'include'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification(`Product status updated to ${newStatus}`, 'success');
+            
+            // Broadcast status change to other tabs/windows
+            if (typeof BroadcastChannel !== 'undefined') {
+                const channel = new BroadcastChannel('product_status_updates');
+                channel.postMessage({
+                    type: 'status_update',
+                    productId: productId,
+                    status: newStatus,
+                    reason: reason
+                });
+            }
+            
+            loadProducts(); // Refresh the product list
+        } else {
+            throw new Error(result.message || 'Failed to update product status');
+        }
+    } catch (error) {
+        console.error('Error updating product status:', error);
+        showNotification(`Network error updating product status: ${error.message}`, 'error');
+        
+        // Restore button state
+        if (statusButton) {
+            statusButton.innerHTML = originalText;
+            statusButton.disabled = false;
+        }
+    }
+}
+
+
+
+// Listen for real-time status updates from other tabs/windows
+if (typeof BroadcastChannel !== 'undefined') {
+    const statusChannel = new BroadcastChannel('product_status_updates');
+    statusChannel.addEventListener('message', function(event) {
+        if (event.data.type === 'status_update') {
+            // Update the product in the local array
+            const productIndex = products.findIndex(p => p.id == event.data.productId);
+            if (productIndex !== -1) {
+                products[productIndex].availability_status = event.data.status;
+                products[productIndex].unavailable_reason = event.data.reason || null;
+                products[productIndex].status_updated_at = new Date().toISOString();
+                
+                // Refresh the display
+                displayProducts();
+                
+                // Show notification
+                showNotification(`Product status updated to ${event.data.status} by another admin`, 'info');
+            }
+        }
+    });
 }
 
 
