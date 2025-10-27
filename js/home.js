@@ -49,19 +49,27 @@ function displayFeaturedProducts(products) {
             ? product.image_url 
             : 'Logo.png';
             
+        // Determine availability status badge
+        const isAvailable = product.availability_status === 'available';
+        const statusBadge = isAvailable 
+            ? '<div class="absolute top-3 left-3 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md flex items-center"><i class="fas fa-check-circle mr-1"></i>Available</div>'
+            : '<div class="absolute top-3 left-3 bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md flex items-center"><i class="fas fa-times-circle mr-1"></i>Unavailable</div>';
+            
         return `
-        <div class="card group">
-            <div class="h-48 bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center relative overflow-hidden">
-                <img src="${imageSrc}" alt="${product.name}" class="h-full w-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-br from-amber-100/40 to-orange-200/40"></div>
+        <div class="product-card group ${!isAvailable ? 'opacity-90' : ''}" id="product-${product.id}">
+            <div class="product-card-image" onclick="viewProduct(${product.id})">
+                <img src="${imageSrc}" alt="${product.name}" class="h-full w-full object-cover ${!isAvailable ? 'grayscale brightness-75' : ''}">
                 <div class="absolute top-3 right-3 bg-amber-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md">
                     ${product.category}
                 </div>
+                ${statusBadge}
+                ${!isAvailable ? '<div class="absolute inset-0 bg-gray-900 bg-opacity-10 flex items-center justify-center"><div class="bg-red-600 text-white px-4 py-2 rounded-md font-semibold text-sm shadow-lg">Currently Unavailable</div></div>' : ''}
             </div>
-            <div class="p-6">
-                <h4 class="text-xl font-bold text-gray-800 mb-3 group-hover:text-amber-600 transition-colors">${product.name}</h4>
-                <p class="text-gray-600 mb-5 line-clamp-3 leading-relaxed">${product.description}</p>
-                <div class="flex justify-between items-center mb-5">
+            <div class="product-card-content">
+                <h4 class="product-card-title" onclick="viewProduct(${product.id})">${product.name}</h4>
+                <p class="product-card-description">${product.description}</p>
+                ${!isAvailable && product.unavailable_reason ? `<p class="text-sm text-red-600 mb-2"><i class="fas fa-info-circle mr-1"></i>${product.unavailable_reason}</p>` : ''}
+                <div class="product-card-price-section">
                     <span class="text-2xl font-bold text-amber-600">₱${product.price}</span>
                     <div class="flex items-center text-yellow-500 space-x-1">
                         <i class="fas fa-star text-sm"></i>
@@ -72,7 +80,7 @@ function displayFeaturedProducts(products) {
                         <span class="text-gray-500 text-sm ml-2">(4.8)</span>
                     </div>
                 </div>
-                <div class="flex space-x-3">
+                <div class="product-card-buttons">
                     <button onclick="addToCart(${product.id})" 
                             class="w-32 bg-amber-600 text-white py-2.5 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
                         <i class="fas fa-cart-plus mr-2"></i>Add to Cart
