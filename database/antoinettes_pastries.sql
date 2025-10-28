@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 26, 2025 at 05:33 PM
+-- Generation Time: Oct 28, 2025 at 04:31 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -46,6 +46,71 @@ INSERT INTO `categories` (`id`, `name`, `description`, `is_active`, `created_at`
 (4, 'Tarts', 'Elegant fruit and custard tarts', 1, '2025-09-21 16:01:40'),
 (5, 'Bread', 'Artisanal breads and rolls', 1, '2025-09-21 16:01:40'),
 (6, 'Seasonal', 'Special seasonal and holiday treats', 1, '2025-09-21 16:01:40');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `chat_messages`
+--
+
+CREATE TABLE `chat_messages` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `sender_type` enum('user','admin') NOT NULL,
+  `message` text NOT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `chat_messages`
+--
+
+INSERT INTO `chat_messages` (`id`, `user_id`, `sender_type`, `message`, `is_read`, `created_at`) VALUES
+(1, 11, 'user', 'Hello Admin', 1, '2025-10-28 14:41:19'),
+(2, 11, 'user', 'Pwede po pa order ngayon ng pandesal?', 1, '2025-10-28 14:42:27'),
+(3, 11, 'admin', 'Okay po Maam Matic', 1, '2025-10-28 14:45:41'),
+(4, 12, 'user', 'Hello po open po kayo for delivery bukas?', 1, '2025-10-28 14:51:18'),
+(5, 12, 'user', 'Need cakes po birthday sa party ng BF ko ito po number ko 09918195483', 1, '2025-10-28 14:52:01'),
+(6, 12, 'admin', 'Yes Yes noted', 1, '2025-10-28 14:54:53'),
+(7, 12, 'user', 'Thank you po..', 1, '2025-10-28 14:55:25'),
+(8, 12, 'admin', '.', 1, '2025-10-28 14:59:17'),
+(9, 12, 'admin', '.', 1, '2025-10-28 14:59:18'),
+(10, 12, 'admin', '.', 1, '2025-10-28 14:59:18'),
+(11, 12, 'admin', 'sd', 1, '2025-10-28 15:02:01'),
+(12, 12, 'admin', 'sd', 1, '2025-10-28 15:02:02'),
+(13, 12, 'admin', 'sd', 1, '2025-10-28 15:02:02'),
+(14, 12, 'admin', 'sd', 1, '2025-10-28 15:02:03'),
+(15, 12, 'admin', 's', 1, '2025-10-28 15:08:25'),
+(16, 12, 'admin', 'das', 1, '2025-10-28 15:08:27'),
+(17, 12, 'admin', 'asd', 1, '2025-10-28 15:08:28'),
+(18, 12, 'admin', 'asd', 1, '2025-10-28 15:08:28'),
+(19, 12, 'admin', 'asd', 1, '2025-10-28 15:08:28'),
+(20, 12, 'admin', 'a', 1, '2025-10-28 15:08:29'),
+(21, 12, 'admin', 'd', 1, '2025-10-28 15:08:31'),
+(22, 12, 'user', 'hey are you ok?', 1, '2025-10-28 15:25:02');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `chat_sessions`
+--
+
+CREATE TABLE `chat_sessions` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `last_message_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `unread_admin_count` int(11) DEFAULT 0,
+  `unread_user_count` int(11) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `chat_sessions`
+--
+
+INSERT INTO `chat_sessions` (`id`, `user_id`, `last_message_at`, `unread_admin_count`, `unread_user_count`) VALUES
+(1, 11, '2025-10-28 14:46:22', 0, 0),
+(4, 12, '2025-10-28 15:25:21', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -214,7 +279,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `first_name`, `last_name`, `phone`, `address`, `city`, `state`, `zip_code`, `role`, `is_active`, `email_verified`, `created_at`, `updated_at`, `email_verification_token`, `email_verification_expires`) VALUES
 (1, 'admin', 'admin@antoinettes.com', '$2y$10$1DyuW6YdQqK.tAhHzfJy8.AaVdltnycowD4Gb2crbp6wJEAjuVqCG', 'TestFirstName', 'TestLastName', '1234567890', 'Test Address', 'Test City', 'Test State', '12345', 'admin', 1, 1, '2025-09-21 16:01:40', '2025-10-18 16:40:07', NULL, NULL),
-(11, 'taylor', 'taylo@gmail.com', '$2y$10$grPoBXqNUwYywkrhfRGw7egC/5kgupEsLyckK6vMDWmN0onR546zK', 'Taylor', 'Swift', '09918195472', 'Tomas Claudio Street', 'Zamboanga City', 'PC', '7000', 'customer', 1, 1, '2025-10-18 16:30:05', '2025-10-18 16:50:56', NULL, NULL);
+(11, 'taylor', 'taylo@gmail.com', '$2y$10$grPoBXqNUwYywkrhfRGw7egC/5kgupEsLyckK6vMDWmN0onR546zK', 'Taylor', 'Swift', '09918195472', 'Tomas Claudio Street', 'Zamboanga City', 'PC', '7000', 'customer', 1, 1, '2025-10-18 16:30:05', '2025-10-18 16:50:56', NULL, NULL),
+(12, 'katy', 'kat2016@gmail.com', '$2y$10$tR.DlgB5ZPtJThTrrA6vDeHS.NfTXFSrqqUcyGzqoWoLPHEHW1aXa', 'Katy', 'Perry', '09918195481', 'Golden Valley Drive', 'Zamboanga City', 'Sta. Maria', '7000', 'customer', 1, 1, '2025-10-28 14:50:41', '2025-10-28 14:50:41', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -247,6 +313,23 @@ INSERT INTO `user_sessions` (`id`, `user_id`, `session_token`, `expires_at`, `cr
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_created_at` (`created_at`),
+  ADD KEY `idx_is_read` (`is_read`);
+
+--
+-- Indexes for table `chat_sessions`
+--
+ALTER TABLE `chat_sessions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_id` (`user_id`),
+  ADD KEY `idx_last_message` (`last_message_at`);
 
 --
 -- Indexes for table `customers`
@@ -323,6 +406,18 @@ ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
+-- AUTO_INCREMENT for table `chat_sessions`
+--
+ALTER TABLE `chat_sessions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
@@ -356,17 +451,29 @@ ALTER TABLE `product_status_audit`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `user_sessions`
 --
 ALTER TABLE `user_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  ADD CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `chat_sessions`
+--
+ALTER TABLE `chat_sessions`
+  ADD CONSTRAINT `chat_sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `orders`
