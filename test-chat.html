@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Test Page</title>
+    <link href="css/output.css" rel="stylesheet">
+    <link href="assets/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-box {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            max-width: 800px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">🧪 Chat Feature Test Page</h1>
+        <p class="text-gray-600 mb-6">This page helps you verify that the chat feature is working correctly.</p>
+
+        <div class="test-box">
+            <h2 class="text-xl font-bold mb-4">📋 Checklist</h2>
+            <div id="checklist">
+                <p>⏳ Running tests...</p>
+            </div>
+        </div>
+
+        <div class="test-box">
+            <h2 class="text-xl font-bold mb-4">🔍 What to Check</h2>
+            <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                <li><strong>Chat Button:</strong> Look for an orange circular button in the bottom-right corner (above any scroll button)</li>
+                <li><strong>Icon:</strong> The button should have a speech bubble/comment icon</li>
+                <li><strong>Position:</strong> It should be fixed and visible even when scrolling</li>
+                <li><strong>Click Test:</strong> Click the button - a chat window should open</li>
+            </ol>
+        </div>
+
+        <div class="test-box">
+            <h2 class="text-xl font-bold mb-4">🐛 Console Logs</h2>
+            <div id="console-output" class="bg-gray-800 text-green-400 p-4 rounded font-mono text-sm max-h-64 overflow-auto">
+                <p>Console output will appear here...</p>
+            </div>
+        </div>
+
+        <div class="test-box">
+            <h2 class="text-xl font-bold mb-4">⚙️ Manual Tests</h2>
+            <div class="space-y-2">
+                <button onclick="testChatButton()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    Test: Check if Chat Button Exists
+                </button>
+                <button onclick="testChatWidget()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 ml-2">
+                    Test: Check Chat Widget HTML
+                </button>
+                <button onclick="testChatJs()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 ml-2">
+                    Test: Check Chat JS Loaded
+                </button>
+            </div>
+            <div id="manual-test-results" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- Chat Widget -->
+    <div id="chat-widget-container"></div>
+
+    <script>
+        const consoleOutput = document.getElementById('console-output');
+        const checklist = document.getElementById('checklist');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-green-400' : 'text-blue-400';
+            consoleOutput.innerHTML += `<p class="${color}">[${timestamp}] ${message}</p>`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        function updateChecklist(items) {
+            checklist.innerHTML = items.map(item => 
+                `<div class="status ${item.status}">
+                    ${item.status === 'success' ? '✅' : item.status === 'error' ? '❌' : '⚠️'} ${item.text}
+                </div>`
+            ).join('');
+        }
+
+        // Load chat widget
+        log('Starting to load chat widget...');
+        
+        fetch('components/chat-widget.html')
+            .then(response => {
+                log('Fetch response received', 'success');
+                return response.text();
+            })
+            .then(data => {
+                log('Chat widget HTML loaded successfully', 'success');
+                document.getElementById('chat-widget-container').innerHTML = data;
+                log('Chat widget HTML inserted into DOM', 'success');
+                
+                // Load chat.js after widget HTML is inserted
+                const script = document.createElement('script');
+                script.src = 'js/chat.js';
+                script.onload = () => {
+                    log('chat.js loaded successfully', 'success');
+                    runChecklist();
+                };
+                script.onerror = () => {
+                    log('ERROR: Failed to load chat.js', 'error');
+                    runChecklist();
+                };
+                document.body.appendChild(script);
+            })
+            .catch(error => {
+                log('ERROR loading chat widget: ' + error.message, 'error');
+                runChecklist();
+            });
+
+        function runChecklist() {
+            setTimeout(() => {
+                const checks = [];
+                
+                // Check if widget container exists
+                const container = document.getElementById('chat-widget-container');
+                checks.push({
+                    text: 'Chat widget container exists',
+                    status: container ? 'success' : 'error'
+                });
+                
+                // Check if widget HTML is loaded
+                const chatWidget = document.getElementById('chat-widget');
+                checks.push({
+                    text: 'Chat widget HTML loaded',
+                    status: chatWidget ? 'success' : 'error'
+                });
+                
+                // Check if button exists
+                const chatButton = document.getElementById('chat-toggle-btn');
+                checks.push({
+                    text: 'Chat button element exists',
+                    status: chatButton ? 'success' : 'error'
+                });
+                
+                // Check if button is visible
+                if (chatButton) {
+                    const rect = chatButton.getBoundingClientRect();
+                    const isVisible = rect.width > 0 && rect.height > 0;
+                    checks.push({
+                        text: 'Chat button is visible (has dimensions)',
+                        status: isVisible ? 'success' : 'error'
+                    });
+                    
+                    // Check position
+                    checks.push({
+                        text: `Chat button position: bottom-right (${Math.round(rect.right)}px from left, ${Math.round(window.innerHeight - rect.bottom)}px from bottom)`,
+                        status: 'success'
+                    });
+                }
+                
+                // Check if Font Awesome is loaded
+                const icon = document.querySelector('.fa-comments');
+                checks.push({
+                    text: 'Font Awesome icons loaded',
+                    status: icon ? 'success' : 'warning'
+                });
+                
+                // Check if Tailwind CSS is working
+                const hasAmber = chatButton && getComputedStyle(chatButton).backgroundColor.includes('rgb');
+                checks.push({
+                    text: 'Tailwind CSS classes applied',
+                    status: hasAmber ? 'success' : 'warning'
+                });
+                
+                updateChecklist(checks);
+            }, 1000);
+        }
+
+        function testChatButton() {
+            const results = document.getElementById('manual-test-results');
+            const button = document.getElementById('chat-toggle-btn');
+            
+            if (button) {
+                const rect = button.getBoundingClientRect();
+                const styles = getComputedStyle(button);
+                results.innerHTML = `<div class="status success">
+                    ✅ Chat button found!<br>
+                    Position: ${Math.round(rect.left)}px from left, ${Math.round(rect.top)}px from top<br>
+                    Size: ${Math.round(rect.width)}px × ${Math.round(rect.height)}px<br>
+                    Background: ${styles.backgroundColor}<br>
+                    Z-index: ${styles.zIndex}<br>
+                    Display: ${styles.display}
+                </div>`;
+            } else {
+                results.innerHTML = '<div class="status error">❌ Chat button NOT found!</div>';
+            }
+        }
+
+        function testChatWidget() {
+            const results = document.getElementById('manual-test-results');
+            const widget = document.getElementById('chat-widget');
+            
+            if (widget) {
+                results.innerHTML = `<div class="status success">
+                    ✅ Chat widget HTML loaded!<br>
+                    HTML content: ${widget.innerHTML.length} characters
+                </div>`;
+            } else {
+                results.innerHTML = '<div class="status error">❌ Chat widget HTML NOT loaded!</div>';
+            }
+        }
+
+        function testChatJs() {
+            const results = document.getElementById('manual-test-results');
+            
+            if (typeof initChatWidget === 'function') {
+                results.innerHTML = '<div class="status success">✅ chat.js loaded and initChatWidget function exists!</div>';
+            } else {
+                results.innerHTML = '<div class="status error">❌ chat.js NOT loaded or initChatWidget function not found!</div>';
+            }
+        }
+    </script>
+</body>
+</html>
+

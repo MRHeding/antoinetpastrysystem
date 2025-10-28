@@ -1,0 +1,160 @@
+<?php
+require_once 'auth-check.php';
+$currentAdmin = requireAdminAuth();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Management - Antoinette's Pastries</title>
+    <link href="../css/output.css" rel="stylesheet">
+    <link href="../assets/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <img src="../Logo.png" alt="Antoinette's Pastries Logo" class="h-8 w-8 mr-3 object-contain">
+                    <h1 class="text-xl font-bold text-gray-800">Antoinette's Admin</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-user-shield mr-2"></i>
+                        <span class="text-sm hidden sm:inline">Welcome, <strong><?php echo htmlspecialchars($currentAdmin['first_name']); ?></strong></span>
+                    </div>
+                    <a href="index.php" class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                    </a>
+                    <button onclick="adminLogout()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Customer Support Chat</h2>
+            <p class="text-gray-600 mt-1">Manage customer conversations and provide support</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden" style="height: calc(100vh - 220px); max-height: calc(100vh - 220px);">
+            <div class="flex h-full">
+                <!-- Conversations List -->
+                <div class="w-full md:w-64 border-r border-gray-200 flex flex-col" style="height: 100%; max-height: 100%;">
+                    <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                        <h3 class="font-semibold text-gray-800">Conversations</h3>
+                        <p class="text-xs text-gray-500 mt-1">
+                            <span id="total-conversations">0</span> active chats
+                        </p>
+                    </div>
+                    <div id="conversations-list" class="flex-1   overflow-y-auto">
+                        <div class="flex items-center justify-center h-full text-gray-500">
+                            <div class="text-center">
+                                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                <p>Loading conversations...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="flex-1 flex flex-col" style="height: 100%; max-height: 100%;">
+                    <!-- No Conversation Selected -->
+                    <div id="no-conversation" class="flex-1 flex items-center justify-center text-gray-500">
+                        <div class="text-center">
+                            <i class="fas fa-comments text-6xl mb-4 text-gray-300"></i>
+                            <p class="text-lg">Select a conversation to start chatting</p>
+                        </div>
+                    </div>
+
+                    <!-- Active Chat -->
+                    <div id="active-chat" class="hidden flex flex-col" style="height: 100%; max-height: 100%;">
+                        <!-- Chat Header -->
+                        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50" style="flex-shrink: 0;">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-amber-600 flex items-center justify-center text-white font-semibold mr-3">
+                                    <span id="chat-user-avatar">U</span>
+                                </div>
+                                <div>
+                                    <h3 id="chat-user-name" class="font-semibold text-gray-800">User Name</h3>
+                                    <p id="chat-user-email" class="text-xs text-gray-500">user@example.com</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Messages -->
+                        <div id="admin-chat-messages" class="p-6 space-y-3 bg-gray-50" style="flex: 1; overflow-y: auto; min-height: 0;">
+                            <!-- Messages will be loaded here -->
+                        </div>
+
+                        <!-- Input Area -->
+                        <div class="border-t border-gray-200 px-6 py-4 bg-white" style="flex-shrink: 0;">
+                            <form id="admin-chat-form" class="flex space-x-3">
+                                <input 
+                                    type="text" 
+                                    id="admin-chat-input" 
+                                    placeholder="Type your message..." 
+                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                    autocomplete="off"
+                                >
+                                <button 
+                                    type="submit" 
+                                    class="bg-amber-600 text-white px-6 py-2 rounded-md hover:bg-amber-700 transition-colors flex items-center"
+                                >
+                                    <i class="fas fa-paper-plane mr-2"></i>Send
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script src="js/admin-chat.js"></script>
+</body>
+</html>
+
+<style>
+#conversations-list::-webkit-scrollbar,
+#admin-chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+#conversations-list::-webkit-scrollbar-track,
+#admin-chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#conversations-list::-webkit-scrollbar-thumb,
+#admin-chat-messages::-webkit-scrollbar-thumb {
+    background: #d97706;
+    border-radius: 3px;
+}
+
+#conversations-list::-webkit-scrollbar-thumb:hover,
+#admin-chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #b45309;
+}
+
+.conversation-item {
+    transition: background-color 0.2s;
+}
+
+.conversation-item:hover {
+    background-color: #f9fafb;
+}
+
+.conversation-item.active {
+    background-color: #fef3c7;
+    border-left: 3px solid #d97706;
+}
+</style>
+

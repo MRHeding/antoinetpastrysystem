@@ -125,11 +125,17 @@ $currentAdmin = requireAdminAuth();
         <!-- Quick Actions -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <a href="#add-product" onclick="document.getElementById('add-product-modal').classList.remove('hidden')" 
                    class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                     <i class="fas fa-plus-circle text-green-600 text-xl mr-3"></i>
                     <span class="font-medium text-gray-900">Add New Product</span>
+                </a>
+                <a href="chat.html" 
+                   class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors relative">
+                    <i class="fas fa-comments text-amber-600 text-xl mr-3"></i>
+                    <span class="font-medium text-gray-900">Customer Chat</span>
+                    <span id="admin-chat-badge" class="hidden absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 font-bold">0</span>
                 </a>
                 <a href="audit-log.html" 
                    class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
@@ -329,6 +335,34 @@ $currentAdmin = requireAdminAuth();
     </div>
 
     <script src="js/admin.js"></script>
+    
+    <script>
+        // Check for unread chat messages
+        async function updateChatBadge() {
+            try {
+                const response = await fetch('../api/chat.php?action=get_unread_count', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const badge = document.getElementById('admin-chat-badge');
+                    if (badge && data.unread_count > 0) {
+                        badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                        badge.classList.remove('hidden');
+                    } else if (badge) {
+                        badge.classList.add('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating chat badge:', error);
+            }
+        }
+        
+        // Update badge on load and periodically
+        updateChatBadge();
+        setInterval(updateChatBadge, 10000); // Check every 10 seconds
+    </script>
 </body>
 </html>
 
