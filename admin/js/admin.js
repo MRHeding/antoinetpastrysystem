@@ -2,18 +2,26 @@
 let productSizes = { add: [], edit: [] }; // Store sizes for add and edit modals
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadDashboardData();
-    loadProducts();
-    loadRecentOrders();
+    // Only load dashboard-specific functions if we're on the dashboard page
+    const isDashboardPage = document.getElementById('total-products') !== null;
     
-    // Setup form submission
-    document.getElementById('add-product-form').addEventListener('submit', handleAddProduct);
+    if (isDashboardPage) {
+        loadDashboardData();
+        loadProducts();
+        loadRecentOrders();
+        
+        // Setup form submission
+        const addProductForm = document.getElementById('add-product-form');
+        if (addProductForm) {
+            addProductForm.addEventListener('submit', handleAddProduct);
+        }
+        
+        // Setup status change handlers
+        setupStatusChangeHandlers();
+    }
     
-    // Initialize mobile menu
+    // Initialize mobile menu (available on all admin pages)
     initAdminMobileMenu();
-    
-    // Setup status change handlers
-    setupStatusChangeHandlers();
 });
 
 // Load dashboard statistics
@@ -70,6 +78,9 @@ async function loadProducts() {
 // Display products in admin interface
 function displayProducts(products) {
     const container = document.getElementById('products-list');
+    
+    // Check if container exists (might not exist on non-dashboard pages)
+    if (!container) return;
     
     if (!products || products.length === 0) {
         container.innerHTML = `
@@ -157,6 +168,9 @@ async function loadRecentOrders() {
 function displayRecentOrders(orders) {
     const container = document.getElementById('recent-orders');
     
+    // Check if container exists (might not exist on non-dashboard pages)
+    if (!container) return;
+    
     if (!orders || orders.length === 0) {
         container.innerHTML = `
             <div class="text-center text-gray-500 py-8">
@@ -193,6 +207,10 @@ function displayRecentOrders(orders) {
 
 function displayRecentOrdersError(message) {
     const container = document.getElementById('recent-orders');
+    
+    // Check if container exists (might not exist on non-dashboard pages)
+    if (!container) return;
+    
     container.innerHTML = `
         <div class="text-center text-red-500 py-8">
             <i class="fas fa-exclamation-circle text-4xl mb-4"></i>
@@ -415,24 +433,29 @@ async function saveProductSizes(productId, sizes) {
 
 // Initialize image preview functionality
 document.addEventListener('DOMContentLoaded', function() {
-    // Setup form submission - ensure this is properly attached
-    const addProductForm = document.getElementById('add-product-form');
-    if (addProductForm) {
-        addProductForm.addEventListener('submit', handleAddProduct);
-    } else {
-        console.error('Add product form not found!');
-    }
+    // Only set up forms if we're on the dashboard page
+    const isDashboardPage = document.getElementById('total-products') !== null;
     
-    // Setup edit product form submission
-    const editProductForm = document.getElementById('edit-product-form');
-    if (editProductForm) {
-        editProductForm.addEventListener('submit', handleEditProduct);
-    } else {
-        console.error('Edit product form not found!');
+    if (isDashboardPage) {
+        // Setup form submission - ensure this is properly attached
+        const addProductForm = document.getElementById('add-product-form');
+        if (addProductForm) {
+            addProductForm.addEventListener('submit', handleAddProduct);
+        } else {
+            console.error('Add product form not found!');
+        }
+        
+        // Setup edit product form submission
+        const editProductForm = document.getElementById('edit-product-form');
+        if (editProductForm) {
+            editProductForm.addEventListener('submit', handleEditProduct);
+        } else {
+            console.error('Edit product form not found!');
+        }
+        
+        // Setup image preview
+        initImagePreview();
     }
-    
-    // Setup image preview
-    initImagePreview();
 });
 
 // Initialize image preview functionality
@@ -710,6 +733,10 @@ async function deleteProduct(productId) {
 // Display error message
 function displayError(message) {
     const container = document.getElementById('products-list');
+    
+    // Check if container exists (might not exist on non-dashboard pages)
+    if (!container) return;
+    
     container.innerHTML = `
         <div class="text-center text-red-500 py-8">
             <i class="fas fa-exclamation-circle text-4xl mb-4"></i>

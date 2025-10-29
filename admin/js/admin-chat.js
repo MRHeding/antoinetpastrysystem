@@ -17,8 +17,37 @@ function initAdminChat() {
         adminChatForm.addEventListener('submit', sendAdminMessage);
     }
 
+    // Setup sidebar toggle
+    initSidebarToggle();
+
     // Poll for new messages
     startAdminChatPolling();
+}
+
+function initSidebarToggle() {
+    const sidebar = document.getElementById('conversations-sidebar');
+    const toggleBtn = document.getElementById('toggle-sidebar-btn');
+    const showBtn = document.getElementById('show-sidebar-btn');
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            sidebar.classList.add('sidebar-hidden');
+            showBtn.classList.remove('hidden');
+            
+            // Update toggle button icon
+            toggleBtn.querySelector('i').className = 'fas fa-chevron-right text-lg';
+        });
+    }
+
+    if (showBtn) {
+        showBtn.addEventListener('click', function() {
+            sidebar.classList.remove('sidebar-hidden');
+            showBtn.classList.add('hidden');
+            
+            // Update toggle button icon back
+            toggleBtn.querySelector('i').className = 'fas fa-chevron-left text-lg';
+        });
+    }
 }
 
 async function loadConversations() {
@@ -62,12 +91,12 @@ function displayConversations(conversations) {
 
     conversations.forEach(conversation => {
         const conversationDiv = document.createElement('div');
-        conversationDiv.className = 'conversation-item px-4 py-3 border-b border-gray-200 cursor-pointer';
+        conversationDiv.className = 'conversation-item px-3 sm:px-4 py-3 border-b border-gray-200 cursor-pointer';
         conversationDiv.dataset.userId = conversation.user_id;
 
         const initials = (conversation.first_name.charAt(0) + conversation.last_name.charAt(0)).toUpperCase();
         const unreadBadge = conversation.unread_admin_count > 0 
-            ? `<span class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2">${conversation.unread_admin_count}</span>`
+            ? `<span class="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 ml-1">${conversation.unread_admin_count}</span>`
             : '';
         
         const lastMessagePreview = conversation.last_message 
@@ -78,16 +107,16 @@ function displayConversations(conversations) {
 
         conversationDiv.innerHTML = `
             <div class="flex items-start">
-                <div class="w-10 h-10 rounded-full bg-amber-600 flex items-center justify-center text-white font-semibold mr-3 flex-shrink-0">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-600 flex items-center justify-center text-white font-semibold mr-2 sm:mr-3 flex-shrink-0 text-sm">
                     ${initials}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-start">
-                        <h4 class="font-semibold text-gray-800 truncate">${escapeHtml(conversation.first_name + ' ' + conversation.last_name)}</h4>
+                    <div class="flex justify-between items-start gap-1">
+                        <h4 class="font-semibold text-gray-800 text-sm truncate flex-1">${escapeHtml(conversation.first_name + ' ' + conversation.last_name)}</h4>
                         ${unreadBadge}
                     </div>
                     ${lastMessagePreview}
-                    <p class="text-xs text-gray-400 mt-1">${timeAgo}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">${timeAgo}</p>
                 </div>
             </div>
         `;
