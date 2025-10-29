@@ -20,7 +20,7 @@ $currentAdmin = requireAdminAuth();
                     <img src="../Logo.png" alt="Antoinette's Pastries Logo" class="h-8 w-8 mr-3 object-contain">
                     <h1 class="text-xl font-bold text-gray-800">Antoinette's Admin</h1>
                 </div>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 sm:space-x-4">
                     <div class="flex items-center text-gray-600">
                         <i class="fas fa-user-shield mr-2"></i>
                         <span class="text-sm hidden sm:inline">Welcome, <strong><?php echo htmlspecialchars($currentAdmin['first_name']); ?></strong></span>
@@ -44,8 +44,8 @@ $currentAdmin = requireAdminAuth();
                     <button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-amber-600 focus:outline-none focus:text-amber-600 p-2">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    <button onclick="adminLogout()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors">
-                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    <button onclick="adminLogout()" class="bg-red-600 text-white px-2 sm:px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-sm sm:text-base">
+                        <i class="fas fa-sign-out-alt sm:mr-2"></i><span class="hidden sm:inline">Logout</span>
                     </button>
                 </div>
             </div>
@@ -112,7 +112,7 @@ $currentAdmin = requireAdminAuth();
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-amber-100 text-amber-600">
-                        <i class="fas fa-dollar-sign text-xl"></i>
+                        <span class="text-2xl font-bold">₱</span>
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Total Revenue</p>
@@ -123,29 +123,34 @@ $currentAdmin = requireAdminAuth();
         </div>
 
         <!-- Quick Actions -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+        <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-8">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                 <a href="#add-product" onclick="document.getElementById('add-product-modal').classList.remove('hidden')" 
-                   class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class="fas fa-plus-circle text-green-600 text-xl mr-3"></i>
-                    <span class="font-medium text-gray-900">Add New Product</span>
+                   class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-plus-circle text-green-600 text-lg sm:text-xl mr-3 flex-shrink-0"></i>
+                    <span class="font-medium text-gray-900 text-sm sm:text-base">Add New Product</span>
                 </a>
                 <a href="chat.html" 
-                   class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors relative">
-                    <i class="fas fa-comments text-amber-600 text-xl mr-3"></i>
-                    <span class="font-medium text-gray-900">Customer Chat</span>
+                   class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors relative">
+                    <i class="fas fa-comments text-amber-600 text-lg sm:text-xl mr-3 flex-shrink-0"></i>
+                    <span class="font-medium text-gray-900 text-sm sm:text-base">Customer Chat</span>
                     <span id="admin-chat-badge" class="hidden absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 font-bold">0</span>
                 </a>
                 <a href="audit-log.html" 
-                   class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class="fas fa-clipboard-list text-blue-600 text-xl mr-3"></i>
-                    <span class="font-medium text-gray-900">View Audit Log</span>
+                   class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-clipboard-list text-blue-600 text-lg sm:text-xl mr-3 flex-shrink-0"></i>
+                    <span class="font-medium text-gray-900 text-sm sm:text-base">View Audit Log</span>
                 </a>
                 <a href="#orders" onclick="alert('Orders management coming soon!')" 
-                   class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class="fas fa-shopping-bag text-purple-600 text-xl mr-3"></i>
-                    <span class="font-medium text-gray-900">Manage Orders</span>
+                   class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-shopping-bag text-purple-600 text-lg sm:text-xl mr-3 flex-shrink-0"></i>
+                    <span class="font-medium text-gray-900 text-sm sm:text-base">Manage Orders</span>
+                </a>
+                <a href="#users" onclick="showUsersSection()" 
+                   class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-users text-indigo-600 text-lg sm:text-xl mr-3 flex-shrink-0"></i>
+                    <span class="font-medium text-gray-900 text-sm sm:text-base">View User Profiles</span>
                 </a>
             </div>
         </div>
@@ -155,15 +160,15 @@ $currentAdmin = requireAdminAuth();
             <!-- Product Management -->
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-lg shadow">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <div class="flex justify-between items-center">
+                    <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
                             <h2 class="text-lg font-semibold text-gray-900">Product Management</h2>
-                            <button onclick="showAddProductModal()" class="bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700">
+                            <button onclick="showAddProductModal()" class="bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 text-sm sm:text-base w-full sm:w-auto">
                                 <i class="fas fa-plus mr-2"></i>Add Product
                             </button>
                         </div>
                     </div>
-                    <div class="p-6">
+                    <div class="p-4 sm:p-6">
                         <div id="products-list" class="space-y-4">
                             <div class="text-center text-gray-500 py-8">
                                 <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
@@ -195,8 +200,8 @@ $currentAdmin = requireAdminAuth();
 
     <!-- Add Product Modal -->
     <div id="add-product-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 overflow-y-auto">
-        <div class="flex items-start justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full my-8">
+        <div class="flex items-start justify-center min-h-screen p-2 sm:p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full my-4 sm:my-8">
                 <div class="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
                     <h3 class="text-lg font-semibold text-gray-900">Add New Product</h3>
                 </div>
@@ -249,6 +254,21 @@ $currentAdmin = requireAdminAuth();
                             <img id="image-preview" class="h-32 w-32 object-cover rounded-md border border-gray-300" src="" alt="Image preview">
                         </div>
                     </div>
+                    
+                    <!-- Product Sizes Section -->
+                    <div class="mb-6 border-t pt-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-sm font-medium text-gray-700">Product Sizes & Prices</label>
+                            <button type="button" onclick="addSizeRow('add')" class="text-xs bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600">
+                                <i class="fas fa-plus mr-1"></i>Add Size
+                            </button>
+                        </div>
+                        <div id="add-sizes-container" class="space-y-2">
+                            <!-- Size rows will be added here dynamically -->
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Add different sizes with their respective prices</p>
+                    </div>
+                    
                         <div class="flex justify-end space-x-3">
                             <button type="button" onclick="hideAddProductModal()" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
                                 Cancel
@@ -265,8 +285,8 @@ $currentAdmin = requireAdminAuth();
 
     <!-- Edit Product Modal -->
     <div id="edit-product-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 overflow-y-auto">
-        <div class="flex items-start justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full my-8">
+        <div class="flex items-start justify-center min-h-screen p-2 sm:p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full my-4 sm:my-8">
                 <div class="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
                     <h3 class="text-lg font-semibold text-gray-900">Edit Product</h3>
                 </div>
@@ -320,6 +340,21 @@ $currentAdmin = requireAdminAuth();
                             <img id="edit-image-preview" class="h-32 w-32 object-cover rounded-md border border-gray-300" src="" alt="Image preview">
                         </div>
                     </div>
+                    
+                    <!-- Product Sizes Section -->
+                    <div class="mb-6 border-t pt-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-sm font-medium text-gray-700">Product Sizes & Prices</label>
+                            <button type="button" onclick="addSizeRow('edit')" class="text-xs bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600">
+                                <i class="fas fa-plus mr-1"></i>Add Size
+                            </button>
+                        </div>
+                        <div id="edit-sizes-container" class="space-y-2">
+                            <!-- Size rows will be added here dynamically -->
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Add different sizes with their respective prices</p>
+                    </div>
+                    
                         <div class="flex justify-end space-x-3">
                             <button type="button" onclick="hideEditProductModal()" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
                                 Cancel
@@ -329,6 +364,64 @@ $currentAdmin = requireAdminAuth();
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Users Modal -->
+    <div id="users-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-start justify-center min-h-screen p-2 sm:p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full my-4 sm:my-8">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900">User Management</h3>
+                    <button onclick="hideUsersModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-4 sm:p-6">
+                    <!-- Filter by role -->
+                    <div class="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:space-x-4 w-full sm:w-auto">
+                            <label class="text-sm font-medium text-gray-700">Filter by Role:</label>
+                            <select id="user-role-filter" onchange="filterUsersByRole()" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <option value="">All Users</option>
+                                <option value="customer">Customers</option>
+                                <option value="admin">Admins</option>
+                            </select>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            Total Users: <span id="total-users-count" class="font-semibold">0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Users List -->
+                    <div id="users-list" class="space-y-4 max-h-[60vh] overflow-y-auto">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                            <p>Loading users...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View User Profile Modal -->
+    <div id="user-profile-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-start justify-center min-h-screen p-2 sm:p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-5xl w-full my-4 sm:my-8">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900">User Profile Details</h3>
+                    <button onclick="hideUserProfileModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6 max-h-[75vh] overflow-y-auto" id="user-profile-content">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                        <p>Loading profile...</p>
+                    </div>
                 </div>
             </div>
         </div>

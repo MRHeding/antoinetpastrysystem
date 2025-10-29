@@ -256,7 +256,7 @@ function displayProducts() {
                 <p class="product-card-description">${product.description}</p>
                 ${!isAvailable && product.unavailable_reason ? `<p class="text-sm text-red-600 mb-2"><i class="fas fa-info-circle mr-1"></i>${product.unavailable_reason}</p>` : ''}
                 <div class="product-card-price-section">
-                    <span class="text-2xl font-bold text-amber-600">₱${product.price}</span>
+                    ${getPriceDisplay(product)}
                     <div class="flex items-center text-yellow-500 space-x-1">
                         <i class="fas fa-star text-sm"></i>
                         <i class="fas fa-star text-sm"></i>
@@ -360,6 +360,23 @@ function goToPage(page) {
     });
 }
 
+// Get price display for a product
+function getPriceDisplay(product) {
+    if (product.sizes && product.sizes.length > 0) {
+        const prices = product.sizes.map(s => parseFloat(s.price));
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        
+        if (minPrice === maxPrice) {
+            return `<span class="text-2xl font-bold text-amber-600">₱${minPrice.toFixed(2)}</span>`;
+        } else {
+            return `<span class="text-2xl font-bold text-amber-600">₱${minPrice.toFixed(2)} - ₱${maxPrice.toFixed(2)}</span>`;
+        }
+    } else {
+        return `<span class="text-2xl font-bold text-amber-600">₱${product.price}</span>`;
+    }
+}
+
 // Clear all filters
 function clearFilters() {
     document.getElementById('search-input').value = '';
@@ -408,8 +425,25 @@ async function viewProductDetails(productId) {
         // Populate modal with product details
         document.getElementById('modal-product-name').textContent = product.name;
         document.getElementById('modal-product-category').textContent = product.category;
-        document.getElementById('modal-product-price').textContent = product.price;
+        
+        // Show price or price range
+        if (product.sizes && product.sizes.length > 0) {
+            const prices = product.sizes.map(s => parseFloat(s.price));
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+            if (minPrice === maxPrice) {
+                document.getElementById('modal-product-price').textContent = minPrice.toFixed(2);
+            } else {
+                document.getElementById('modal-product-price').textContent = `${minPrice.toFixed(2)} - ${maxPrice.toFixed(2)}`;
+            }
+        } else {
+            document.getElementById('modal-product-price').textContent = product.price;
+        }
+        
         document.getElementById('modal-product-description').textContent = product.description;
+        
+        // Populate sizes
+        populateProductSizes(product);
         
         // Set product image
         const modalImage = document.getElementById('modal-product-image');
@@ -441,10 +475,6 @@ async function viewProductDetails(productId) {
         
         // Reset quantity to 1
         document.getElementById('product-quantity').value = 1;
-        
-        // Set product size if available, default to Medium
-        const productSize = product.size || 'M';
-        setProductSize(productSize);
         
         // Set up add to cart button
         const addToCartBtn = document.getElementById('add-to-cart-btn');
@@ -481,6 +511,39 @@ async function viewProductDetails(productId) {
     }
 }
 
+// Populate product sizes in the modal
+function populateProductSizes(product) {
+    const container = document.getElementById('sizes-container');
+    
+    if (!product.sizes || product.sizes.length === 0) {
+        // No sizes available, hide the section
+        document.getElementById('size-selection-section').style.display = 'none';
+        return;
+    }
+    
+    // Show the section
+    document.getElementById('size-selection-section').style.display = 'block';
+    
+    // Clear existing sizes
+    container.innerHTML = '';
+    
+    // Add each size option
+    product.sizes.forEach((size, index) => {
+        const isFirst = index === 0;
+        const sizeOption = document.createElement('label');
+        sizeOption.className = 'size-option cursor-pointer';
+        sizeOption.innerHTML = `
+            <input type="radio" name="product-size" value="${size.size_code}" data-size-id="${size.id}" data-price="${size.price}" class="sr-only" ${isFirst ? 'checked' : ''}>
+            <div class="size-label border-2 ${isFirst ? 'border-amber-500 bg-amber-50' : 'border-gray-300'} rounded-lg p-3 text-center transition-all duration-200 hover:border-amber-400">
+                <div class="font-semibold text-gray-800">${size.size_name}</div>
+                <div class="text-sm text-gray-500">${size.size_code}</div>
+                <div class="text-sm font-medium text-amber-600 mt-1">₱${parseFloat(size.price).toFixed(2)}</div>
+            </div>
+        `;
+        container.appendChild(sizeOption);
+    });
+}
+
 // Set product size in the modal
 function setProductSize(size) {
     // Reset all size options
@@ -502,7 +565,13 @@ function setProductSize(size) {
 // Get selected size from the modal
 function getSelectedSize() {
     const selectedSizeInput = document.querySelector('input[name="product-size"]:checked');
-    return selectedSizeInput ? selectedSizeInput.value : 'M'; // Default to Medium if none selected
+    return selectedSizeInput ? selectedSizeInput.value : null;
+}
+
+// Get selected size price
+function getSelectedSizePrice() {
+    const selectedSizeInput = document.querySelector('input[name="product-size"]:checked');
+    return selectedSizeInput ? parseFloat(selectedSizeInput.getAttribute('data-price')) : null;
 }
 
 // Hide product details modal
@@ -532,7 +601,7 @@ async function addToCart(productId) {
 }
 
 // Add to cart with quantity
-async function addToCartWithQuantity(productId, quantity, size = 'M') {
+async function addToCartWithQuantity(productId, quantity, size = null) {
     // Check if user is admin
     try {
         const response = await fetch('api/auth.php?action=check');
@@ -554,6 +623,24 @@ async function addToCartWithQuantity(productId, quantity, size = 'M') {
         return;
     }
     
+    // Determine price based on size
+    let price = product.price;
+    let sizeName = 'Standard';
+    
+    if (size && product.sizes && product.sizes.length > 0) {
+        const selectedSize = product.sizes.find(s => s.size_code === size);
+        if (selectedSize) {
+            price = parseFloat(selectedSize.price);
+            sizeName = selectedSize.size_name;
+        }
+    } else if (product.sizes && product.sizes.length > 0) {
+        // Use first size as default if no size selected
+        const defaultSize = product.sizes[0];
+        size = defaultSize.size_code;
+        price = parseFloat(defaultSize.price);
+        sizeName = defaultSize.size_name;
+    }
+    
     // Get existing cart or initialize new one
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     
@@ -566,10 +653,11 @@ async function addToCartWithQuantity(productId, quantity, size = 'M') {
         cart.push({
             id: product.id,
             name: product.name,
-            price: product.price,
+            price: price,
             image: product.image_url || 'Logo.png',
             quantity: quantity,
-            size: size
+            size: size,
+            size_name: sizeName
         });
     }
     
@@ -596,7 +684,7 @@ async function addToCartWithQuantity(productId, quantity, size = 'M') {
     }
     
     // Show notification
-    showNotification(`${quantity} ${product.name} added to cart!`, 'success');
+    showNotification(`${quantity} ${product.name} (${sizeName}) added to cart!`, 'success');
 }
 
 // Handle URL hash for direct product linking

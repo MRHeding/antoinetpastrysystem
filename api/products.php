@@ -61,6 +61,13 @@ function getProducts() {
             $product = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($product) {
+                // Get product sizes
+                $sizeStmt = $pdo->prepare("SELECT id, size_name, size_code, price, is_available, sort_order FROM product_sizes WHERE product_id = ? ORDER BY sort_order ASC");
+                $sizeStmt->execute([$id]);
+                $sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                $product['sizes'] = $sizes;
+                
                 echo json_encode([
                     'success' => true,
                     'data' => $product
@@ -75,6 +82,14 @@ function getProducts() {
             // Get all products with availability status
             $stmt = $pdo->query("SELECT *, availability_status, unavailable_reason, status_updated_at FROM products WHERE is_active = 1 ORDER BY created_at DESC");
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Get sizes for all products
+            foreach ($products as &$product) {
+                $sizeStmt = $pdo->prepare("SELECT id, size_name, size_code, price, is_available, sort_order FROM product_sizes WHERE product_id = ? ORDER BY sort_order ASC");
+                $sizeStmt->execute([$product['id']]);
+                $sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
+                $product['sizes'] = $sizes;
+            }
             
             echo json_encode([
                 'success' => true,

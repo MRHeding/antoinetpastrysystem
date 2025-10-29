@@ -144,41 +144,44 @@ function displayCartItems() {
             hasValidItems = true;
             
             // Get size display text
-            const sizeMap = { 'S': 'Small', 'M': 'Medium', 'L': 'Large', 'XL': 'Extra Large' };
-            const sizeText = item.size ? sizeMap[item.size] || item.size : 'Medium';
+            const sizeText = item.size_name || (item.size ? item.size : 'Standard');
             
             html += `
-                <div class="flex items-center space-x-6 p-6 border border-gray-200 rounded-lg bg-white shadow-sm">
-                    <div class="flex-shrink-0">
-                        <img src="${product.image_url || 'Logo.png'}" alt="${product.name}" class="h-24 w-24 object-cover rounded-lg border border-gray-200">
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">${product.name}</h3>
-                        <div class="flex items-center space-x-3 mb-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                Size: ${sizeText}
-                            </span>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-6 border border-gray-200 rounded-lg bg-white shadow-sm">
+                    <div class="flex items-start sm:items-center gap-4 flex-1">
+                        <div class="flex-shrink-0">
+                            <img src="${product.image_url || 'Logo.png'}" alt="${product.name}" class="h-20 w-20 sm:h-24 sm:w-24 object-cover rounded-lg border border-gray-200">
                         </div>
-                        <p class="text-gray-600 mb-3 line-clamp-2 leading-relaxed">${product.description}</p>
-                        <p class="text-amber-600 font-bold text-lg">₱${parseFloat(product.price).toFixed(2)} each</p>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">${product.name}</h3>
+                            <div class="flex items-center space-x-3 mb-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                    Size: ${sizeText}
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2 line-clamp-2 leading-relaxed hidden sm:block">${product.description}</p>
+                            <p class="text-amber-600 font-bold text-base sm:text-lg">₱${parseFloat(product.price).toFixed(2)} each</p>
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <button onclick="updateQuantity(${index}, ${item.quantity - 1})" 
-                                class="w-10 h-10 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition duration-200 flex items-center justify-center">
-                            <i class="fas fa-minus text-sm"></i>
-                        </button>
-                        <span class="w-12 text-center font-semibold text-lg">${item.quantity}</span>
-                        <button onclick="updateQuantity(${index}, ${item.quantity + 1})" 
-                                class="w-10 h-10 bg-amber-600 text-white rounded-full hover:bg-amber-700 transition duration-200 flex items-center justify-center">
-                            <i class="fas fa-plus text-sm"></i>
-                        </button>
-                    </div>
-                    <div class="text-right min-w-0">
-                        <p class="text-xl font-bold text-gray-800 mb-2">₱${(parseFloat(product.price) * item.quantity).toFixed(2)}</p>
-                        <button onclick="removeFromCart(${index})" 
-                                class="text-red-600 hover:text-red-800 transition duration-200 text-sm">
-                            <i class="fas fa-trash mr-1"></i>Remove
-                        </button>
+                    <div class="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
+                        <div class="flex items-center space-x-3">
+                            <button onclick="updateQuantity(${index}, ${item.quantity - 1})" 
+                                    class="w-9 h-9 sm:w-10 sm:h-10 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition duration-200 flex items-center justify-center">
+                                <i class="fas fa-minus text-sm"></i>
+                            </button>
+                            <span class="w-10 sm:w-12 text-center font-semibold text-base sm:text-lg">${item.quantity}</span>
+                            <button onclick="updateQuantity(${index}, ${item.quantity + 1})" 
+                                    class="w-9 h-9 sm:w-10 sm:h-10 bg-amber-600 text-white rounded-full hover:bg-amber-700 transition duration-200 flex items-center justify-center">
+                                <i class="fas fa-plus text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg sm:text-xl font-bold text-gray-800 mb-2">₱${(parseFloat(product.price) * item.quantity).toFixed(2)}</p>
+                            <button onclick="removeFromCart(${index})" 
+                                    class="text-red-600 hover:text-red-800 transition duration-200 text-sm">
+                                <i class="fas fa-trash mr-1"></i>Remove
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -187,41 +190,43 @@ function displayCartItems() {
             hasValidItems = true;
             
             // Get size display text
-            const sizeMap = { 'S': 'Small', 'M': 'Medium', 'L': 'Large', 'XL': 'Extra Large' };
-            const sizeText = item.size ? sizeMap[item.size] || item.size : 'Medium';
+            const sizeText = item.size_name || (item.size ? item.size : 'Standard');
             
             html += `
-                <div class="flex items-center space-x-6 p-6 border border-gray-200 rounded-lg">
-                    <div class="flex-shrink-0">
-                        <img src="${item.image || 'Logo.png'}" alt="${item.name}" class="h-20 w-20 object-contain rounded-lg">
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-xl font-semibold text-gray-800">${item.name}</h3>
-                        <div class="flex items-center space-x-3 mb-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                Size: ${sizeText}
-                            </span>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-6 border border-gray-200 rounded-lg bg-white shadow-sm">
+                    <div class="flex items-start sm:items-center gap-4 flex-1">
+                        <div class="flex-shrink-0">
+                            <img src="${item.image || 'Logo.png'}" alt="${item.name}" class="h-20 w-20 sm:h-24 sm:w-24 object-cover rounded-lg border border-gray-200">
                         </div>
-                        <p class="text-gray-600">Product details</p>
-                        <p class="text-amber-600 font-bold text-lg">₱${parseFloat(item.price).toFixed(2)}</p>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">${item.name}</h3>
+                            <div class="flex items-center space-x-3 mb-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                    Size: ${sizeText}
+                                </span>
+                            </div>
+                            <p class="text-amber-600 font-bold text-base sm:text-lg">₱${parseFloat(item.price).toFixed(2)} each</p>
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <button onclick="updateQuantity(${index}, ${item.quantity - 1})" 
-                                class="w-8 h-8 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition duration-200">
-                            <i class="fas fa-minus text-sm"></i>
-                        </button>
-                        <span class="w-12 text-center font-semibold">${item.quantity}</span>
-                        <button onclick="updateQuantity(${index}, ${item.quantity + 1})" 
-                                class="w-8 h-8 bg-amber-600 text-white rounded-full hover:bg-amber-700 transition duration-200">
-                            <i class="fas fa-plus text-sm"></i>
-                        </button>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xl font-bold text-gray-800">₱${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
-                        <button onclick="removeFromCart(${index})" 
-                                class="text-red-600 hover:text-red-800 transition duration-200 mt-2">
-                            <i class="fas fa-trash mr-1"></i>Remove
-                        </button>
+                    <div class="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
+                        <div class="flex items-center space-x-3">
+                            <button onclick="updateQuantity(${index}, ${item.quantity - 1})" 
+                                    class="w-9 h-9 sm:w-10 sm:h-10 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition duration-200 flex items-center justify-center">
+                                <i class="fas fa-minus text-sm"></i>
+                            </button>
+                            <span class="w-10 sm:w-12 text-center font-semibold text-base sm:text-lg">${item.quantity}</span>
+                            <button onclick="updateQuantity(${index}, ${item.quantity + 1})" 
+                                    class="w-9 h-9 sm:w-10 sm:h-10 bg-amber-600 text-white rounded-full hover:bg-amber-700 transition duration-200 flex items-center justify-center">
+                                <i class="fas fa-plus text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg sm:text-xl font-bold text-gray-800 mb-2">₱${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
+                            <button onclick="removeFromCart(${index})" 
+                                    class="text-red-600 hover:text-red-800 transition duration-200 text-sm">
+                                <i class="fas fa-trash mr-1"></i>Remove
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -400,8 +405,7 @@ function showCheckoutModal() {
     
     cart.forEach(item => {
         // Get size display text
-        const sizeMap = { 'S': 'Small', 'M': 'Medium', 'L': 'Large', 'XL': 'Extra Large' };
-        const sizeText = item.size ? sizeMap[item.size] || item.size : 'Medium';
+        const sizeText = item.size_name || (item.size ? item.size : 'Standard');
         
         if (item.name) {
             // Cart item has stored product data
