@@ -275,28 +275,13 @@
     pointer-events: none;
   }
   
-  /* Force mobile menu to be hidden on desktop */
-  @media (min-width: 768px) {
-    #mobile-menu-button,
-    #mobile-menu,
-    .mobile-menu-container {
-      display: none !important;
-    }
-    
-    /* Ensure desktop menu is visible on desktop */
-    .desktop-menu {
-      display: flex !important;
-    }
+  /* Mobile menu animation */
+  #mobile-menu {
+    transition: max-height 0.3s ease-in-out;
   }
   
-  /* Ensure mobile menu is visible on mobile */
-  @media (max-width: 767px) {
-    .desktop-menu {
-      display: none !important;
-    }
-    
-    .mobile-menu-container {
-      display: flex !important;
-    }
+  #mobile-menu.hidden {
+    max-height: 0;
+    overflow: hidden;
   }
 }
