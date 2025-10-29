@@ -510,15 +510,16 @@ async function confirmCheckout() {
         // Show loading state
         const confirmBtn = document.querySelector('button[onclick="confirmCheckout()"]');
         const originalText = confirmBtn.innerHTML;
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing Payment...';
         confirmBtn.disabled = true;
         
-        // Prepare order data
+        // Prepare order data with product names for PayMongo
         const orderItems = cart.map(item => {
             if (item.price) {
                 // Cart item has stored price data
                 return {
                     product_id: item.id,
+                    name: item.name,
                     quantity: item.quantity,
                     unit_price: parseFloat(item.price)
                 };
@@ -527,6 +528,7 @@ async function confirmCheckout() {
                 const product = products.find(p => p.id === item.id);
                 return {
                     product_id: item.id,
+                    name: product ? product.name : 'Product',
                     quantity: item.quantity,
                     unit_price: product ? parseFloat(product.price) : 0
                 };
@@ -551,45 +553,43 @@ async function confirmCheckout() {
         const delivery = 50.00;
         const total = subtotal + delivery;
         
-        // Create order
-        const orderData = {
+        // Create checkout session with PayMongo
+        const checkoutData = {
             items: orderItems,
             notes: `Order total: ₱${total.toFixed(2)} (Subtotal: ₱${subtotal.toFixed(2)}, Delivery: ₱${delivery.toFixed(2)})`
         };
         
-        const orderResponse = await fetch('api/orders.php?action=create_order', {
+        const paymentResponse = await fetch('api/payment.php?action=create_checkout_session', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(orderData)
+            body: JSON.stringify(checkoutData)
         });
         
-        const orderResult = await orderResponse.json();
+        const paymentResult = await paymentResponse.json();
         
-        if (orderResult.success) {
-            // Close modal
-            closeCheckoutModal();
+        if (paymentResult.success) {
+            // Store order info AND checkout session ID in localStorage for success page
+            localStorage.setItem('pending_order', JSON.stringify({
+                order_id: paymentResult.order_id,
+                order_number: paymentResult.order_number,
+                checkout_session_id: paymentResult.checkout_session_id
+            }));
             
-            // Clear cart after successful order
-            clearCart();
-            
-            // Show success message
-            showNotification(`Order placed successfully! Order #${orderResult.order_number}`, 'success');
-            
-            // Redirect to orders page after a short delay
-            setTimeout(() => {
-                window.location.href = 'orders.html';
-            }, 3000);
+            // Redirect to PayMongo checkout page
+            window.location.href = paymentResult.checkout_url;
             
         } else {
-            showNotification(`Failed to create order: ${orderResult.message}`, 'error');
+            showNotification(`Failed to create payment session: ${paymentResult.message}`, 'error');
+            // Restore button state
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
         }
         
     } catch (error) {
         console.error('Error during checkout:', error);
         showNotification('An error occurred during checkout. Please try again.', 'error');
-    } finally {
         // Restore button state
         const confirmBtn = document.querySelector('button[onclick="confirmCheckout()"]');
         if (confirmBtn) {

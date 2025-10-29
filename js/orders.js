@@ -184,13 +184,38 @@ function createOrderCard(order) {
     const statusColor = statusColors[order.status] || 'bg-gray-100 text-gray-800';
     const statusIcon = statusIcons[order.status] || 'fa-question-circle';
     
+    const paymentStatusColors = {
+        paid: 'bg-green-100 text-green-800 border-green-200',
+        pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        failed: 'bg-red-100 text-red-800 border-red-200',
+        refunded: 'bg-gray-100 text-gray-800 border-gray-200'
+    };
+    
+    const paymentStatusIcons = {
+        paid: 'fa-check-circle',
+        pending: 'fa-clock',
+        failed: 'fa-times-circle',
+        refunded: 'fa-undo'
+    };
+    
+    const paymentBadgeColor = paymentStatusColors[order.payment_status] || 'bg-gray-100 text-gray-800 border-gray-200';
+    const paymentIcon = paymentStatusIcons[order.payment_status] || 'fa-question-circle';
+    
     return `
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
             <div class="p-6">
                 <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                     <div class="flex-1 min-w-0">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 truncate">Order #${order.order_number}</h3>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="text-lg font-semibold text-gray-900 truncate">Order #${order.order_number}</h3>
+                                ${order.payment_status === 'paid' ? `
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${paymentBadgeColor} border inline-flex items-center">
+                                        <i class="fas ${paymentIcon} mr-1"></i>
+                                        PAID
+                                    </span>
+                                ` : ''}
+                            </div>
                             <span class="px-3 py-1 rounded-full text-xs font-medium ${statusColor} inline-flex items-center w-fit">
                                 <i class="fas ${statusIcon} mr-1"></i>
                                 ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -211,6 +236,12 @@ function createOrderCard(order) {
                                 <i class="fas fa-dollar-sign mr-2 text-gray-400"></i>
                                 <span class="font-semibold text-gray-900">Total: ₱${(typeof order.total_amount === 'number' ? order.total_amount : parseFloat(order.total_amount)).toFixed(2)}</span>
                             </div>
+                            ${order.payment_method ? `
+                                <div class="flex items-center">
+                                    <i class="fas fa-credit-card mr-2 text-gray-400"></i>
+                                    <span class="text-xs">${order.payment_method.charAt(0).toUpperCase() + order.payment_method.slice(1)}</span>
+                                </div>
+                            ` : ''}
                             ${order.notes ? `
                                 <div class="flex items-start col-span-2">
                                     <i class="fas fa-sticky-note mr-2 text-gray-400 mt-0.5"></i>
@@ -320,6 +351,23 @@ function displayOrderModal(order) {
     
     const statusColor = statusColors[order.status] || 'bg-gray-100 text-gray-800';
     
+    const paymentStatusColors = {
+        paid: 'bg-green-100 text-green-800 border-green-200',
+        pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        failed: 'bg-red-100 text-red-800 border-red-200',
+        refunded: 'bg-gray-100 text-gray-800 border-gray-200'
+    };
+    
+    const paymentStatusIcons = {
+        paid: 'fa-check-circle',
+        pending: 'fa-clock',
+        failed: 'fa-times-circle',
+        refunded: 'fa-undo'
+    };
+    
+    const paymentBadgeColor = paymentStatusColors[order.payment_status] || 'bg-gray-100 text-gray-800 border-gray-200';
+    const paymentIcon = paymentStatusIcons[order.payment_status] || 'fa-question-circle';
+    
     content.innerHTML = `
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Order Info -->
@@ -337,6 +385,25 @@ function displayOrderModal(order) {
                                 ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </span>
                         </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Payment Status:</span>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${paymentBadgeColor} border inline-flex items-center">
+                                <i class="fas ${paymentIcon} mr-1"></i>
+                                ${order.payment_status ? order.payment_status.toUpperCase() : 'PENDING'}
+                            </span>
+                        </div>
+                        ${order.payment_method ? `
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Payment Method:</span>
+                                <span class="font-medium">${order.payment_method.charAt(0).toUpperCase() + order.payment_method.slice(1)}</span>
+                            </div>
+                        ` : ''}
+                        ${order.paid_at ? `
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Paid At:</span>
+                                <span class="font-medium">${formatDate(order.paid_at)}</span>
+                            </div>
+                        ` : ''}
                         <div class="flex justify-between">
                             <span class="text-gray-600">Order Date:</span>
                             <span class="font-medium">${formatDate(order.order_date)}</span>
@@ -347,7 +414,7 @@ function displayOrderModal(order) {
                                 <span class="font-medium">${formatDate(order.pickup_date)}</span>
                             </div>
                         ` : ''}
-                         <div class="flex justify-between">
+                         <div class="flex justify-between pt-2 border-t border-gray-200">
                              <span class="text-gray-600">Total Amount:</span>
                              <span class="font-bold text-lg">₱${(typeof order.total_amount === 'number' ? order.total_amount : parseFloat(order.total_amount)).toFixed(2)}</span>
                          </div>

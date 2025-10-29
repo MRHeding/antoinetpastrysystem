@@ -1,0 +1,261 @@
+<?php
+require_once 'auth-check.php';
+$currentAdmin = requireAdminAuth();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Orders - Antoinette's Pastries Admin</title>
+    <link href="../css/output.css" rel="stylesheet">
+    <link href="../assets/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <img src="../Logo.png" alt="Antoinette's Pastries Logo" class="h-8 w-8 mr-3 object-contain">
+                    <h1 class="text-xl font-bold text-gray-800">Antoinette's Admin</h1>
+                </div>
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <div class="flex items-center text-gray-600">
+                        <i class="fas fa-user-shield mr-2"></i>
+                        <span class="text-sm hidden sm:inline">Welcome, <strong><?php echo htmlspecialchars($currentAdmin['first_name']); ?></strong></span>
+                    </div>
+                    <!-- Navigation Links -->
+                    <div class="hidden md:flex items-center space-x-4">
+                        <a href="index.html" class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-home mr-2"></i>Dashboard
+                        </a>
+                        <a href="../index.html" class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-store mr-2"></i>Store
+                        </a>
+                        <a href="chat.html" class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors relative">
+                            <i class="fas fa-comments mr-2"></i>Chat
+                            <span id="admin-chat-badge" class="hidden absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-2 py-1 font-bold">0</span>
+                        </a>
+                        <a href="audit-log.html" class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-clipboard-list mr-2"></i>Audit Log
+                        </a>
+                    </div>
+                    <!-- Mobile menu button -->
+                    <button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-amber-600 focus:outline-none focus:text-amber-600 p-2">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <button onclick="adminLogout()" class="bg-red-600 text-white px-2 sm:px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-sm sm:text-base">
+                        <i class="fas fa-sign-out-alt sm:mr-2"></i><span class="hidden sm:inline">Logout</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile menu -->
+            <div id="mobile-menu" class="hidden md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+                    <a href="index.html" class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                    <a href="../index.html" class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-store mr-2"></i>Store
+                    </a>
+                    <a href="chat.html" class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-comments mr-2"></i>Chat
+                    </a>
+                    <a href="audit-log.html" class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
+                        <i class="fas fa-clipboard-list mr-2"></i>Audit Log
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                <i class="fas fa-shopping-bag mr-3 text-purple-600"></i>Manage Orders
+            </h1>
+            <p class="text-gray-600">View and manage customer orders</p>
+        </div>
+
+        <!-- Order Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Orders</p>
+                        <p id="stat-total" class="text-2xl font-bold text-gray-900">-</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Pending</p>
+                        <p id="stat-pending" class="text-2xl font-bold text-gray-900">-</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-orange-100 text-orange-600">
+                        <i class="fas fa-fire text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Preparing</p>
+                        <p id="stat-preparing" class="text-2xl font-bold text-gray-900">-</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-check-circle text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Completed</p>
+                        <p id="stat-completed" class="text-2xl font-bold text-gray-900">-</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-amber-100 text-amber-600">
+                        <span class="text-2xl font-bold">₱</span>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Revenue</p>
+                        <p id="stat-revenue" class="text-2xl font-bold text-gray-900">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+                <div class="flex flex-col sm:flex-row gap-4 flex-1 w-full">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+                        <select id="status-filter" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="">All Orders</option>
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="preparing">Preparing</option>
+                            <option value="ready">Ready for Pickup</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Payment Status</label>
+                        <select id="payment-filter" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="">All Payments</option>
+                            <option value="paid">Paid</option>
+                            <option value="pending">Pending</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Search Order</label>
+                        <input type="text" id="search-input" placeholder="Order # or Customer Name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                </div>
+                
+                <div class="flex gap-2 w-full lg:w-auto">
+                    <button onclick="applyFilters()" class="flex-1 lg:flex-none bg-amber-600 text-white px-6 py-2 rounded-md hover:bg-amber-700 transition-colors">
+                        <i class="fas fa-filter mr-2"></i>Apply
+                    </button>
+                    <button onclick="resetFilters()" class="flex-1 lg:flex-none bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-redo mr-2"></i>Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders List -->
+        <div class="bg-white rounded-lg shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-gray-900">Orders List</h2>
+                    <span id="orders-count" class="text-sm text-gray-600">0 orders</span>
+                </div>
+            </div>
+            <div class="p-6">
+                <div id="orders-list">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                        <p>Loading orders...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="order-details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-start justify-center min-h-screen p-2 sm:p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full my-4 sm:my-8">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+                    <h3 class="text-lg font-semibold text-gray-900">Order Details</h3>
+                    <button onclick="hideOrderDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6 max-h-[75vh] overflow-y-auto" id="order-details-content">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                        <p>Loading order details...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script src="js/manage-orders.js"></script>
+    
+    <script>
+        // Check for unread chat messages
+        async function updateChatBadge() {
+            try {
+                const response = await fetch('../api/chat.php?action=get_unread_count', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const badge = document.getElementById('admin-chat-badge');
+                    if (badge && data.unread_count > 0) {
+                        badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                        badge.classList.remove('hidden');
+                    } else if (badge) {
+                        badge.classList.add('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating chat badge:', error);
+            }
+        }
+        
+        // Update badge on load and periodically
+        updateChatBadge();
+        setInterval(updateChatBadge, 10000); // Check every 10 seconds
+    </script>
+</body>
+</html>
+
