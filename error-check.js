@@ -1,4 +1,4 @@
-// Comprehensive Error Checking Script for Antoinette's Pastries
+// Comprehensive Error Checking Script for Antonette's Pastries
 
 console.log('🔍 Starting comprehensive functionality test...');
 
@@ -194,7 +194,7 @@ function checkConsoleErrors() {
 
 // Run all tests
 async function runAllTests() {
-    console.log('🚀 Antoinette\'s Pastries - Comprehensive Functionality Test');
+    console.log('🚀 Antonette\'s Pastries - Comprehensive Functionality Test');
     console.log('=' .repeat(60));
     
     checkFileExistence();

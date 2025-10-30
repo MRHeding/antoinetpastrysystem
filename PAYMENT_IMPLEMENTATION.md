@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully integrated PayMongo payment gateway with e-wallet support (GCash, Maya/PayMaya, and GrabPay) using hosted checkout pages for Antoinette's Pastries e-commerce website.
+Successfully integrated PayMongo payment gateway with e-wallet support (GCash, Maya/PayMaya, and GrabPay) using hosted checkout pages for Antonette's Pastries e-commerce website.
 
 ## What Was Implemented
 

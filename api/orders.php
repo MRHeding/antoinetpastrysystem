@@ -183,7 +183,7 @@ function getOrderDetails() {
                 ps.size_name
             FROM order_items oi
             JOIN products p ON oi.product_id = p.id
-            LEFT JOIN product_sizes ps ON oi.size_id = ps.id
+            LEFT JOIN product_sizes ps ON oi.product_id = ps.product_id AND oi.size_code = ps.size_code
             WHERE oi.order_id = ?
         ");
         $stmt->execute([$order_id]);

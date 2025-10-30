@@ -59,7 +59,7 @@ $checkoutSessionId = $_GET['session_id'] ?? '';
                 echo '<div class="warning">';
                 echo '<strong>Action Required:</strong><br>';
                 echo '1. Go to <a href="http://localhost/phpmyadmin" target="_blank">phpMyAdmin</a><br>';
-                echo '2. Select database: antoinettes_pastries<br>';
+                echo '2. Select database: antonettes_pastries<br>';
                 echo '3. Click SQL tab<br>';
                 echo '4. Copy and paste contents of: database/add_payment_fields.sql<br>';
                 echo '5. Click Go<br>';

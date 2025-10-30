@@ -1,6 +1,6 @@
 # PayMongo E-Wallet Payment Integration Setup Guide
 
-This guide will help you set up PayMongo payment integration for Antoinette's Pastries website, enabling customers to pay using GCash, Maya (PayMaya), and GrabPay.
+This guide will help you set up PayMongo payment integration for Antonette's Pastries website, enabling customers to pay using GCash, Maya (PayMaya), and GrabPay.
 
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
@@ -348,5 +348,5 @@ If you encounter issues not covered in this guide:
 
 **Last Updated:** October 2025  
 **Version:** 1.0  
-**Maintained by:** Antoinette's Pastries Development Team
+**Maintained by:** Antonette's Pastries Development Team
 

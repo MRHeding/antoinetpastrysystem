@@ -165,7 +165,7 @@
 {
   "id": 1,
   "username": "admin",
-  "email": "admin@antoinettes.com",
+  "email": "admin@antonettes.com",
   "first_name": "Admin",
   "last_name": "User",
   "role": "admin",

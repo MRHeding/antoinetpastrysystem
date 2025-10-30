@@ -1,4 +1,4 @@
-# Antoinette's Pastries - Web-Based Marketing System
+# Antonette's Pastries - Web-Based Marketing System
 
 A beautiful, modern web application for showcasing and managing artisanal pastries in the Philippines. Built with a simple, effective tech stack for easy deployment and maintenance. All prices are displayed in Philippine Peso (₱).
 
@@ -187,6 +187,6 @@ This project is open source and available under the MIT License.
 
 ---
 
-**Built with ❤️ for Antoinette's Pastries** 🥐✨
+**Built with ❤️ for Antonette's Pastries** 🥐✨
 
 

@@ -1,8 +1,8 @@
 <?php
-// Database configuration for Antoinette's Pastries
+// Database configuration for Antonette's Pastries
 class Database {
     private $host = 'localhost';
-    private $db_name = 'antoinettes_pastries';
+    private $db_name = 'antonettes_pastries';
     private $username = 'root';
     private $password = '';
     private $conn;

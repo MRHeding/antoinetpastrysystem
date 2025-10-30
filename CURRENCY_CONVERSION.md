@@ -1,7 +1,7 @@
 # Currency Conversion to Philippine Peso (₱)
 
 ## Overview
-The Antoinette's Pastries website has been updated to use Philippine Peso (₱) as the primary currency instead of US Dollar ($).
+The Antonette's Pastries website has been updated to use Philippine Peso (₱) as the primary currency instead of US Dollar ($).
 
 ## Conversion Rate Used
 - **Conversion Rate**: 1 USD = 50 PHP (approximate)

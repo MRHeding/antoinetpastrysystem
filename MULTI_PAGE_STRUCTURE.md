@@ -1,6 +1,6 @@
 # Multi-Page Website Structure
 
-This document outlines the new multi-page structure for Antoinette's Pastries website.
+This document outlines the new multi-page structure for Antonette's Pastries website.
 
 ## File Structure
 

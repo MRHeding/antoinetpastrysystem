@@ -1,4 +1,4 @@
-# Antoinette's Pastries - Functionality Test Report
+# Antonette's Pastries - Functionality Test Report
 
 ## ✅ **Test Results Summary**
 

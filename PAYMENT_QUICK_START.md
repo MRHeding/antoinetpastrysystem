@@ -33,7 +33,7 @@ Get your payment system up and running in 5 minutes!
 ### 3. Update Database (1 minute)
 
 1. Open phpMyAdmin
-2. Select `antoinettes_pastries` database
+2. Select `antonettes_pastries` database
 3. Go to SQL tab
 4. Copy and paste contents of `database/add_payment_fields.sql`
 5. Click "Go"

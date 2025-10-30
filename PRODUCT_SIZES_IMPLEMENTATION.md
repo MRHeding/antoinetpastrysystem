@@ -1,6 +1,6 @@
 # Product Sizes Implementation Guide
 
-This document explains the implementation of different product sizes with different prices for Antoinette's Pastries e-commerce system.
+This document explains the implementation of different product sizes with different prices for Antonette's Pastries e-commerce system.
 
 ## Overview
 
