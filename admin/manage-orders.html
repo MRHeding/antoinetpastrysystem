@@ -233,7 +233,7 @@ $currentAdmin = requireAdminAuth();
         // Check for unread chat messages
         async function updateChatBadge() {
             try {
-                const response = await fetch('../api/chat.php?action=get_unread_count', {
+                const response = await fetch('../api/support.php?action=get_unread_count', {
                     credentials: 'include'
                 });
                 const data = await response.json();

@@ -52,7 +52,7 @@ function initSidebarToggle() {
 
 async function loadConversations() {
     try {
-        const response = await fetch('../api/chat.php?action=get_conversations', {
+        const response = await fetch('../api/support.php?action=get_conversations', {
             credentials: 'include'
         });
 
@@ -160,7 +160,7 @@ async function openConversation(conversation) {
 
 async function loadConversationMessages(userId) {
     try {
-        const response = await fetch(`../api/chat.php?action=get_messages&user_id=${userId}`, {
+        const response = await fetch(`../api/support.php?action=get_messages&user_id=${userId}`, {
             credentials: 'include'
         });
 
@@ -225,7 +225,7 @@ async function sendAdminMessage(e) {
     if (!message) return;
 
     try {
-        const response = await fetch('../api/chat.php?action=send_message', {
+        const response = await fetch('../api/support.php?action=send_message', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -260,7 +260,7 @@ async function checkAdminNewMessages() {
     if (!currentChatUserId) return;
 
     try {
-        const response = await fetch(`../api/chat.php?action=get_messages&user_id=${currentChatUserId}`, {
+        const response = await fetch(`../api/support.php?action=get_messages&user_id=${currentChatUserId}`, {
             credentials: 'include'
         });
 
@@ -289,7 +289,7 @@ async function checkAdminNewMessages() {
 
 async function markAdminMessagesAsRead(userId) {
     try {
-        await fetch('../api/chat.php?action=mark_as_read', {
+        await fetch('../api/support.php?action=mark_as_read', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

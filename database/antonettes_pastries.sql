@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 29, 2025 at 10:31 AM
+-- Generation Time: Oct 30, 2025 at 01:42 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,31 @@ SET time_zone = "+00:00";
 --
 -- Database: `antonettes_pastries`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `audit_log`
+--
+
+CREATE TABLE `audit_log` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `action` varchar(100) NOT NULL,
+  `action_description` text DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `audit_log`
+--
+
+INSERT INTO `audit_log` (`id`, `user_id`, `action`, `action_description`, `ip_address`, `user_agent`, `created_at`) VALUES
+(1, 1, 'update_order_status', 'Updated order status from \'ready\' to \'completed\' for order ID 31', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36', '2025-10-29 16:29:03'),
+(2, 1, 'update_order_status', 'Updated order status from \'ready\' to \'completed\' for order ID 32', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36', '2025-10-29 16:29:19'),
+(3, 1, 'update_order_status', 'Updated order status from \'pending\' to \'preparing\' for order ID 34', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '2025-10-30 12:34:34');
 
 -- --------------------------------------------------------
 
@@ -67,39 +92,8 @@ CREATE TABLE `chat_messages` (
 --
 
 INSERT INTO `chat_messages` (`id`, `user_id`, `sender_type`, `message`, `is_read`, `created_at`) VALUES
-(1, 11, 'user', 'Hello Admin', 1, '2025-10-28 14:41:19'),
-(2, 11, 'user', 'Pwede po pa order ngayon ng pandesal?', 1, '2025-10-28 14:42:27'),
-(3, 11, 'admin', 'Okay po Maam Matic', 1, '2025-10-28 14:45:41'),
-(4, 12, 'user', 'Hello po open po kayo for delivery bukas?', 1, '2025-10-28 14:51:18'),
-(5, 12, 'user', 'Need cakes po birthday sa party ng BF ko ito po number ko 09918195483', 1, '2025-10-28 14:52:01'),
-(6, 12, 'admin', 'Yes Yes noted', 1, '2025-10-28 14:54:53'),
-(7, 12, 'user', 'Thank you po..', 1, '2025-10-28 14:55:25'),
-(8, 12, 'admin', '.', 1, '2025-10-28 14:59:17'),
-(9, 12, 'admin', '.', 1, '2025-10-28 14:59:18'),
-(10, 12, 'admin', '.', 1, '2025-10-28 14:59:18'),
-(11, 12, 'admin', 'sd', 1, '2025-10-28 15:02:01'),
-(12, 12, 'admin', 'sd', 1, '2025-10-28 15:02:02'),
-(13, 12, 'admin', 'sd', 1, '2025-10-28 15:02:02'),
-(14, 12, 'admin', 'sd', 1, '2025-10-28 15:02:03'),
-(15, 12, 'admin', 's', 1, '2025-10-28 15:08:25'),
-(16, 12, 'admin', 'das', 1, '2025-10-28 15:08:27'),
-(17, 12, 'admin', 'asd', 1, '2025-10-28 15:08:28'),
-(18, 12, 'admin', 'asd', 1, '2025-10-28 15:08:28'),
-(19, 12, 'admin', 'asd', 1, '2025-10-28 15:08:28'),
-(20, 12, 'admin', 'a', 1, '2025-10-28 15:08:29'),
-(21, 12, 'admin', 'd', 1, '2025-10-28 15:08:31'),
-(22, 12, 'user', 'hey are you ok?', 1, '2025-10-28 15:25:02'),
-(23, 13, 'user', 'hi?', 1, '2025-10-29 06:05:54'),
-(24, 13, 'admin', 'Hi po!', 1, '2025-10-29 06:06:15'),
-(25, 13, 'user', 'hm df bound to Uganda', 1, '2025-10-29 06:06:31'),
-(26, 13, 'admin', 'Kupal Ka', 1, '2025-10-29 06:06:36'),
-(27, 13, 'user', 'Hot Croisant 100pcs', 1, '2025-10-29 06:06:41'),
-(28, 13, 'user', 'mas kupal ka', 1, '2025-10-29 06:06:45'),
-(29, 13, 'user', 'block na kita', 1, '2025-10-29 06:06:48'),
-(30, 13, 'user', 'wala lasa tinapay nyo', 1, '2025-10-29 06:06:54'),
-(31, 13, 'admin', 'Edi wow pangit mo', 1, '2025-10-29 06:07:11'),
-(32, 13, 'user', 'magsara na kayo!!!!!!!!!!!!!!!!!!!!!!!!!!', 1, '2025-10-29 06:07:12'),
-(33, 13, 'admin', 'Okay po', 1, '2025-10-29 06:07:36');
+(38, 14, 'user', 'Hello po good evening ma\'am/sir need ko po yung delivery mamaya around 9pm if pwede po', 1, '2025-10-30 12:35:40'),
+(39, 14, 'admin', 'Yes po noted', 1, '2025-10-30 12:36:05');
 
 -- --------------------------------------------------------
 
@@ -120,9 +114,7 @@ CREATE TABLE `chat_sessions` (
 --
 
 INSERT INTO `chat_sessions` (`id`, `user_id`, `last_message_at`, `unread_admin_count`, `unread_user_count`) VALUES
-(1, 11, '2025-10-28 14:46:22', 0, 0),
-(4, 12, '2025-10-28 15:25:21', 0, 0),
-(23, 13, '2025-10-29 06:09:21', 0, 0);
+(38, 14, '2025-10-30 12:36:08', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -157,6 +149,11 @@ CREATE TABLE `orders` (
   `order_number` varchar(50) NOT NULL,
   `total_amount` decimal(10,2) NOT NULL,
   `status` enum('pending','confirmed','preparing','ready','completed','cancelled') DEFAULT 'pending',
+  `payment_status` enum('pending','paid','failed','refunded') DEFAULT 'pending',
+  `payment_method` varchar(50) DEFAULT NULL,
+  `payment_intent_id` varchar(255) DEFAULT NULL,
+  `paymongo_checkout_id` varchar(255) DEFAULT NULL,
+  `paid_at` datetime DEFAULT NULL,
   `order_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `pickup_date` date DEFAULT NULL,
   `notes` text DEFAULT NULL,
@@ -168,11 +165,9 @@ CREATE TABLE `orders` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `customer_id`, `order_number`, `total_amount`, `status`, `order_date`, `pickup_date`, `notes`, `created_at`, `updated_at`) VALUES
-(9, 11, NULL, 'ORD-20251018-0006', 30.00, 'pending', '2025-10-18 16:51:43', NULL, 'Order total: ₱80.00 (Subtotal: ₱30.00, Delivery: ₱50.00)', '2025-10-18 16:51:43', '2025-10-18 16:51:43'),
-(10, 11, NULL, 'ORD-20251019-8590', 5.00, 'pending', '2025-10-19 12:10:43', NULL, 'Order total: ₱55.00 (Subtotal: ₱5.00, Delivery: ₱50.00)', '2025-10-19 12:10:43', '2025-10-19 12:10:43'),
-(11, 11, NULL, 'ORD-20251026-3972', 180.00, 'pending', '2025-10-26 15:39:35', NULL, 'Order total: ₱230.00 (Subtotal: ₱180.00, Delivery: ₱50.00)', '2025-10-26 15:39:35', '2025-10-26 15:39:35'),
-(12, 13, NULL, 'ORD-20251029-0253', 3550.00, 'pending', '2025-10-29 06:08:19', NULL, 'Order total: ₱3600.00 (Subtotal: ₱3550.00, Delivery: ₱50.00)', '2025-10-29 06:08:19', '2025-10-29 06:08:19');
+INSERT INTO `orders` (`id`, `user_id`, `customer_id`, `order_number`, `total_amount`, `status`, `payment_status`, `payment_method`, `payment_intent_id`, `paymongo_checkout_id`, `paid_at`, `order_date`, `pickup_date`, `notes`, `created_at`, `updated_at`) VALUES
+(33, 14, NULL, 'ORD-20251030-8589', 370.00, 'cancelled', 'pending', NULL, NULL, 'cs_QaF5XyRSr95MUPUsjYNCoVrf', NULL, '2025-10-30 12:31:28', NULL, 'Order total: ₱370.00 (Subtotal: ₱320.00, Delivery: ₱50.00)', '2025-10-30 12:31:28', '2025-10-30 12:31:53'),
+(34, 14, NULL, 'ORD-20251030-7737', 370.00, 'preparing', 'paid', 'gcash', 'pi_EeeKTbGw6cbHK8qBeLQGiFT7', 'cs_SjAc37wwGz3dG6DqzytPZBex', '2025-10-30 20:33:28', '2025-10-30 12:32:25', NULL, 'Order total: ₱370.00 (Subtotal: ₱320.00, Delivery: ₱50.00)', '2025-10-30 12:32:25', '2025-10-30 12:34:34');
 
 -- --------------------------------------------------------
 
@@ -196,15 +191,8 @@ CREATE TABLE `order_items` (
 --
 
 INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `size_code`, `quantity`, `unit_price`, `total_price`, `created_at`) VALUES
-(15, 9, 19, NULL, 15, 2.00, 30.00, '2025-10-18 16:51:43'),
-(16, 10, 19, NULL, 2, 2.50, 5.00, '2025-10-19 12:10:43'),
-(17, 11, 23, NULL, 1, 15.00, 15.00, '2025-10-26 15:39:35'),
-(18, 11, 22, NULL, 1, 150.00, 150.00, '2025-10-26 15:39:35'),
-(19, 11, 21, NULL, 1, 10.00, 10.00, '2025-10-26 15:39:35'),
-(20, 11, 20, NULL, 1, 5.00, 5.00, '2025-10-26 15:39:35'),
-(21, 12, 22, NULL, 22, 150.00, 3300.00, '2025-10-29 06:08:19'),
-(22, 12, 21, NULL, 3, 10.00, 30.00, '2025-10-29 06:08:19'),
-(23, 12, 21, NULL, 22, 10.00, 220.00, '2025-10-29 06:08:19');
+(45, 33, 23, NULL, 2, 160.00, 320.00, '2025-10-30 12:31:28'),
+(46, 34, 23, NULL, 2, 160.00, 320.00, '2025-10-30 12:32:25');
 
 -- --------------------------------------------------------
 
@@ -238,7 +226,7 @@ INSERT INTO `products` (`id`, `name`, `description`, `price`, `category`, `size`
 (20, 'Pandesal Choco', 'Our Best Selling Pandesal', 5.00, 'Bread', 'M', 'uploads/products/1760876922_PandeSalcopy.jpg', 1, 'available', NULL, NULL, NULL, '2025-10-19 12:28:42', '2025-10-19 12:29:54'),
 (21, 'Hot Croissant', 'Buttery, flaky, crescent-shaped French pastry made from a laminated yeast', 10.00, 'Croissants', 'M', 'uploads/products/1760877121_Vegan-Croissants-1.jpg', 1, 'available', NULL, NULL, NULL, '2025-10-19 12:32:01', '2025-10-19 12:32:01'),
 (22, 'Banana Cake', 'Our very delicious banana cake', 150.00, 'Cakes', 'M', 'uploads/products/1760877245_Banan.jpg', 1, 'unavailable', 'no stock', '2025-10-29 06:09:01', 1, '2025-10-19 12:34:05', '2025-10-29 06:09:01'),
-(23, 'Choco Cookie', 'Choco cookie delicious and yummy', 15.00, 'Cookies', 'M', 'uploads/products/1760877326_images.jpg', 1, 'unavailable', 'No stock', '2025-10-26 16:18:54', 1, '2025-10-19 12:35:26', '2025-10-26 16:18:54');
+(23, 'Choco Cookie', 'Choco cookie delicious and yummy', 15.00, 'Cookies', 'M', 'uploads/products/1760877326_images.jpg', 1, 'available', NULL, '2025-10-29 16:29:40', 1, '2025-10-19 12:35:26', '2025-10-29 16:29:40');
 
 -- --------------------------------------------------------
 
@@ -302,7 +290,8 @@ CREATE TABLE `product_status_audit` (
 
 INSERT INTO `product_status_audit` (`id`, `product_id`, `old_status`, `new_status`, `reason`, `changed_by`, `changed_at`) VALUES
 (1, 23, 'available', 'unavailable', 'No stock', 1, '2025-10-26 16:18:54'),
-(2, 22, 'available', 'unavailable', 'no stock', 1, '2025-10-29 06:09:01');
+(2, 22, 'available', 'unavailable', 'no stock', 1, '2025-10-29 06:09:01'),
+(3, 23, 'unavailable', 'available', NULL, 1, '2025-10-29 16:29:40');
 
 -- --------------------------------------------------------
 
@@ -336,10 +325,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `first_name`, `last_name`, `phone`, `address`, `city`, `state`, `zip_code`, `role`, `is_active`, `email_verified`, `created_at`, `updated_at`, `email_verification_token`, `email_verification_expires`) VALUES
-(1, 'admin', 'admin@antonettes.com', '$2y$10$1DyuW6YdQqK.tAhHzfJy8.AaVdltnycowD4Gb2crbp6wJEAjuVqCG', 'TestFirstName', 'TestLastName', '1234567890', 'Test Address', 'Test City', 'Test State', '12345', 'admin', 1, 1, '2025-09-21 16:01:40', '2025-10-18 16:40:07', NULL, NULL),
-(11, 'taylor', 'taylo@gmail.com', '$2y$10$grPoBXqNUwYywkrhfRGw7egC/5kgupEsLyckK6vMDWmN0onR546zK', 'Taylor', 'Swift', '09918195472', 'Tomas Claudio Street', 'Zamboanga City', 'PC', '7000', 'customer', 1, 1, '2025-10-18 16:30:05', '2025-10-18 16:50:56', NULL, NULL),
-(12, 'katy', 'kat2016@gmail.com', '$2y$10$tR.DlgB5ZPtJThTrrA6vDeHS.NfTXFSrqqUcyGzqoWoLPHEHW1aXa', 'Katy', 'Perry', '09918195481', 'Golden Valley Drive', 'Zamboanga City', 'Sta. Maria', '7000', 'customer', 1, 1, '2025-10-28 14:50:41', '2025-10-28 14:50:41', NULL, NULL),
-(13, 'ame', 'akosilid@gmail.com', '$2y$10$y1VJi.IHrIYj7EgQ4Hnvju5qX4LYHxAW3ld8bVXfqkRxUFm.TVBRa', 'Ame', 'Lia', '09304097583', 'San. roque green hills drive near church', 'zamboanga', 'calarian', '7000', 'customer', 1, 1, '2025-10-29 06:05:33', '2025-10-29 06:05:33', NULL, NULL);
+(1, 'admin', 'admin@antoinettes.com', '$2y$10$1DyuW6YdQqK.tAhHzfJy8.AaVdltnycowD4Gb2crbp6wJEAjuVqCG', 'TestFirstName', 'TestLastName', '1234567890', 'Test Address', 'Test City', 'Test State', '12345', 'admin', 1, 1, '2025-09-21 16:01:40', '2025-10-18 16:40:07', NULL, NULL),
+(14, 'test', 'testcustomer@gmail.com', '$2y$10$oO2sI/bt6FWi598gSnmKG.0Yp0vCJWmeFyE3QmNAjVlLzm1bqLCPi', 'test', 'customer', '09918195472', 'Peace Compound', 'Zamboanga City', 'Sinunuc', '7000', 'customer', 1, 1, '2025-10-30 12:26:08', '2025-10-30 12:26:08', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -361,14 +348,24 @@ CREATE TABLE `user_sessions` (
 
 INSERT INTO `user_sessions` (`id`, `user_id`, `session_token`, `expires_at`, `created_at`) VALUES
 (25, 1, 'd4e8974c88911f51d70c8eacdca6fbd19245d9496188a46764a51dd4284059d0', '2025-10-25 02:59:48', '2025-10-18 08:59:48'),
-(69, 13, 'ff8072a8cb5cb17323031848d9248b2252fbb7748e67da145391a23afaaa8171', '2025-11-04 23:05:42', '2025-10-29 06:05:42'),
 (71, 1, '66644466c60ab7a39772d37ec4b7795ad24730c8a72c5ccde71386a2299ab1cd', '2025-11-04 23:35:52', '2025-10-29 06:35:52'),
 (72, 1, '4687fe602896e03926b104676a6932682d549868b0c0ba2cbba208cb2a7ed294', '2025-11-05 01:16:51', '2025-10-29 08:16:51'),
-(76, 1, '904d019dcd1b2db1840082aec69a5fe5878c136ec6ae60464cf59bd9c3c0ebe0', '2025-11-05 02:13:47', '2025-10-29 09:13:47');
+(76, 1, '904d019dcd1b2db1840082aec69a5fe5878c136ec6ae60464cf59bd9c3c0ebe0', '2025-11-05 02:13:47', '2025-10-29 09:13:47'),
+(87, 1, 'e48e8f7bc556b598bfeb8f5476dab8b1ffa23bc64904da3ddb33f143eb6de175', '2025-11-06 05:26:47', '2025-10-30 12:26:47'),
+(88, 14, '5ed12b38cd47a2f71da092b3cc727b187420a0e69b8f9ddb55ca6a319c8ebb8d', '2025-11-06 05:27:49', '2025-10-30 12:27:49');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `audit_log`
+--
+ALTER TABLE `audit_log`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_action` (`action`),
+  ADD KEY `idx_created_at` (`created_at`);
 
 --
 -- Indexes for table `categories`
@@ -410,7 +407,9 @@ ALTER TABLE `orders`
   ADD KEY `idx_orders_customer` (`customer_id`),
   ADD KEY `idx_orders_status` (`status`),
   ADD KEY `idx_orders_date` (`order_date`),
-  ADD KEY `idx_orders_user` (`user_id`);
+  ADD KEY `idx_orders_user` (`user_id`),
+  ADD KEY `idx_payment_status` (`payment_status`),
+  ADD KEY `idx_paymongo_checkout_id` (`paymongo_checkout_id`);
 
 --
 -- Indexes for table `order_items`
@@ -473,6 +472,12 @@ ALTER TABLE `user_sessions`
 --
 
 --
+-- AUTO_INCREMENT for table `audit_log`
+--
+ALTER TABLE `audit_log`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
@@ -482,13 +487,13 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `chat_messages`
 --
 ALTER TABLE `chat_messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `chat_sessions`
 --
 ALTER TABLE `chat_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `customers`
@@ -500,13 +505,13 @@ ALTER TABLE `customers`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -524,23 +529,29 @@ ALTER TABLE `product_sizes`
 -- AUTO_INCREMENT for table `product_status_audit`
 --
 ALTER TABLE `product_status_audit`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `user_sessions`
 --
 ALTER TABLE `user_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `audit_log`
+--
+ALTER TABLE `audit_log`
+  ADD CONSTRAINT `fk_audit_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `chat_messages`
