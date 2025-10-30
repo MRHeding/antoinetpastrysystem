@@ -1,4 +1,4 @@
-// Authentication JavaScript for Antoinette's Pastries
+// Authentication JavaScript for Antonette's Pastries
 document.addEventListener('DOMContentLoaded', function() {
     // Check if user is already logged in
     checkAuthStatus();

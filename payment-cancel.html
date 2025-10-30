@@ -22,7 +22,7 @@
                 </div>
                 <h2 class="text-3xl font-bold text-gray-800 mb-4">Payment Cancelled</h2>
                 <p class="text-gray-600 mb-2">Your payment was cancelled and no charges were made.</p>
-                <p class="text-gray-600 mb-8">Your order is still saved and waiting for payment.</p>
+                <p class="text-gray-600 mb-8">The pending order has been automatically cancelled.</p>
                 
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
                     <div class="flex items-start">
@@ -32,8 +32,9 @@
                             <ul class="text-yellow-700 text-sm space-y-1">
                                 <li>• You cancelled the payment process</li>
                                 <li>• No payment was processed</li>
+                                <li>• The pending order was automatically cancelled</li>
                                 <li>• Your items are still in your cart</li>
-                                <li>• You can try again whenever you're ready</li>
+                                <li>• You can checkout again whenever you're ready</li>
                             </ul>
                         </div>
                     </div>
@@ -62,6 +63,61 @@
     <div id="footer-container"></div>
 
     <script src="js/shared.js"></script>
+    <script>
+        // Automatically cancel the order when returning from cancelled payment
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load navigation
+            try {
+                const response = await fetch('components/navigation.html');
+                const html = await response.text();
+                document.getElementById('navigation-container').innerHTML = html;
+                
+                if (typeof initNavigation === 'function') initNavigation();
+                if (typeof initAuth === 'function') initAuth();
+                if (typeof updateCartDisplay === 'function') updateCartDisplay();
+            } catch (error) {
+                console.error('Error loading navigation:', error);
+            }
+
+            // Get checkout session ID from URL or localStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            let sessionId = urlParams.get('session_id');
+            
+            // If not in URL, try localStorage
+            if (!sessionId || sessionId === '{CHECKOUT_SESSION_ID}') {
+                const pendingOrder = localStorage.getItem('pending_order');
+                if (pendingOrder) {
+                    try {
+                        const orderData = JSON.parse(pendingOrder);
+                        sessionId = orderData.checkout_session_id;
+                    } catch (e) {
+                        console.error('Error parsing pending order:', e);
+                    }
+                }
+            }
+
+            // Cancel the order if session ID exists
+            if (sessionId) {
+                try {
+                    const response = await fetch(`api/payment.php?action=cancel_order&session_id=${sessionId}`, {
+                        method: 'POST'
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        console.log('Order cancelled successfully:', data.order_number);
+                        // Don't clear cart - user might want to retry
+                        // Only clear pending order data
+                        localStorage.removeItem('pending_order');
+                    } else {
+                        console.warn('Failed to cancel order:', data.message);
+                    }
+                } catch (error) {
+                    console.error('Error cancelling order:', error);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
 

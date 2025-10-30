@@ -1,7 +1,7 @@
 -- Migration script to add availability status field to products table
 -- This adds a dedicated status field for product availability management
 
-USE antoinettes_pastries;
+USE antonettes_pastries;
 
 -- Add availability_status field to products table
 ALTER TABLE `products` 

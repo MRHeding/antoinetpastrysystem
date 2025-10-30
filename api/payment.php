@@ -42,6 +42,9 @@ switch ($method) {
             case 'webhook':
                 handleWebhook();
                 break;
+            case 'cancel_order':
+                cancelOrderBySession();
+                break;
             default:
                 echo json_encode(['success' => false, 'message' => 'Invalid action']);
                 break;
@@ -172,7 +175,7 @@ function createCheckoutSession() {
                         'payment_method_types' => ['gcash', 'paymaya', 'grab_pay'],
                         'success_url' => PayMongoConfig::getSuccessUrl(),
                         'cancel_url' => PayMongoConfig::getCancelUrl(),
-                        'description' => "Order #$order_number - Antoinette's Pastries",
+                        'description' => "Order #$order_number - Antonette's Pastries",
                         'metadata' => [
                             'order_id' => $order_id,
                             'order_number' => $order_number,
@@ -549,6 +552,77 @@ function handleWebhook() {
     } catch (Exception $e) {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Webhook error: ' . $e->getMessage()]);
+    }
+}
+
+/**
+ * Cancel order by checkout session ID
+ */
+function cancelOrderBySession() {
+    try {
+        $checkout_session_id = $_GET['session_id'] ?? '';
+        
+        if (!$checkout_session_id) {
+            echo json_encode(['success' => false, 'message' => 'Missing session ID']);
+            return;
+        }
+        
+        $database = Database::getInstance();
+        $db = $database->getConnection();
+        
+        // Get order by checkout session ID
+        $stmt = $db->prepare("
+            SELECT id, order_number, status, payment_status 
+            FROM orders 
+            WHERE paymongo_checkout_id = ?
+        ");
+        $stmt->execute([$checkout_session_id]);
+        $order = $stmt->fetch();
+        
+        if (!$order) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Order not found for this checkout session'
+            ]);
+            return;
+        }
+        
+        // Only cancel if payment is still pending
+        if ($order['payment_status'] === 'pending') {
+            $stmt = $db->prepare("
+                UPDATE orders 
+                SET status = 'cancelled', 
+                    updated_at = NOW()
+                WHERE id = ? AND payment_status = 'pending'
+            ");
+            $stmt->execute([$order['id']]);
+            
+            echo json_encode([
+                'success' => true,
+                'message' => 'Order cancelled successfully',
+                'order_number' => $order['order_number'],
+                'order_id' => $order['id']
+            ]);
+        } else {
+            // Order was already paid, don't cancel
+            echo json_encode([
+                'success' => false,
+                'message' => 'Cannot cancel order - payment already processed',
+                'order_number' => $order['order_number'],
+                'payment_status' => $order['payment_status']
+            ]);
+        }
+        
+    } catch (PDOException $e) {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Database error: ' . $e->getMessage()
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Error: ' . $e->getMessage()
+        ]);
     }
 }
 

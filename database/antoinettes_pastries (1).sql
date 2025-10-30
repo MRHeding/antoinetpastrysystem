@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `antoinettes_pastries`
+-- Database: `antonettes_pastries`
 --
 
 -- --------------------------------------------------------
@@ -403,7 +403,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `first_name`, `last_name`, `phone`, `address`, `city`, `state`, `zip_code`, `role`, `is_active`, `email_verified`, `created_at`, `updated_at`, `email_verification_token`, `email_verification_expires`) VALUES
-(1, 'admin', 'admin@antoinettes.com', '$2y$10$1DyuW6YdQqK.tAhHzfJy8.AaVdltnycowD4Gb2crbp6wJEAjuVqCG', 'TestFirstName', 'TestLastName', '1234567890', 'Test Address', 'Test City', 'Test State', '12345', 'admin', 1, 1, '2025-09-21 16:01:40', '2025-10-18 16:40:07', NULL, NULL),
+(1, 'admin', 'admin@antonettes.com', '$2y$10$1DyuW6YdQqK.tAhHzfJy8.AaVdltnycowD4Gb2crbp6wJEAjuVqCG', 'TestFirstName', 'TestLastName', '1234567890', 'Test Address', 'Test City', 'Test State', '12345', 'admin', 1, 1, '2025-09-21 16:01:40', '2025-10-18 16:40:07', NULL, NULL),
 (11, 'taylor', 'taylo@gmail.com', '$2y$10$grPoBXqNUwYywkrhfRGw7egC/5kgupEsLyckK6vMDWmN0onR546zK', 'Taylor', 'Swift', '09918195472', 'Tomas Claudio Street', 'Zamboanga City', 'PC', '7000', 'customer', 1, 1, '2025-10-18 16:30:05', '2025-10-18 16:50:56', NULL, NULL),
 (12, 'katy', 'kat2016@gmail.com', '$2y$10$tR.DlgB5ZPtJThTrrA6vDeHS.NfTXFSrqqUcyGzqoWoLPHEHW1aXa', 'Katy', 'Perry', '09918195481', 'Golden Valley Drive', 'Zamboanga City', 'Sta. Maria', '7000', 'customer', 1, 1, '2025-10-28 14:50:41', '2025-10-28 14:50:41', NULL, NULL),
 (13, 'ame', 'akosilid@gmail.com', '$2y$10$y1VJi.IHrIYj7EgQ4Hnvju5qX4LYHxAW3ld8bVXfqkRxUFm.TVBRa', 'Ame', 'Lia', '09304097583', 'San. roque green hills drive near church', 'zamboanga', 'calarian', '7000', 'customer', 1, 1, '2025-10-29 06:05:33', '2025-10-29 06:05:33', NULL, NULL);

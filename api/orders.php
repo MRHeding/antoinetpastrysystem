@@ -81,15 +81,17 @@ function getUserOrders() {
             return;
         }
         
-        // Get user's orders
+        // Get user's orders (exclude unpaid pending orders and cancelled orders)
         $stmt = $db->prepare("
             SELECT o.id, o.order_number, o.total_amount, o.status, o.payment_status, 
                    o.payment_method, o.order_date, o.pickup_date, o.notes, o.created_at
             FROM orders o
-            WHERE o.user_id = ? OR o.customer_id = (
+            WHERE (o.user_id = ? OR o.customer_id = (
                 SELECT c.id FROM customers c 
                 WHERE c.email = (SELECT u.email FROM users u WHERE u.id = ?)
-            )
+            ))
+            AND o.status != 'cancelled'
+            AND NOT (o.status = 'pending' AND o.payment_status = 'pending')
             ORDER BY o.order_date DESC
         ");
         $stmt->execute([$user['id'], $user['id']]);
@@ -398,7 +400,7 @@ function getAllOrders() {
             return;
         }
         
-        // Get all orders with customer information
+        // Get all orders with customer information (exclude unpaid pending orders and cancelled orders)
         $stmt = $db->prepare("
             SELECT 
                 o.id,
@@ -419,6 +421,8 @@ function getAllOrders() {
                 (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as total_items
             FROM orders o
             LEFT JOIN users u ON o.user_id = u.id
+            WHERE o.status != 'cancelled'
+            AND NOT (o.status = 'pending' AND o.payment_status = 'pending')
             ORDER BY o.order_date DESC
         ");
         $stmt->execute();

@@ -1,5 +1,5 @@
 /**
- * Cart functionality for Antoinette's Pastries
+ * Cart functionality for Antonette's Pastries
  */
 
 let cart = [];

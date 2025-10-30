@@ -1,7 +1,7 @@
 -- Add size field to products table
 -- This script adds a size column to store product size information
 
-USE `antoinettes_pastries`;
+USE `antonettes_pastries`;
 
 -- Add size column to products table
 ALTER TABLE `products` 

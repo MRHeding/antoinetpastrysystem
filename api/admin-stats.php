@@ -46,8 +46,13 @@ try {
     $stmt = $db->query("SELECT COUNT(*) as total FROM products WHERE is_active = 1");
     $totalProducts = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
-    // Get total orders
-    $stmt = $db->query("SELECT COUNT(*) as total FROM orders");
+    // Get total orders (exclude unpaid pending and cancelled orders)
+    $stmt = $db->query("
+        SELECT COUNT(*) as total 
+        FROM orders 
+        WHERE status != 'cancelled' 
+        AND NOT (status = 'pending' AND payment_status = 'pending')
+    ");
     $totalOrders = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
     // Get total customers (users with role 'customer')
@@ -58,12 +63,14 @@ try {
     $stmt = $db->query("SELECT COALESCE(SUM(total_amount), 0) as total FROM orders WHERE status = 'completed'");
     $totalRevenue = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
-    // Get recent orders for the dashboard
+    // Get recent orders for the dashboard (exclude unpaid pending and cancelled orders)
     $stmt = $db->query("
         SELECT o.id, o.order_number, o.total_amount, o.status, o.order_date,
                CONCAT(u.first_name, ' ', u.last_name) as customer_name
         FROM orders o
         LEFT JOIN users u ON o.user_id = u.id
+        WHERE o.status != 'cancelled'
+        AND NOT (o.status = 'pending' AND o.payment_status = 'pending')
         ORDER BY o.order_date DESC
         LIMIT 5
     ");

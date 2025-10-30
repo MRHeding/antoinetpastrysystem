@@ -1,4 +1,4 @@
-// Main JavaScript for Antoinette's Pastries
+// Main JavaScript for Antonette's Pastries
 document.addEventListener('DOMContentLoaded', function() {
     // Load products when page loads
     loadProducts();
@@ -97,7 +97,7 @@ function displayProducts(products) {
     container.innerHTML = products.map(product => `
         <div class="card group">
             <div class="h-48 bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center relative overflow-hidden">
-                <img src="Logo.png" alt="Antoinette's Pastries Logo" class="h-16 w-16 object-contain group-hover:scale-110 transition-transform duration-300">
+                <img src="Logo.png" alt="Antonette's Pastries Logo" class="h-16 w-16 object-contain group-hover:scale-110 transition-transform duration-300">
                 <div class="absolute top-2 right-2 bg-amber-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
                     ${product.category}
                 </div>

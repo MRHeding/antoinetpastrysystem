@@ -1,4 +1,4 @@
-// Orders JavaScript for Antoinette's Pastries
+// Orders JavaScript for Antonette's Pastries
 let currentUser = null;
 let orders = [];
 let filteredOrders = [];

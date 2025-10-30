@@ -1,4 +1,4 @@
-// Profile Dashboard JavaScript for Antoinette's Pastries
+// Profile Dashboard JavaScript for Antonette's Pastries
 let currentUser = null;
 let isEditMode = false;
 
