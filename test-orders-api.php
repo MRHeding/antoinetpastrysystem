@@ -76,7 +76,7 @@ if (file_exists('database/insert_sample_orders.sql')) {
 echo "<h2>Instructions</h2>";
 echo "<ol>";
 echo "<li>Make sure XAMPP is running</li>";
-echo "<li>Import the database from database/antoinettes_pastries.sql</li>";
+echo "<li>Import the database from database/antonettes_pastries.sql</li>";
 echo "<li>Run the sample data script: database/insert_sample_orders.sql</li>";
 echo "<li>Update the database structure: database/update_orders_structure.sql</li>";
 echo "<li>Test the orders page at: <a href='http://localhost:8000/orders.html'>http://localhost:8000/orders.html</a></li>";

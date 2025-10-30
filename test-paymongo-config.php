@@ -243,7 +243,7 @@ PAYMONGO_PUBLIC_KEY=pk_test_your_public_key_here</pre>
             <p><strong>Database Migration:</strong></p>
             <ol>
                 <li>Go to <a href="http://localhost/phpmyadmin" target="_blank">phpMyAdmin</a></li>
-                <li>Select <code>antoinettes_pastries</code> database</li>
+                <li>Select <code>antonettes_pastries</code> database</li>
                 <li>Click SQL tab</li>
                 <li>Copy contents of <code>database/add_payment_fields.sql</code></li>
                 <li>Paste and click Go</li>

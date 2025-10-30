@@ -209,4 +209,4 @@ graph TD
 - Form switches to login mode
 - Registration form is cleared
 
-This DFD shows the complete user registration workflow in the Antoinette's Pastries system!
+This DFD shows the complete user registration workflow in the Antonette's Pastries system!

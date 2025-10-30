@@ -1,7 +1,7 @@
-# Use Case Diagram - Antoinette's Pastries System
+# Use Case Diagram - Antonette's Pastries System
 
 ## System Overview
-This Use Case Diagram shows the interactions between different types of users (Customers, Registered Users, and Admins) with the Antoinette's Pastries web-based marketing and management system.
+This Use Case Diagram shows the interactions between different types of users (Customers, Registered Users, and Admins) with the Antonette's Pastries web-based marketing and management system.
 
 ## Visual Use Case Diagram
 
@@ -13,7 +13,7 @@ graph TD
     Admin[👤 Admin<br/>System Administrator]
     
     %% System Boundary
-    subgraph System["🏪 Antoinette's Pastries System"]
+    subgraph System["🏪 Antonette's Pastries System"]
         %% Customer Use Cases
         subgraph CustomerUC["Customer Use Cases"]
             BrowseProducts[Browse Products]
@@ -142,7 +142,7 @@ graph TD
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
-│                           Antoinette's Pastries System                              │
+│                           Antonette's Pastries System                              │
 ├─────────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                     │
 │  ┌─────────────┐                                                                   │
@@ -310,7 +310,7 @@ graph TD
 - Must authenticate to access admin dashboard
 - Can manage all products and view all orders
 
-This Use Case Diagram provides a comprehensive view of all the functionalities available to different types of users in the Antoinette's Pastries system.
+This Use Case Diagram provides a comprehensive view of all the functionalities available to different types of users in the Antonette's Pastries system.
 
 ## Summary - Main User and Admin Capabilities
 
@@ -387,4 +387,4 @@ This Use Case Diagram provides a comprehensive view of all the functionalities a
 2. **Monitor** - Track business performance
 3. **Administer** - Full system administration
 
-This summary shows the core functionalities that define what each type of user can do in the Antoinette's Pastries system.
+This summary shows the core functionalities that define what each type of user can do in the Antonette's Pastries system.
