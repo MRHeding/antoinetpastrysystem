@@ -17,10 +17,10 @@ header('Content-Type: application/json');
 // $currentAdmin = requireAdminAuth();
 
 // Function to safely execute and log queries
-function executeQuery($conn, $query, $description) {
+function executeQuery($conn, $query, $description, $params = []) {
     try {
         $stmt = $conn->prepare($query);
-        $stmt->execute();
+        $stmt->execute($params);
         $affected = $stmt->rowCount();
         return [
             'success' => true,
@@ -31,7 +31,8 @@ function executeQuery($conn, $query, $description) {
         return [
             'success' => false,
             'description' => $description,
-            'error' => $e->getMessage()
+            'error' => $e->getMessage(),
+            'affected_rows' => 0
         ];
     }
 }
@@ -40,6 +41,7 @@ function executeQuery($conn, $query, $description) {
 function cleanDatabase() {
     $results = [];
     $totalDeleted = 0;
+    $conn = null;
     
     try {
         // Get database connection
@@ -52,8 +54,11 @@ function cleanDatabase() {
         // Step 1: Get all non-admin user IDs
         $stmt = $conn->prepare("SELECT id, username, email FROM users WHERE role != 'admin'");
         $stmt->execute();
-        $nonAdminUsers = $stmt->fetchAll();
+        $nonAdminUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $nonAdminCount = count($nonAdminUsers);
+        
+        // Extract user IDs for use in subsequent queries
+        $userIds = array_column($nonAdminUsers, 'id');
         
         $results[] = [
             'description' => 'Non-admin users identified',
@@ -72,67 +77,126 @@ function cleanDatabase() {
             ];
         }
         
+        // Create placeholders for IN clause
+        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+        
         // Step 2: Delete chat messages for non-admin users
         $result = executeQuery(
             $conn,
-            "DELETE FROM chat_messages WHERE user_id IN (SELECT id FROM users WHERE role != 'admin')",
-            "Delete chat messages for non-admin users"
+            "DELETE FROM chat_messages WHERE user_id IN ($placeholders)",
+            "Delete chat messages for non-admin users",
+            $userIds
         );
         $results[] = $result;
+        if (!$result['success']) {
+            throw new Exception($result['error']);
+        }
         $totalDeleted += $result['affected_rows'] ?? 0;
         
         // Step 3: Delete chat sessions for non-admin users
         $result = executeQuery(
             $conn,
-            "DELETE FROM chat_sessions WHERE user_id IN (SELECT id FROM users WHERE role != 'admin')",
-            "Delete chat sessions for non-admin users"
+            "DELETE FROM chat_sessions WHERE user_id IN ($placeholders)",
+            "Delete chat sessions for non-admin users",
+            $userIds
         );
         $results[] = $result;
+        if (!$result['success']) {
+            throw new Exception($result['error']);
+        }
         $totalDeleted += $result['affected_rows'] ?? 0;
         
-        // Step 4: Delete order items for orders belonging to non-admin users
-        $result = executeQuery(
-            $conn,
-            "DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE user_id IN (SELECT id FROM users WHERE role != 'admin'))",
-            "Delete order items for non-admin users"
-        );
-        $results[] = $result;
-        $totalDeleted += $result['affected_rows'] ?? 0;
+        // Step 4: Get order IDs for non-admin users
+        $stmt = $conn->prepare("SELECT id FROM orders WHERE user_id IN ($placeholders)");
+        $stmt->execute($userIds);
+        $orderIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        if (!empty($orderIds)) {
+            $orderPlaceholders = implode(',', array_fill(0, count($orderIds), '?'));
+            
+            // Delete order items for orders belonging to non-admin users
+            $result = executeQuery(
+                $conn,
+                "DELETE FROM order_items WHERE order_id IN ($orderPlaceholders)",
+                "Delete order items for non-admin users",
+                $orderIds
+            );
+            $results[] = $result;
+            if (!$result['success']) {
+                throw new Exception($result['error']);
+            }
+            $totalDeleted += $result['affected_rows'] ?? 0;
+        } else {
+            $results[] = [
+                'success' => true,
+                'description' => 'Delete order items for non-admin users',
+                'affected_rows' => 0
+            ];
+        }
         
         // Step 5: Delete orders for non-admin users
         $result = executeQuery(
             $conn,
-            "DELETE FROM orders WHERE user_id IN (SELECT id FROM users WHERE role != 'admin')",
-            "Delete orders for non-admin users"
+            "DELETE FROM orders WHERE user_id IN ($placeholders)",
+            "Delete orders for non-admin users",
+            $userIds
         );
         $results[] = $result;
+        if (!$result['success']) {
+            throw new Exception($result['error']);
+        }
         $totalDeleted += $result['affected_rows'] ?? 0;
         
         // Step 6: Delete user sessions for non-admin users
         $result = executeQuery(
             $conn,
-            "DELETE FROM user_sessions WHERE user_id IN (SELECT id FROM users WHERE role != 'admin')",
-            "Delete user sessions for non-admin users"
+            "DELETE FROM user_sessions WHERE user_id IN ($placeholders)",
+            "Delete user sessions for non-admin users",
+            $userIds
         );
         $results[] = $result;
+        if (!$result['success']) {
+            throw new Exception($result['error']);
+        }
         $totalDeleted += $result['affected_rows'] ?? 0;
         
         // Step 7: Delete audit log entries for non-admin users (if table exists)
-        $result = executeQuery(
-            $conn,
-            "DELETE FROM audit_log WHERE user_id IN (SELECT id FROM users WHERE role != 'admin')",
-            "Delete audit log entries for non-admin users"
-        );
-        $results[] = $result;
-        $totalDeleted += $result['affected_rows'] ?? 0;
+        // Check if table exists first
+        $stmt = $conn->prepare("SHOW TABLES LIKE 'audit_log'");
+        $stmt->execute();
+        if ($stmt->rowCount() > 0) {
+            $result = executeQuery(
+                $conn,
+                "DELETE FROM audit_log WHERE user_id IN ($placeholders)",
+                "Delete audit log entries for non-admin users",
+                $userIds
+            );
+            $results[] = $result;
+            if (!$result['success']) {
+                // Log but don't fail if audit_log table has issues
+                error_log("Failed to delete audit log entries: " . ($result['error'] ?? 'Unknown error'));
+            }
+            $totalDeleted += $result['affected_rows'] ?? 0;
+        } else {
+            $results[] = [
+                'success' => true,
+                'description' => 'Delete audit log entries for non-admin users',
+                'affected_rows' => 0,
+                'note' => 'audit_log table does not exist'
+            ];
+        }
         
         // Step 8: Delete non-admin users
         $result = executeQuery(
             $conn,
-            "DELETE FROM users WHERE role != 'admin'",
-            "Delete non-admin users"
+            "DELETE FROM users WHERE id IN ($placeholders)",
+            "Delete non-admin users",
+            $userIds
         );
         $results[] = $result;
+        if (!$result['success']) {
+            throw new Exception($result['error']);
+        }
         $totalDeleted += $result['affected_rows'] ?? 0;
         
         // Commit transaction
@@ -141,7 +205,7 @@ function cleanDatabase() {
         // Get remaining user count
         $stmt = $conn->prepare("SELECT COUNT(*) as count FROM users");
         $stmt->execute();
-        $remainingUsers = $stmt->fetch()['count'];
+        $remainingUsers = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
         
         return [
             'success' => true,
@@ -149,7 +213,7 @@ function cleanDatabase() {
             'summary' => [
                 'non_admin_users_removed' => $nonAdminCount,
                 'total_records_deleted' => $totalDeleted,
-                'remaining_users' => $remainingUsers
+                'remaining_users' => (int)$remainingUsers
             ],
             'details' => $results
         ];
@@ -163,7 +227,8 @@ function cleanDatabase() {
         return [
             'success' => false,
             'message' => 'Database cleanup failed: ' . $e->getMessage(),
-            'results' => $results
+            'results' => $results,
+            'total_deleted' => $totalDeleted
         ];
     }
 }
@@ -191,22 +256,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $database = Database::getInstance();
         $conn = $database->getConnection();
         
-        // Get counts
-        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM users WHERE role != 'admin'");
+        // Get non-admin user IDs first
+        $stmt = $conn->prepare("SELECT id FROM users WHERE role != 'admin'");
         $stmt->execute();
-        $userCount = $stmt->fetch()['count'];
+        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $userCount = count($userIds);
         
-        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM chat_messages WHERE user_id IN (SELECT id FROM users WHERE role != 'admin')");
-        $stmt->execute();
-        $chatCount = $stmt->fetch()['count'];
+        // Get counts using user IDs if any exist
+        $chatCount = 0;
+        $orderCount = 0;
         
-        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM orders WHERE user_id IN (SELECT id FROM users WHERE role != 'admin')");
-        $stmt->execute();
-        $orderCount = $stmt->fetch()['count'];
-        
-        $stmt = $conn->prepare("SELECT id, username, email, role FROM users WHERE role != 'admin'");
-        $stmt->execute();
-        $users = $stmt->fetchAll();
+        if (!empty($userIds)) {
+            $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+            
+            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM chat_messages WHERE user_id IN ($placeholders)");
+            $stmt->execute($userIds);
+            $chatCount = (int)$stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            
+            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM orders WHERE user_id IN ($placeholders)");
+            $stmt->execute($userIds);
+            $orderCount = (int)$stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            
+            $stmt = $conn->prepare("SELECT id, username, email, role FROM users WHERE role != 'admin'");
+            $stmt->execute();
+            $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $users = [];
+        }
         
         echo json_encode([
             'success' => true,
