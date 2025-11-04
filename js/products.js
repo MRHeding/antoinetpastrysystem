@@ -255,16 +255,8 @@ function displayProducts() {
                 <h4 class="product-card-title" onclick="viewProductDetails(${product.id})">${product.name}</h4>
                 <p class="product-card-description">${product.description}</p>
                 ${!isAvailable && product.unavailable_reason ? `<p class="text-sm text-red-600 mb-2"><i class="fas fa-info-circle mr-1"></i>${product.unavailable_reason}</p>` : ''}
-                <div class="product-card-price-section">
+                                <div class="product-card-price-section">
                     ${getPriceDisplay(product)}
-                    <div class="flex items-center text-yellow-500 space-x-1">
-                        <i class="fas fa-star text-sm"></i>
-                        <i class="fas fa-star text-sm"></i>
-                        <i class="fas fa-star text-sm"></i>
-                        <i class="fas fa-star text-sm"></i>
-                        <i class="fas fa-star text-sm"></i>
-                        <span class="text-gray-500 text-sm ml-2">(4.8)</span>
-                    </div>
                 </div>
                 <div class="product-card-buttons">
                     ${window.isAdmin ? 
@@ -501,8 +493,8 @@ async function viewProductDetails(productId) {
                 hideProductModal();
             };
         }
-        
-        // Show modal
+
+                // Show modal
         document.getElementById('product-details-modal').classList.remove('hidden');
         
     } catch (error) {
@@ -766,10 +758,12 @@ if (typeof BroadcastChannel !== 'undefined') {
     });
 }
 
+
+
 // Show notification
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
-    notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${
+    notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${                                                                             
         type === 'success' ? 'bg-green-500 text-white' :
         type === 'error' ? 'bg-red-500 text-white' :
         type === 'warning' ? 'bg-yellow-500 text-white' :
@@ -786,9 +780,9 @@ function showNotification(message, type = 'info') {
             <span>${message}</span>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
