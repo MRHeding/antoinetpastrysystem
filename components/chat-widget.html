@@ -45,7 +45,35 @@
 
             <!-- Input Area -->
             <div class="border-t border-gray-200 p-4 bg-white">
+                <!-- Image Preview -->
+                <div id="chat-image-preview" class="hidden mb-2 relative">
+                    <div class="relative inline-block">
+                        <img id="chat-preview-img" src="" alt="Preview" class="max-w-xs max-h-32 rounded-lg border border-gray-300">
+                        <button 
+                            type="button"
+                            id="chat-remove-image" 
+                            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                        >
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                
                 <form id="chat-form" class="flex space-x-2">
+                    <input 
+                        type="file" 
+                        id="chat-image-input" 
+                        accept="image/*"
+                        class="hidden"
+                    >
+                    <button 
+                        type="button"
+                        id="chat-image-btn" 
+                        class="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors"
+                        title="Upload image"
+                    >
+                        <i class="fas fa-image"></i>
+                    </button>
                     <input 
                         type="text" 
                         id="chat-input" 
@@ -144,6 +172,23 @@
     30% {
         transform: translateY(-8px);
     }
+}
+
+/* Image preview styles */
+#chat-image-preview img {
+    max-width: 200px;
+    max-height: 150px;
+    object-fit: contain;
+}
+
+/* Chat message image styles */
+#chat-messages img {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#chat-messages img:hover {
+    transform: scale(1.05);
 }
 </style>
 

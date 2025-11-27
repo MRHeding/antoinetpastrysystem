@@ -76,6 +76,95 @@ try {
     ");
     $recentOrders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Get monthly sales report
+    $action = $_GET['action'] ?? '';
+    
+    if ($action === 'monthly_sales') {
+        $year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
+        
+        // Get sales data grouped by month
+        $stmt = $db->prepare("
+            SELECT 
+                MONTH(order_date) as month,
+                MONTHNAME(order_date) as month_name,
+                COUNT(*) as order_count,
+                COALESCE(SUM(total_amount), 0) as total_sales
+            FROM orders 
+            WHERE status = 'completed' 
+            AND payment_status = 'paid'
+            AND YEAR(order_date) = ?
+            GROUP BY MONTH(order_date), MONTHNAME(order_date)
+            ORDER BY MONTH(order_date)
+        ");
+        $stmt->execute([$year]);
+        $monthlySales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Get current month and year for comparison
+        $currentMonth = (int)date('m');
+        $currentYear = (int)date('Y');
+        
+        // Get current month sales
+        $stmt = $db->prepare("
+            SELECT 
+                COALESCE(SUM(total_amount), 0) as current_month_sales,
+                COUNT(*) as current_month_orders
+            FROM orders 
+            WHERE status = 'completed' 
+            AND payment_status = 'paid'
+            AND YEAR(order_date) = ?
+            AND MONTH(order_date) = ?
+        ");
+        $stmt->execute([$currentYear, $currentMonth]);
+        $currentMonthData = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Get previous month sales for comparison
+        $prevMonth = $currentMonth - 1;
+        $prevYear = $currentYear;
+        if ($prevMonth < 1) {
+            $prevMonth = 12;
+            $prevYear--;
+        }
+        
+        $stmt = $db->prepare("
+            SELECT 
+                COALESCE(SUM(total_amount), 0) as prev_month_sales,
+                COUNT(*) as prev_month_orders
+            FROM orders 
+            WHERE status = 'completed' 
+            AND payment_status = 'paid'
+            AND YEAR(order_date) = ?
+            AND MONTH(order_date) = ?
+        ");
+        $stmt->execute([$prevYear, $prevMonth]);
+        $prevMonthData = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Calculate growth percentage
+        $salesGrowth = 0;
+        if ($prevMonthData['prev_month_sales'] > 0) {
+            $salesGrowth = (($currentMonthData['current_month_sales'] - $prevMonthData['prev_month_sales']) / $prevMonthData['prev_month_sales']) * 100;
+        } elseif ($currentMonthData['current_month_sales'] > 0) {
+            $salesGrowth = 100; // 100% growth if no previous sales
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'monthly_sales' => $monthlySales,
+                'current_month' => [
+                    'sales' => (float)$currentMonthData['current_month_sales'],
+                    'orders' => (int)$currentMonthData['current_month_orders']
+                ],
+                'previous_month' => [
+                    'sales' => (float)$prevMonthData['prev_month_sales'],
+                    'orders' => (int)$prevMonthData['prev_month_orders']
+                ],
+                'sales_growth' => round($salesGrowth, 2),
+                'year' => $year
+            ]
+        ]);
+        exit;
+    }
+    
     // Format the response
     echo json_encode([
         'success' => true,

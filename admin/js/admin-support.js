@@ -9,12 +9,32 @@ document.addEventListener('DOMContentLoaded', function() {
     initAdminChat();
 });
 
+let selectedAdminImageFile = null;
+
 function initAdminChat() {
     loadConversations();
     
     const adminChatForm = document.getElementById('admin-chat-form');
+    const adminImageBtn = document.getElementById('admin-image-btn');
+    const adminImageInput = document.getElementById('admin-image-input');
+    const adminRemoveImage = document.getElementById('admin-remove-image');
+    
     if (adminChatForm) {
         adminChatForm.addEventListener('submit', sendAdminMessage);
+    }
+
+    if (adminImageBtn && adminImageInput) {
+        adminImageBtn.addEventListener('click', function() {
+            adminImageInput.click();
+        });
+    }
+
+    if (adminImageInput) {
+        adminImageInput.addEventListener('change', handleAdminImageSelect);
+    }
+
+    if (adminRemoveImage) {
+        adminRemoveImage.addEventListener('click', removeAdminImagePreview);
     }
 
     // Setup sidebar toggle
@@ -22,6 +42,50 @@ function initAdminChat() {
 
     // Poll for new messages
     startAdminChatPolling();
+}
+
+function handleAdminImageSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file');
+        return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Image size must be less than 5MB');
+        return;
+    }
+
+    selectedAdminImageFile = file;
+
+    // Show preview
+    const preview = document.getElementById('admin-image-preview');
+    const previewImg = document.getElementById('admin-preview-img');
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        previewImg.src = e.target.result;
+        preview.classList.remove('hidden');
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function removeAdminImagePreview() {
+    selectedAdminImageFile = null;
+    const preview = document.getElementById('admin-image-preview');
+    const previewImg = document.getElementById('admin-preview-img');
+    const imageInput = document.getElementById('admin-image-input');
+    
+    preview.classList.add('hidden');
+    previewImg.src = '';
+    if (imageInput) {
+        imageInput.value = '';
+    }
 }
 
 function initSidebarToggle() {
@@ -200,11 +264,20 @@ function appendAdminChatMessage(message, animate = true) {
 
     const senderLabel = isAdmin ? 'You' : message.first_name;
 
+    // Build message content
+    let messageContent = '';
+    if (message.image_path) {
+        messageContent += `<img src="../${escapeHtml(message.image_path)}" alt="Chat image" class="max-w-full rounded-lg mb-2" style="max-height: 300px; object-fit: contain; cursor: pointer;" onclick="window.open('../${escapeHtml(message.image_path)}', '_blank')">`;
+    }
+    if (message.message) {
+        messageContent += `<p class="text-sm">${escapeHtml(message.message)}</p>`;
+    }
+
     messageDiv.className = `flex ${alignClass} ${animateClass}`;
     messageDiv.innerHTML = `
         <div class="${bgClass} rounded-lg px-4 py-2 max-w-md shadow-sm">
             <p class="text-xs font-semibold mb-1 ${isAdmin ? 'text-amber-100' : 'text-gray-600'}">${senderLabel}</p>
-            <p class="text-sm">${escapeHtml(message.message)}</p>
+            ${messageContent}
             <span class="text-xs ${isAdmin ? 'text-amber-100' : 'text-gray-400'} mt-1 block">${time}</span>
         </div>
     `;
@@ -222,19 +295,21 @@ async function sendAdminMessage(e) {
     const input = document.getElementById('admin-chat-input');
     const message = input.value.trim();
 
-    if (!message) return;
+    // Must have either message or image
+    if (!message && !selectedAdminImageFile) return;
 
     try {
+        const formData = new FormData();
+        formData.append('message', message || '');
+        formData.append('target_user_id', currentChatUserId);
+        if (selectedAdminImageFile) {
+            formData.append('image', selectedAdminImageFile);
+        }
+
         const response = await fetch('../api/support.php?action=send_message', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             credentials: 'include',
-            body: JSON.stringify({ 
-                message,
-                target_user_id: currentChatUserId
-            })
+            body: formData
         });
 
         const data = await response.json();
@@ -242,6 +317,7 @@ async function sendAdminMessage(e) {
         if (data.success) {
             appendAdminChatMessage(data.data, true);
             input.value = '';
+            removeAdminImagePreview();
             scrollAdminChatToBottom();
             lastAdminMessageId = Math.max(lastAdminMessageId, data.data.id);
             

@@ -103,7 +103,37 @@ $currentAdmin = requireAdminAuth();
 
                         <!-- Input Area -->
                         <div class="border-t border-gray-200 px-3 sm:px-4 md:px-6 py-3 sm:py-4 bg-white" style="flex-shrink: 0;">
-                            <form id="admin-chat-form" class="flex space-x-2 sm:space-x-3">
+                            <!-- Image Preview -->
+                            <div id="admin-image-preview" class="hidden mb-2 relative">
+                                <div class="relative inline-block">
+                                    <img id="admin-preview-img" src="" alt="Preview" class="max-w-xs max-h-32 rounded-lg border border-gray-300">
+                                    <button 
+                                        type="button"
+                                        id="admin-remove-image" 
+                                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                                    >
+                                        <i class="fas fa-times text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <form id="admin-chat-form" class="flex space-x-2 sm:space-x-3 items-center">
+                                <input 
+                                    type="file" 
+                                    id="admin-image-input" 
+                                    accept="image/*"
+                                    class="hidden"
+                                >
+                                <button 
+                                    type="button"
+                                    id="admin-image-btn" 
+                                    class="bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 px-3 py-2 rounded-md transition-colors flex items-center justify-center min-w-[40px] h-[40px] shadow-sm"
+                                    style="display: flex !important; visibility: visible !important; opacity: 1 !important; background-color: #dbeafe !important; color: #1e40af !important; border: 1px solid #93c5fd !important;"
+                                    title="Upload image"
+                                    aria-label="Upload image"
+                                >
+                                    <i class="fas fa-image text-base"></i>
+                                </button>
                                 <input 
                                     type="text" 
                                     id="admin-chat-input" 

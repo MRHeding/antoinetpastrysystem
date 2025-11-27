@@ -20,9 +20,233 @@ document.addEventListener('DOMContentLoaded', function() {
         setupStatusChangeHandlers();
     }
     
+    // Load monthly sales if on monthly sales page
+    const isMonthlySalesPage = document.getElementById('monthly-sales-container') !== null;
+    if (isMonthlySalesPage) {
+        loadMonthlySales();
+        
+        // Setup year selector for sales report
+        const yearSelect = document.getElementById('sales-year-select');
+        if (yearSelect) {
+            populateYearSelector();
+            yearSelect.addEventListener('change', function() {
+                loadMonthlySales(this.value);
+            });
+        }
+    }
+    
     // Initialize mobile menu (available on all admin pages)
     initAdminMobileMenu();
 });
+
+// Load monthly sales report
+async function loadMonthlySales(year = null) {
+    if (!year) {
+        year = new Date().getFullYear();
+    }
+    
+    try {
+        const response = await fetch(`../api/admin-stats.php?action=monthly_sales&year=${year}`, {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            displayMonthlySales(data.data);
+        } else {
+            console.error('Failed to load monthly sales:', data.message);
+            displayMonthlySalesError();
+        }
+    } catch (error) {
+        console.error('Error loading monthly sales:', error);
+        displayMonthlySalesError();
+    }
+}
+
+// Display monthly sales data
+function displayMonthlySales(salesData) {
+    // Update summary cards
+    const currentMonthSales = document.getElementById('current-month-sales');
+    const currentMonthOrders = document.getElementById('current-month-orders');
+    const prevMonthSales = document.getElementById('prev-month-sales');
+    const prevMonthOrders = document.getElementById('prev-month-orders');
+    const salesGrowth = document.getElementById('sales-growth');
+    const growthIndicator = document.getElementById('growth-indicator');
+    
+    if (currentMonthSales) {
+        currentMonthSales.textContent = '₱' + salesData.current_month.sales.toFixed(2);
+    }
+    if (currentMonthOrders) {
+        currentMonthOrders.textContent = `${salesData.current_month.orders} orders`;
+    }
+    if (prevMonthSales) {
+        prevMonthSales.textContent = '₱' + salesData.previous_month.sales.toFixed(2);
+    }
+    if (prevMonthOrders) {
+        prevMonthOrders.textContent = `${salesData.previous_month.orders} orders`;
+    }
+    if (salesGrowth) {
+        const growth = salesData.sales_growth;
+        salesGrowth.textContent = (growth >= 0 ? '+' : '') + growth.toFixed(2) + '%';
+        salesGrowth.className = 'text-2xl font-bold ' + (growth >= 0 ? 'text-green-600' : 'text-red-600');
+    }
+    if (growthIndicator) {
+        const growth = salesData.sales_growth;
+        const icon = growth >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+        growthIndicator.innerHTML = `<i class="fas ${icon}"></i> vs previous month`;
+        growthIndicator.className = 'text-xs ' + (growth >= 0 ? 'text-green-600' : 'text-red-600') + ' mt-1';
+    }
+    
+    // Display monthly sales table
+    const tableBody = document.getElementById('monthly-sales-table');
+    if (!tableBody) return;
+    
+    if (!salesData.monthly_sales || salesData.monthly_sales.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                    <i class="fas fa-chart-line text-4xl mb-2"></i>
+                    <p>No sales data available for ${salesData.year}</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // Create array with all 12 months, filling in missing months with 0
+    const allMonths = [];
+    for (let i = 1; i <= 12; i++) {
+        const monthData = salesData.monthly_sales.find(m => m.month == i);
+        if (monthData) {
+            allMonths.push(monthData);
+        } else {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            allMonths.push({
+                month: i,
+                month_name: monthNames[i - 1],
+                order_count: 0,
+                total_sales: 0
+            });
+        }
+    }
+    
+    tableBody.innerHTML = allMonths.map(month => {
+        const avgOrder = month.order_count > 0 
+            ? (parseFloat(month.total_sales) / month.order_count).toFixed(2)
+            : '0.00';
+        
+        return `
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                    ${month.month_name}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 text-right">
+                    ${month.order_count}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
+                    ₱${parseFloat(month.total_sales).toFixed(2)}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 text-right">
+                    ₱${avgOrder}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Display error for monthly sales
+function displayMonthlySalesError() {
+    const tableBody = document.getElementById('monthly-sales-table');
+    if (tableBody) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="px-4 py-8 text-center text-red-500">
+                    <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                    <p>Failed to load sales data</p>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Populate year selector
+function populateYearSelector() {
+    const yearSelect = document.getElementById('sales-year-select');
+    if (!yearSelect) return;
+    
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear - 5; // Show last 5 years
+    
+    yearSelect.innerHTML = '';
+    for (let year = currentYear; year >= startYear; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) {
+            option.selected = true;
+        }
+        yearSelect.appendChild(option);
+    }
+}
+
+// Export sales report
+function exportSalesReport() {
+    const year = document.getElementById('sales-year-select')?.value || new Date().getFullYear();
+    
+    // Fetch data and create CSV
+    fetch(`../api/admin-stats.php?action=monthly_sales&year=${year}`, {
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Create CSV content
+            let csv = 'Month,Orders,Total Sales,Average Order\n';
+            
+            const allMonths = [];
+            for (let i = 1; i <= 12; i++) {
+                const monthData = data.data.monthly_sales.find(m => m.month == i);
+                if (monthData) {
+                    allMonths.push(monthData);
+                } else {
+                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                      'July', 'August', 'September', 'October', 'November', 'December'];
+                    allMonths.push({
+                        month: i,
+                        month_name: monthNames[i - 1],
+                        order_count: 0,
+                        total_sales: 0
+                    });
+                }
+            }
+            
+            allMonths.forEach(month => {
+                const avgOrder = month.order_count > 0 
+                    ? (parseFloat(month.total_sales) / month.order_count).toFixed(2)
+                    : '0.00';
+                csv += `${month.month_name},${month.order_count},${parseFloat(month.total_sales).toFixed(2)},${avgOrder}\n`;
+            });
+            
+            // Download CSV
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sales-report-${year}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } else {
+            alert('Failed to export sales report');
+        }
+    })
+    .catch(error => {
+        console.error('Error exporting sales report:', error);
+        alert('Failed to export sales report');
+    });
+}
 
 // Load dashboard statistics
 async function loadDashboardData() {

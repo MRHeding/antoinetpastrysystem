@@ -85,12 +85,34 @@ function sendMessage($conn) {
         return;
     }
 
-    $data = json_decode(file_get_contents('php://input'), true);
-    $message = isset($data['message']) ? trim($data['message']) : '';
-    $targetUserId = isset($data['target_user_id']) ? $data['target_user_id'] : null;
+    // Handle both JSON and FormData
+    $message = '';
+    $targetUserId = null;
+    $imagePath = null;
 
-    if (empty($message)) {
-        echo json_encode(['success' => false, 'message' => 'Message cannot be empty']);
+    if ($_SERVER['CONTENT_TYPE'] && strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false) {
+        // Handle FormData (for image uploads)
+        $message = isset($_POST['message']) ? trim($_POST['message']) : '';
+        $targetUserId = isset($_POST['target_user_id']) ? $_POST['target_user_id'] : null;
+        
+        // Handle image upload
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $imagePath = handleImageUpload($_FILES['image']);
+            if (!$imagePath) {
+                echo json_encode(['success' => false, 'message' => 'Failed to upload image']);
+                return;
+            }
+        }
+    } else {
+        // Handle JSON (for text-only messages)
+        $data = json_decode(file_get_contents('php://input'), true);
+        $message = isset($data['message']) ? trim($data['message']) : '';
+        $targetUserId = isset($data['target_user_id']) ? $data['target_user_id'] : null;
+    }
+
+    // Must have either message or image
+    if (empty($message) && empty($imagePath)) {
+        echo json_encode(['success' => false, 'message' => 'Message or image is required']);
         return;
     }
 
@@ -111,10 +133,10 @@ function sendMessage($conn) {
 
         // Insert message
         $stmt = $conn->prepare("
-            INSERT INTO chat_messages (user_id, sender_type, message, is_read)
-            VALUES (?, ?, ?, FALSE)
+            INSERT INTO chat_messages (user_id, sender_type, message, image_path, is_read)
+            VALUES (?, ?, ?, ?, FALSE)
         ");
-        $stmt->execute([$userId, $senderType, $message]);
+        $stmt->execute([$userId, $senderType, $message, $imagePath]);
         $messageId = $conn->lastInsertId();
 
         // Update or create chat session
@@ -147,6 +169,7 @@ function sendMessage($conn) {
                 cm.user_id,
                 cm.sender_type,
                 cm.message,
+                cm.image_path,
                 cm.is_read,
                 cm.created_at,
                 u.first_name,
@@ -171,6 +194,40 @@ function sendMessage($conn) {
             'message' => 'Failed to send message: ' . $e->getMessage()
         ]);
     }
+}
+
+// Function to handle image upload
+function handleImageUpload($file) {
+    // Validate file
+    $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    $maxSize = 5 * 1024 * 1024; // 5MB
+    
+    if (!in_array($file['type'], $allowedTypes)) {
+        return false;
+    }
+    
+    if ($file['size'] > $maxSize) {
+        return false;
+    }
+    
+    // Create uploads directory if it doesn't exist
+    $uploadDir = '../uploads/chat/';
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+    
+    // Generate unique filename
+    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = uniqid('chat_', true) . '_' . time() . '.' . $extension;
+    $filepath = $uploadDir . $filename;
+    
+    // Move uploaded file
+    if (move_uploaded_file($file['tmp_name'], $filepath)) {
+        // Return relative path from web root
+        return 'uploads/chat/' . $filename;
+    }
+    
+    return false;
 }
 
 // Function to get messages for a conversation
@@ -200,6 +257,7 @@ function getMessages($conn) {
                 cm.user_id,
                 cm.sender_type,
                 cm.message,
+                cm.image_path,
                 cm.is_read,
                 cm.created_at,
                 u.first_name,

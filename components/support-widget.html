@@ -45,7 +45,37 @@
 
             <!-- Input Area -->
             <div class="border-t border-gray-200 p-4 bg-white">
-                <form id="support-form" class="flex space-x-2">
+                <!-- Image Preview -->
+                <div id="support-image-preview" class="hidden mb-2 relative">
+                    <div class="relative inline-block">
+                        <img id="support-preview-img" src="" alt="Preview" class="max-w-xs max-h-32 rounded-lg border border-gray-300">
+                        <button 
+                            type="button"
+                            id="support-remove-image" 
+                            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                        >
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <form id="support-form" class="flex space-x-2 items-center">
+                    <input 
+                        type="file" 
+                        id="support-image-input" 
+                        accept="image/*"
+                        class="hidden"
+                    >
+                    <button 
+                        type="button"
+                        id="support-image-btn" 
+                        class="bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 px-3 py-2 rounded-md transition-colors flex items-center justify-center min-w-[40px] h-[40px] shadow-sm"
+                        style="display: flex !important; visibility: visible !important; opacity: 1 !important; background-color: #dbeafe !important; color: #1e40af !important; border: 1px solid #93c5fd !important;"
+                        title="Upload image"
+                        aria-label="Upload image"
+                    >
+                        <i class="fas fa-image text-base"></i>
+                    </button>
                     <input 
                         type="text" 
                         id="support-input" 
@@ -55,7 +85,7 @@
                     >
                     <button 
                         type="submit" 
-                        class="bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 transition-colors"
+                        class="bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 transition-colors flex items-center justify-center min-w-[40px] h-[40px]"
                     >
                         <i class="fas fa-paper-plane"></i>
                     </button>
@@ -65,3 +95,64 @@
     </div>
 </div>
 
+<style>
+/* Support widget styles */
+#support-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+#support-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#support-messages::-webkit-scrollbar-thumb {
+    background: #d97706;
+    border-radius: 3px;
+}
+
+#support-messages::-webkit-scrollbar-thumb:hover {
+    background: #b45309;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    #support-window {
+        width: calc(100vw - 32px);
+        right: 16px;
+        bottom: 80px;
+    }
+}
+
+/* Message animations */
+.support-message-enter {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Image preview styles */
+#support-image-preview img {
+    max-width: 200px;
+    max-height: 150px;
+    object-fit: contain;
+}
+
+/* Support message image styles */
+#support-messages img {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#support-messages img:hover {
+    transform: scale(1.05);
+}
+</style>

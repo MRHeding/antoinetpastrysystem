@@ -14,6 +14,9 @@ function initChatWidget() {
     const chatCloseBtn = document.getElementById('chat-close-btn');
     const chatForm = document.getElementById('chat-form');
     const chatLoginBtn = document.getElementById('chat-login-btn');
+    const chatImageBtn = document.getElementById('chat-image-btn');
+    const chatImageInput = document.getElementById('chat-image-input');
+    const chatRemoveImage = document.getElementById('chat-remove-image');
 
     if (chatToggleBtn) {
         chatToggleBtn.addEventListener('click', toggleChat);
@@ -36,6 +39,20 @@ function initChatWidget() {
             }
             closeChat();
         });
+    }
+
+    if (chatImageBtn && chatImageInput) {
+        chatImageBtn.addEventListener('click', function() {
+            chatImageInput.click();
+        });
+    }
+
+    if (chatImageInput) {
+        chatImageInput.addEventListener('change', handleImageSelect);
+    }
+
+    if (chatRemoveImage) {
+        chatRemoveImage.addEventListener('click', removeImagePreview);
     }
 
     // Check if user is logged in
@@ -177,15 +194,70 @@ function appendChatMessage(message, animate = true) {
         minute: '2-digit'
     });
 
+    // Build message content
+    let messageContent = '';
+    if (message.image_path) {
+        messageContent += `<img src="${escapeHtml(message.image_path)}" alt="Chat image" class="max-w-full rounded-lg mb-2" style="max-height: 300px; object-fit: contain;">`;
+    }
+    if (message.message) {
+        messageContent += `<p class="text-sm">${escapeHtml(message.message)}</p>`;
+    }
+
     messageDiv.className = `flex ${alignClass} ${animateClass}`;
     messageDiv.innerHTML = `
         <div class="${bgClass} rounded-lg px-4 py-2 max-w-xs shadow-sm">
-            <p class="text-sm">${escapeHtml(message.message)}</p>
+            ${messageContent}
             <span class="text-xs ${isUser ? 'text-amber-100' : 'text-gray-400'} mt-1 block">${time}</span>
         </div>
     `;
 
     messagesContainer.appendChild(messageDiv);
+}
+
+let selectedImageFile = null;
+
+function handleImageSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showChatError('Please select a valid image file');
+        return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showChatError('Image size must be less than 5MB');
+        return;
+    }
+
+    selectedImageFile = file;
+
+    // Show preview
+    const preview = document.getElementById('chat-image-preview');
+    const previewImg = document.getElementById('chat-preview-img');
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        previewImg.src = e.target.result;
+        preview.classList.remove('hidden');
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function removeImagePreview() {
+    selectedImageFile = null;
+    const preview = document.getElementById('chat-image-preview');
+    const previewImg = document.getElementById('chat-preview-img');
+    const imageInput = document.getElementById('chat-image-input');
+    
+    preview.classList.add('hidden');
+    previewImg.src = '';
+    if (imageInput) {
+        imageInput.value = '';
+    }
 }
 
 async function sendUserMessage(e) {
@@ -194,16 +266,20 @@ async function sendUserMessage(e) {
     const input = document.getElementById('chat-input');
     const message = input.value.trim();
 
-    if (!message) return;
+    // Must have either message or image
+    if (!message && !selectedImageFile) return;
 
     try {
+        const formData = new FormData();
+        formData.append('message', message || '');
+        if (selectedImageFile) {
+            formData.append('image', selectedImageFile);
+        }
+
         const response = await fetch('api/chat.php?action=send_message', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             credentials: 'include',
-            body: JSON.stringify({ message })
+            body: formData
         });
 
         const data = await response.json();
@@ -211,6 +287,7 @@ async function sendUserMessage(e) {
         if (data.success) {
             appendChatMessage(data.data, true);
             input.value = '';
+            removeImagePreview();
             scrollChatToBottom();
             lastMessageId = Math.max(lastMessageId, data.data.id);
         } else {
