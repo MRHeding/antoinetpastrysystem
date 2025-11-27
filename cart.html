@@ -63,6 +63,27 @@
                 </div>
 
                 <div class="space-y-3 sm:space-y-4">
+                    <!-- Payment Method Selection -->
+                    <div class="border-t border-gray-200 pt-4">
+                        <h4 class="text-sm sm:text-base font-semibold text-gray-800 mb-3">Payment Method</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
+                                <input type="radio" name="payment-method" value="cod" class="mr-3 text-amber-600 focus:ring-amber-500" checked>
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Cash on Delivery (COD)</div>
+                                    <div class="text-xs text-gray-600">Pay when you receive your order</div>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
+                                <input type="radio" name="payment-method" value="online" class="mr-3 text-amber-600 focus:ring-amber-500">
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Online Payment</div>
+                                    <div class="text-xs text-gray-600">Pay via GCash, PayMaya, or GrabPay</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
                     <button id="checkout-btn" class="w-full bg-amber-600 text-white py-3 px-4 sm:px-6 rounded-md hover:bg-amber-700 transition duration-200 font-semibold text-sm sm:text-base">
                         <i class="fas fa-credit-card mr-2"></i>Proceed to Checkout
                     </button>
@@ -100,7 +121,7 @@
                 <button onclick="closeCheckoutModal()" class="w-full sm:w-auto px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
                     Cancel
                 </button>
-                <button onclick="confirmCheckout()" class="w-full sm:w-auto px-6 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
+                <button id="confirm-checkout-btn" onclick="confirmCheckout()" class="w-full sm:w-auto px-6 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors">
                     <i class="fas fa-wallet mr-2"></i>Proceed to Payment
                 </button>
             </div>

@@ -380,6 +380,10 @@ function showCheckoutModal() {
     const modal = document.getElementById('checkout-modal');
     const summary = document.getElementById('checkout-summary');
     
+    // Get selected payment method
+    const paymentMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'cod';
+    const paymentMethodText = paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : 'Online Payment';
+    
     // Calculate totals
     const subtotal = cart.reduce((sum, item) => {
         if (item.price) {
@@ -472,6 +476,11 @@ function showCheckoutModal() {
                             <span class="text-gray-900">Total:</span>
                             <span class="text-amber-600">₱${total.toFixed(2)}</span>
                         </div>
+                        <hr class="border-gray-300 mt-3">
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-gray-600">Payment Method:</span>
+                            <span class="font-semibold text-gray-900">${paymentMethodText}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -480,6 +489,16 @@ function showCheckoutModal() {
     
     summary.innerHTML = summaryHTML;
     modal.classList.remove('hidden');
+    
+    // Update button text based on payment method
+    const confirmBtn = document.getElementById('confirm-checkout-btn');
+    if (confirmBtn) {
+        if (paymentMethod === 'cod') {
+            confirmBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Place Order';
+        } else {
+            confirmBtn.innerHTML = '<i class="fas fa-wallet mr-2"></i>Proceed to Payment';
+        }
+    }
 }
 
 /**
@@ -507,13 +526,16 @@ async function confirmCheckout() {
             return;
         }
         
+        // Get selected payment method
+        const paymentMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'cod';
+        
         // Show loading state
         const confirmBtn = document.querySelector('button[onclick="confirmCheckout()"]');
         const originalText = confirmBtn.innerHTML;
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing Payment...';
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
         confirmBtn.disabled = true;
         
-        // Prepare order data with product names for PayMongo
+        // Prepare order data with product names
         const orderItems = cart.map(item => {
             if (item.price) {
                 // Cart item has stored price data
@@ -553,38 +575,83 @@ async function confirmCheckout() {
         const delivery = 50.00;
         const total = subtotal + delivery;
         
-        // Create checkout session with PayMongo
-        const checkoutData = {
-            items: orderItems,
-            notes: `Order total: ₱${total.toFixed(2)} (Subtotal: ₱${subtotal.toFixed(2)}, Delivery: ₱${delivery.toFixed(2)})`
-        };
-        
-        const paymentResponse = await fetch('api/payment.php?action=create_checkout_session', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(checkoutData)
-        });
-        
-        const paymentResult = await paymentResponse.json();
-        
-        if (paymentResult.success) {
-            // Store order info AND checkout session ID in localStorage for success page
-            localStorage.setItem('pending_order', JSON.stringify({
-                order_id: paymentResult.order_id,
-                order_number: paymentResult.order_number,
-                checkout_session_id: paymentResult.checkout_session_id
-            }));
+        // Handle COD orders
+        if (paymentMethod === 'cod') {
+            // Create order directly via orders API (COD)
+            const orderData = {
+                items: orderItems,
+                notes: `Order total: ₱${total.toFixed(2)} (Subtotal: ₱${subtotal.toFixed(2)}, Delivery: ₱${delivery.toFixed(2)}). Payment Method: Cash on Delivery (COD)`,
+                payment_method: 'COD',
+                delivery_fee: delivery,
+                total_amount: total
+            };
             
-            // Redirect to PayMongo checkout page
-            window.location.href = paymentResult.checkout_url;
+            const orderResponse = await fetch('api/orders.php?action=create_order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            });
             
+            const orderResult = await orderResponse.json();
+            
+            if (orderResult.success) {
+                // Clear cart
+                cart = [];
+                saveCart();
+                updateCartDisplay();
+                
+                // Store order info for orders page
+                localStorage.setItem('order_success', JSON.stringify({
+                    order_id: orderResult.order_id,
+                    order_number: orderResult.order_number,
+                    payment_method: 'COD',
+                    payment_status: 'pending'
+                }));
+                
+                // Redirect to orders page
+                window.location.href = 'orders.html';
+            } else {
+                showNotification(`Failed to create order: ${orderResult.message}`, 'error');
+                // Restore button state
+                confirmBtn.innerHTML = originalText;
+                confirmBtn.disabled = false;
+            }
         } else {
-            showNotification(`Failed to create payment session: ${paymentResult.message}`, 'error');
-            // Restore button state
-            confirmBtn.innerHTML = originalText;
-            confirmBtn.disabled = false;
+            // Handle online payment (PayMongo)
+            const checkoutData = {
+                items: orderItems,
+                notes: `Order total: ₱${total.toFixed(2)} (Subtotal: ₱${subtotal.toFixed(2)}, Delivery: ₱${delivery.toFixed(2)})`
+            };
+            
+            const paymentResponse = await fetch('api/payment.php?action=create_checkout_session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(checkoutData)
+            });
+            
+            const paymentResult = await paymentResponse.json();
+            
+            if (paymentResult.success) {
+                // Store order info AND checkout session ID in localStorage for success page
+                localStorage.setItem('pending_order', JSON.stringify({
+                    order_id: paymentResult.order_id,
+                    order_number: paymentResult.order_number,
+                    checkout_session_id: paymentResult.checkout_session_id
+                }));
+                
+                // Redirect to PayMongo checkout page
+                window.location.href = paymentResult.checkout_url;
+                
+            } else {
+                showNotification(`Failed to create payment session: ${paymentResult.message}`, 'error');
+                // Restore button state
+                confirmBtn.innerHTML = originalText;
+                confirmBtn.disabled = false;
+            }
         }
         
     } catch (error) {

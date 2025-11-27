@@ -318,21 +318,31 @@ function createOrder() {
             // Generate order number
             $order_number = 'ORD-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
             
-            // Calculate total amount
-            $total_amount = 0;
+            // Calculate total amount (subtotal)
+            $subtotal = 0;
             foreach ($input['items'] as $item) {
-                $total_amount += $item['quantity'] * $item['unit_price'];
+                $subtotal += $item['quantity'] * $item['unit_price'];
             }
+            
+            // Add delivery fee if provided, otherwise default to 50.00
+            $delivery_fee = isset($input['delivery_fee']) ? floatval($input['delivery_fee']) : 50.00;
+            $total_amount = isset($input['total_amount']) ? floatval($input['total_amount']) : ($subtotal + $delivery_fee);
+            
+            // Get payment method and status
+            $payment_method = $input['payment_method'] ?? null;
+            $payment_status = ($payment_method === 'COD') ? 'pending' : 'pending';
             
             // Create order
             $stmt = $db->prepare("
-                INSERT INTO orders (user_id, order_number, total_amount, status, notes, order_date)
-                VALUES (?, ?, ?, 'pending', ?, NOW())
+                INSERT INTO orders (user_id, order_number, total_amount, status, payment_status, payment_method, notes, order_date)
+                VALUES (?, ?, ?, 'pending', ?, ?, ?, NOW())
             ");
             $stmt->execute([
                 $user['id'],
                 $order_number,
                 $total_amount,
+                $payment_status,
+                $payment_method,
                 $input['notes'] ?? null
             ]);
             
