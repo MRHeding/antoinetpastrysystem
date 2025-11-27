@@ -5,26 +5,26 @@ let filteredProducts = [];
 let currentPage = 1;
 const productsPerPage = 12;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Load navigation and footer components
     loadComponent('components/navigation.html', 'navigation-container');
     loadComponent('components/footer.html', 'footer-container');
-    
+
     // Load all products
     loadProducts();
-    
+
     // Initialize search and filter functionality
     initSearchAndFilter();
-    
+
     // Initialize pagination
     initPagination();
-    
+
     // Initialize modal controls
     initModalControls();
-    
+
     // Initialize size selection
     initSizeSelection();
-    
+
     // Check admin status and disable cart functionality if needed
     checkAdminStatus();
 });
@@ -34,7 +34,7 @@ async function checkAdminStatus() {
     try {
         const response = await fetch('api/auth.php?action=check');
         const data = await response.json();
-        
+
         if (data.success && data.user.role === 'admin') {
             // Store admin status globally for use in other functions
             window.isAdmin = true;
@@ -54,38 +54,46 @@ function initModalControls() {
     if (closeBtn) {
         closeBtn.addEventListener('click', hideProductModal);
     }
-    
+
     // Close modal when clicking outside the modal content
     const modal = document.getElementById('product-details-modal');
     if (modal) {
-        modal.addEventListener('click', function(event) {
+        modal.addEventListener('click', function (event) {
             if (event.target === modal) {
                 hideProductModal();
             }
         });
     }
-    
+
     // Initialize quantity controls
     const decreaseBtn = document.getElementById('decrease-quantity');
     const increaseBtn = document.getElementById('increase-quantity');
     const quantityInput = document.getElementById('product-quantity');
-    
+
     if (decreaseBtn && increaseBtn && quantityInput) {
-        decreaseBtn.addEventListener('click', function() {
+        decreaseBtn.addEventListener('click', function () {
             const currentValue = parseInt(quantityInput.value);
             if (currentValue > 1) {
                 quantityInput.value = currentValue - 1;
             }
         });
-        
-        increaseBtn.addEventListener('click', function() {
-            quantityInput.value = parseInt(quantityInput.value) + 1;
+
+        increaseBtn.addEventListener('click', function () {
+            const currentValue = parseInt(quantityInput.value);
+            if (currentValue < 10) {
+                quantityInput.value = currentValue + 1;
+            } else {
+                showNotification('Maximum quantity limit is 10 per item', 'warning');
+            }
         });
-        
-        // Ensure quantity is always at least 1
-        quantityInput.addEventListener('change', function() {
+
+        // Ensure quantity is always at least 1 and at most 10
+        quantityInput.addEventListener('change', function () {
             if (this.value < 1 || !this.value) {
                 this.value = 1;
+            } else if (this.value > 10) {
+                this.value = 10;
+                showNotification('Maximum quantity limit is 10 per item', 'warning');
             }
         });
     }
@@ -94,22 +102,22 @@ function initModalControls() {
 // Initialize size selection functionality
 function initSizeSelection() {
     // Handle size option clicks
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         if (event.target.closest('.size-option')) {
             const sizeOption = event.target.closest('.size-option');
             const radioInput = sizeOption.querySelector('input[type="radio"]');
             const sizeLabel = sizeOption.querySelector('.size-label');
-            
+
             // Remove selected state from all size options
             document.querySelectorAll('.size-option .size-label').forEach(label => {
                 label.classList.remove('border-amber-500', 'bg-amber-50');
                 label.classList.add('border-gray-300');
             });
-            
+
             // Add selected state to clicked option
             sizeLabel.classList.remove('border-gray-300');
             sizeLabel.classList.add('border-amber-500', 'bg-amber-50');
-            
+
             // Check the radio button
             radioInput.checked = true;
         }
@@ -121,11 +129,11 @@ async function loadProducts() {
     try {
         const response = await fetch('api/products.php');
         const products = await response.json();
-        
+
         if (products.success) {
             allProducts = products.data;
             filteredProducts = [...allProducts];
-            
+
             // Ensure admin status is checked before displaying products
             await checkAdminStatus();
             displayProducts();
@@ -145,21 +153,21 @@ function initSearchAndFilter() {
     const searchInput = document.getElementById('search-input');
     const categoryFilter = document.getElementById('category-filter');
     const sortFilter = document.getElementById('sort-filter');
-    
+
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             filterProducts();
         });
     }
-    
+
     if (categoryFilter) {
-        categoryFilter.addEventListener('change', function() {
+        categoryFilter.addEventListener('change', function () {
             filterProducts();
         });
     }
-    
+
     if (sortFilter) {
-        sortFilter.addEventListener('change', function() {
+        sortFilter.addEventListener('change', function () {
             sortProducts();
         });
     }
@@ -169,17 +177,17 @@ function initSearchAndFilter() {
 function filterProducts() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
     const category = document.getElementById('category-filter').value;
-    
+
     filteredProducts = allProducts.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
-                            product.description.toLowerCase().includes(searchTerm) ||
-                            product.category.toLowerCase().includes(searchTerm);
-        
+            product.description.toLowerCase().includes(searchTerm) ||
+            product.category.toLowerCase().includes(searchTerm);
+
         const matchesCategory = !category || product.category === category;
-        
+
         return matchesSearch && matchesCategory;
     });
-    
+
     currentPage = 1;
     displayProducts();
     updatePagination();
@@ -188,7 +196,7 @@ function filterProducts() {
 // Sort products
 function sortProducts() {
     const sortBy = document.getElementById('sort-filter').value;
-    
+
     switch (sortBy) {
         case 'name':
             filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
@@ -203,7 +211,7 @@ function sortProducts() {
             filteredProducts.sort((a, b) => a.category.localeCompare(b.category));
             break;
     }
-    
+
     currentPage = 1;
     displayProducts();
     updatePagination();
@@ -215,7 +223,7 @@ function displayProducts() {
     const startIndex = (currentPage - 1) * productsPerPage;
     const endIndex = startIndex + productsPerPage;
     const productsToShow = filteredProducts.slice(startIndex, endIndex);
-    
+
     if (!productsToShow || productsToShow.length === 0) {
         container.innerHTML = `
             <div class="col-span-full text-center text-gray-500 py-12">
@@ -228,19 +236,19 @@ function displayProducts() {
         `;
         return;
     }
-    
+
     container.innerHTML = productsToShow.map(product => {
         // Determine image source
-        const imageSrc = product.image_url 
-            ? product.image_url 
+        const imageSrc = product.image_url
+            ? product.image_url
             : 'Logo.png';
-            
+
         // Determine availability status badge
         const isAvailable = product.availability_status === 'available';
-        const statusBadge = isAvailable 
+        const statusBadge = isAvailable
             ? '<div class="absolute top-3 left-3 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md flex items-center"><i class="fas fa-check-circle mr-1"></i>Available</div>'
             : '<div class="absolute top-3 left-3 bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md flex items-center"><i class="fas fa-times-circle mr-1"></i>Unavailable</div>';
-            
+
         return `
         <div class="product-card group ${!isAvailable ? 'opacity-90' : ''}" id="product-${product.id}">
             <div class="product-card-image" onclick="viewProductDetails(${product.id})">
@@ -259,19 +267,19 @@ function displayProducts() {
                     ${getPriceDisplay(product)}
                 </div>
                 <div class="product-card-buttons">
-                    ${window.isAdmin ? 
-                        `<button disabled class="w-32 bg-gray-400 text-white py-2.5 px-4 rounded-md cursor-not-allowed opacity-50">
+                    ${window.isAdmin ?
+                `<button disabled class="w-32 bg-gray-400 text-white py-2.5 px-4 rounded-md cursor-not-allowed opacity-50">
                             <i class="fas fa-ban mr-2"></i>Admin Mode
                         </button>` :
-                        !isAvailable ?
-                        `<button disabled class="w-32 bg-gray-400 text-white py-2.5 px-4 rounded-md cursor-not-allowed opacity-50">
+                !isAvailable ?
+                    `<button disabled class="w-32 bg-gray-400 text-white py-2.5 px-4 rounded-md cursor-not-allowed opacity-50">
                             <i class="fas fa-times mr-2"></i>Unavailable
                         </button>` :
-                        `<button onclick="addToCart(${product.id})" 
+                    `<button onclick="addToCart(${product.id})" 
                                 class="w-32 bg-amber-600 text-white py-2.5 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
                             <i class="fas fa-cart-plus mr-2"></i>Add to Cart
                         </button>`
-                    }
+            }
                     <button onclick="viewProductDetails(${product.id})" 
                             class="bg-gray-200 text-gray-700 py-2.5 px-4 rounded-md hover:bg-gray-300 transition-colors">
                         <i class="fas fa-eye mr-1"></i>View
@@ -292,14 +300,14 @@ function initPagination() {
 function updatePagination() {
     const container = document.getElementById('pagination-container');
     const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-    
+
     if (totalPages <= 1) {
         container.innerHTML = '';
         return;
     }
-    
+
     let paginationHTML = '<div class="flex items-center space-x-2">';
-    
+
     // Previous button
     if (currentPage > 1) {
         paginationHTML += `
@@ -309,22 +317,21 @@ function updatePagination() {
             </button>
         `;
     }
-    
+
     // Page numbers
     const startPage = Math.max(1, currentPage - 2);
     const endPage = Math.min(totalPages, currentPage + 2);
-    
+
     for (let i = startPage; i <= endPage; i++) {
         paginationHTML += `
             <button onclick="goToPage(${i})" 
-                    class="px-3 py-2 border border-gray-300 rounded-md transition-colors ${
-                        i === currentPage ? 'bg-amber-600 text-white border-amber-600' : 'hover:bg-gray-50'
-                    }">
+                    class="px-3 py-2 border border-gray-300 rounded-md transition-colors ${i === currentPage ? 'bg-amber-600 text-white border-amber-600' : 'hover:bg-gray-50'
+            }">
                 ${i}
             </button>
         `;
     }
-    
+
     // Next button
     if (currentPage < totalPages) {
         paginationHTML += `
@@ -334,7 +341,7 @@ function updatePagination() {
             </button>
         `;
     }
-    
+
     paginationHTML += '</div>';
     container.innerHTML = paginationHTML;
 }
@@ -344,11 +351,11 @@ function goToPage(page) {
     currentPage = page;
     displayProducts();
     updatePagination();
-    
+
     // Scroll to top of products section
-    document.getElementById('products-container').scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
+    document.getElementById('products-container').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
     });
 }
 
@@ -358,7 +365,7 @@ function getPriceDisplay(product) {
         const prices = product.sizes.map(s => parseFloat(s.price));
         const minPrice = Math.min(...prices);
         const maxPrice = Math.max(...prices);
-        
+
         if (minPrice === maxPrice) {
             return `<span class="text-2xl font-bold text-amber-600">₱${minPrice.toFixed(2)}</span>`;
         } else {
@@ -374,7 +381,7 @@ function clearFilters() {
     document.getElementById('search-input').value = '';
     document.getElementById('category-filter').value = '';
     document.getElementById('sort-filter').value = 'name';
-    
+
     filteredProducts = [...allProducts];
     currentPage = 1;
     displayProducts();
@@ -400,12 +407,12 @@ async function viewProductDetails(productId) {
     try {
         // Find product in already loaded products first
         let product = allProducts.find(p => p.id == productId);
-        
+
         // If not found or we need fresh data, fetch from API
         if (!product) {
             const response = await fetch(`api/products.php?id=${productId}`);
             const result = await response.json();
-            
+
             if (result.success && result.data) {
                 product = result.data;
             } else {
@@ -413,11 +420,11 @@ async function viewProductDetails(productId) {
                 return;
             }
         }
-        
+
         // Populate modal with product details
         document.getElementById('modal-product-name').textContent = product.name;
         document.getElementById('modal-product-category').textContent = product.category;
-        
+
         // Show price or price range
         if (product.sizes && product.sizes.length > 0) {
             const prices = product.sizes.map(s => parseFloat(s.price));
@@ -431,21 +438,21 @@ async function viewProductDetails(productId) {
         } else {
             document.getElementById('modal-product-price').textContent = product.price;
         }
-        
+
         document.getElementById('modal-product-description').textContent = product.description;
-        
+
         // Populate sizes
         populateProductSizes(product);
-        
+
         // Set product image
         const modalImage = document.getElementById('modal-product-image');
         modalImage.src = product.image_url ? product.image_url : 'Logo.png';
         modalImage.alt = product.name;
-        
+
         // Add availability status to modal
         const isAvailable = product.availability_status === 'available';
         const statusContainer = document.getElementById('modal-product-status') || createStatusContainer();
-        
+
         if (isAvailable) {
             statusContainer.innerHTML = `
                 <div class="flex items-center text-green-600 mb-3">
@@ -464,13 +471,13 @@ async function viewProductDetails(productId) {
                 </div>
             `;
         }
-        
+
         // Reset quantity to 1
         document.getElementById('product-quantity').value = 1;
-        
+
         // Set up add to cart button
         const addToCartBtn = document.getElementById('add-to-cart-btn');
-        
+
         // Update button appearance and functionality based on admin status and availability
         if (window.isAdmin) {
             addToCartBtn.disabled = true;
@@ -486,7 +493,7 @@ async function viewProductDetails(productId) {
             addToCartBtn.disabled = false;
             addToCartBtn.innerHTML = 'Add to Cart';
             addToCartBtn.className = 'flex-1 bg-amber-600 text-white px-6 py-2 rounded-lg hover:bg-amber-700 transition-colors';
-            addToCartBtn.onclick = async function() {
+            addToCartBtn.onclick = async function () {
                 const quantity = parseInt(document.getElementById('product-quantity').value);
                 const selectedSize = getSelectedSize();
                 addToCartWithQuantity(productId, quantity, selectedSize);
@@ -494,9 +501,9 @@ async function viewProductDetails(productId) {
             };
         }
 
-                // Show modal
+        // Show modal
         document.getElementById('product-details-modal').classList.remove('hidden');
-        
+
     } catch (error) {
         console.error('Error fetching product details:', error);
         showNotification('Network error loading product details', 'error');
@@ -506,19 +513,19 @@ async function viewProductDetails(productId) {
 // Populate product sizes in the modal
 function populateProductSizes(product) {
     const container = document.getElementById('sizes-container');
-    
+
     if (!product.sizes || product.sizes.length === 0) {
         // No sizes available, hide the section
         document.getElementById('size-selection-section').style.display = 'none';
         return;
     }
-    
+
     // Show the section
     document.getElementById('size-selection-section').style.display = 'block';
-    
+
     // Clear existing sizes
     container.innerHTML = '';
-    
+
     // Add each size option
     product.sizes.forEach((size, index) => {
         const isFirst = index === 0;
@@ -543,7 +550,7 @@ function setProductSize(size) {
         label.classList.remove('border-amber-500', 'bg-amber-50');
         label.classList.add('border-gray-300');
     });
-    
+
     // Set the specified size as selected
     const sizeInput = document.querySelector(`input[name="product-size"][value="${size}"]`);
     if (sizeInput) {
@@ -577,12 +584,12 @@ async function addToCart(productId) {
     try {
         const response = await fetch('api/auth.php?action=check');
         const data = await response.json();
-        
+
         if (data.success && data.user.role === 'admin') {
             showNotification('Admin users cannot add items to cart', 'error');
             return;
         }
-        
+
         // Proceed with adding to cart if not admin
         addToCartWithQuantity(productId, 1);
     } catch (error) {
@@ -598,7 +605,7 @@ async function addToCartWithQuantity(productId, quantity, size = null) {
     try {
         const response = await fetch('api/auth.php?action=check');
         const data = await response.json();
-        
+
         if (data.success && data.user.role === 'admin') {
             showNotification('Admin users cannot add items to cart', 'error');
             return;
@@ -607,18 +614,18 @@ async function addToCartWithQuantity(productId, quantity, size = null) {
         console.error('Error checking admin status:', error);
         // If there's an error checking admin status, proceed normally
     }
-    
+
     const product = allProducts.find(p => p.id == productId);
-    
+
     if (!product) {
         showNotification('Product not found', 'error');
         return;
     }
-    
+
     // Determine price based on size
     let price = product.price;
     let sizeName = 'Standard';
-    
+
     if (size && product.sizes && product.sizes.length > 0) {
         const selectedSize = product.sizes.find(s => s.size_code === size);
         if (selectedSize) {
@@ -632,13 +639,23 @@ async function addToCartWithQuantity(productId, quantity, size = null) {
         price = parseFloat(defaultSize.price);
         sizeName = defaultSize.size_name;
     }
-    
+
     // Get existing cart or initialize new one
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
+
+    // Calculate total quantity of this product in cart (across all sizes)
+    const totalQuantityInCart = cart.reduce((total, item) => {
+        return item.id == productId ? total + item.quantity : total;
+    }, 0);
+
+    if (totalQuantityInCart + quantity > 10) {
+        showNotification(`Cannot add ${quantity} more. Maximum limit is 10 per item (You have ${totalQuantityInCart} in cart)`, 'warning');
+        return;
+    }
+
     // Check if product already in cart (with same size)
     const existingItem = cart.find(item => item.id == productId && item.size === size);
-    
+
     if (existingItem) {
         existingItem.quantity += quantity;
     } else {
@@ -652,10 +669,10 @@ async function addToCartWithQuantity(productId, quantity, size = null) {
             size_name: sizeName
         });
     }
-    
+
     // Save updated cart
     localStorage.setItem('cart', JSON.stringify(cart));
-    
+
     // Update cart count - call the shared function
     if (typeof updateCartDisplay === 'function') {
         updateCartDisplay();
@@ -674,13 +691,13 @@ async function addToCartWithQuantity(productId, quantity, size = null) {
             }
         });
     }
-    
+
     // Show notification
     showNotification(`${quantity} ${product.name} (${sizeName}) added to cart!`, 'success');
 }
 
 // Handle URL hash for direct product linking
-window.addEventListener('hashchange', function() {
+window.addEventListener('hashchange', function () {
     const hash = window.location.hash;
     if (hash.startsWith('#product-')) {
         const productId = hash.replace('#product-', '');
@@ -700,7 +717,7 @@ window.addEventListener('hashchange', function() {
 });
 
 // Check for hash on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
         const hash = window.location.hash;
         if (hash.startsWith('#product-')) {
@@ -713,21 +730,21 @@ document.addEventListener('DOMContentLoaded', function() {
 function createStatusContainer() {
     const modal = document.getElementById('product-details-modal');
     const nameElement = document.getElementById('modal-product-name');
-    
+
     // Create status container
     const statusContainer = document.createElement('div');
     statusContainer.id = 'modal-product-status';
-    
+
     // Insert after product name
     nameElement.parentNode.insertBefore(statusContainer, nameElement.nextSibling);
-    
+
     return statusContainer;
 }
 
 // Listen for real-time status updates from admin
 if (typeof BroadcastChannel !== 'undefined') {
     const statusChannel = new BroadcastChannel('product_status_updates');
-    statusChannel.addEventListener('message', function(event) {
+    statusChannel.addEventListener('message', function (event) {
         if (event.data.type === 'status_update') {
             // Update the product in the local array
             const productIndex = allProducts.findIndex(p => p.id == event.data.productId);
@@ -735,7 +752,7 @@ if (typeof BroadcastChannel !== 'undefined') {
                 allProducts[productIndex].availability_status = event.data.status;
                 allProducts[productIndex].unavailable_reason = event.data.reason || null;
                 allProducts[productIndex].status_updated_at = new Date().toISOString();
-                
+
                 // Update filtered products as well
                 const filteredIndex = filteredProducts.findIndex(p => p.id == event.data.productId);
                 if (filteredIndex !== -1) {
@@ -743,10 +760,10 @@ if (typeof BroadcastChannel !== 'undefined') {
                     filteredProducts[filteredIndex].unavailable_reason = event.data.reason || null;
                     filteredProducts[filteredIndex].status_updated_at = new Date().toISOString();
                 }
-                
+
                 // Refresh the display
                 displayProducts();
-                
+
                 // Show subtle notification
                 if (event.data.status === 'unavailable') {
                     showNotification(`A product is now unavailable: ${event.data.reason || 'No reason provided'}`, 'warning');
@@ -763,20 +780,18 @@ if (typeof BroadcastChannel !== 'undefined') {
 // Show notification
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
-    notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${                                                                             
-        type === 'success' ? 'bg-green-500 text-white' :
+    notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-green-500 text-white' :
         type === 'error' ? 'bg-red-500 text-white' :
-        type === 'warning' ? 'bg-yellow-500 text-white' :
-        'bg-blue-500 text-white'
-    }`;
+            type === 'warning' ? 'bg-yellow-500 text-white' :
+                'bg-blue-500 text-white'
+        }`;
     notification.innerHTML = `
         <div class="flex items-center">
-            <i class="fas ${
-                type === 'success' ? 'fa-check-circle' :
-                type === 'error' ? 'fa-exclamation-circle' :
+            <i class="fas ${type === 'success' ? 'fa-check-circle' :
+            type === 'error' ? 'fa-exclamation-circle' :
                 type === 'warning' ? 'fa-exclamation-triangle' :
-                'fa-info-circle'
-            } mr-2"></i>
+                    'fa-info-circle'
+        } mr-2"></i>
             <span>${message}</span>
         </div>
     `;

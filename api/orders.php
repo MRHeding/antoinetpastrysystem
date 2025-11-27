@@ -321,9 +321,12 @@ function createOrder() {
             // Generate order number
             $order_number = 'ORD-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
             
-            // Calculate total amount
+            // Calculate total amount and validate quantity
             $total_amount = 0;
             foreach ($input['items'] as $item) {
+                if ($item['quantity'] > 10) {
+                    throw new Exception('Maximum quantity limit is 10 per item');
+                }
                 $total_amount += $item['quantity'] * $item['unit_price'];
             }
             
@@ -416,9 +419,12 @@ function createCodOrder() {
             // Generate order number
             $order_number = 'ORD-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
             
-            // Calculate total amount
+            // Calculate total amount and validate quantity
             $subtotal = 0;
             foreach ($input['items'] as $item) {
+                if ($item['quantity'] > 10) {
+                    throw new Exception('Maximum quantity limit is 10 per item');
+                }
                 $subtotal += $item['quantity'] * $item['unit_price'];
             }
             

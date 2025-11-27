@@ -165,15 +165,7 @@ function displayCartItems() {
                     </div>
                     <div class="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
                         <div class="flex items-center space-x-3">
-                            <button onclick="updateQuantity(${index}, ${item.quantity - 1})" 
-                                    class="w-9 h-9 sm:w-10 sm:h-10 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition duration-200 flex items-center justify-center">
-                                <i class="fas fa-minus text-sm"></i>
-                            </button>
-                            <span class="w-10 sm:w-12 text-center font-semibold text-base sm:text-lg">${item.quantity}</span>
-                            <button onclick="updateQuantity(${index}, ${item.quantity + 1})" 
-                                    class="w-9 h-9 sm:w-10 sm:h-10 bg-amber-600 text-white rounded-full hover:bg-amber-700 transition duration-200 flex items-center justify-center">
-                                <i class="fas fa-plus text-sm"></i>
-                            </button>
+                            <span class="w-10 sm:w-12 text-center font-semibold text-base sm:text-lg">Qty: ${item.quantity}</span>
                         </div>
                         <div class="text-right">
                             <p class="text-lg sm:text-xl font-bold text-gray-800 mb-2">₱${(parseFloat(product.price) * item.quantity).toFixed(2)}</p>
@@ -210,15 +202,7 @@ function displayCartItems() {
                     </div>
                     <div class="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
                         <div class="flex items-center space-x-3">
-                            <button onclick="updateQuantity(${index}, ${item.quantity - 1})" 
-                                    class="w-9 h-9 sm:w-10 sm:h-10 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition duration-200 flex items-center justify-center">
-                                <i class="fas fa-minus text-sm"></i>
-                            </button>
-                            <span class="w-10 sm:w-12 text-center font-semibold text-base sm:text-lg">${item.quantity}</span>
-                            <button onclick="updateQuantity(${index}, ${item.quantity + 1})" 
-                                    class="w-9 h-9 sm:w-10 sm:h-10 bg-amber-600 text-white rounded-full hover:bg-amber-700 transition duration-200 flex items-center justify-center">
-                                <i class="fas fa-plus text-sm"></i>
-                            </button>
+                            <span class="w-10 sm:w-12 text-center font-semibold text-base sm:text-lg">Qty: ${item.quantity}</span>
                         </div>
                         <div class="text-right">
                             <p class="text-lg sm:text-xl font-bold text-gray-800 mb-2">₱${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
@@ -267,6 +251,11 @@ function displayCartItems() {
 function updateQuantity(index, newQuantity) {
     if (newQuantity <= 0) {
         removeFromCart(index);
+        return;
+    }
+
+    if (newQuantity > 10) {
+        showNotification('Maximum quantity limit is 10 per item', 'warning');
         return;
     }
 
