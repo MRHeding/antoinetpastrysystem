@@ -39,6 +39,9 @@ switch ($method) {
             case 'create_order':
                 createOrder();
                 break;
+            case 'create_cod_order':
+                createCodOrder();
+                break;
             case 'update_status':
                 updateOrderStatus();
                 break;
@@ -91,7 +94,7 @@ function getUserOrders() {
                 WHERE c.email = (SELECT u.email FROM users u WHERE u.id = ?)
             ))
             AND o.status != 'cancelled'
-            AND NOT (o.status = 'pending' AND o.payment_status = 'pending')
+            AND NOT (o.status = 'pending' AND o.payment_status = 'pending' AND o.payment_method != 'cod')
             ORDER BY o.order_date DESC
         ");
         $stmt->execute([$user['id'], $user['id']]);
@@ -373,6 +376,104 @@ function createOrder() {
     }
 }
 
+function createCodOrder() {
+    try {
+        $session_token = $_COOKIE['session_token'] ?? '';
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        if (!$session_token) {
+            echo json_encode(['success' => false, 'message' => 'Authentication required']);
+            return;
+        }
+        
+        // Validate input
+        if (!isset($input['items']) || !is_array($input['items']) || empty($input['items'])) {
+            echo json_encode(['success' => false, 'message' => 'Order items are required']);
+            return;
+        }
+        
+        $database = Database::getInstance();
+        $db = $database->getConnection();
+        
+        // Get user ID from session
+        $stmt = $db->prepare("
+            SELECT u.id, u.first_name, u.last_name, u.email FROM users u
+            JOIN user_sessions s ON u.id = s.user_id
+            WHERE s.session_token = ? AND s.expires_at > NOW() AND u.is_active = 1
+        ");
+        $stmt->execute([$session_token]);
+        $user = $stmt->fetch();
+        
+        if (!$user) {
+            echo json_encode(['success' => false, 'message' => 'Authentication required']);
+            return;
+        }
+        
+        // Start transaction
+        $db->beginTransaction();
+        
+        try {
+            // Generate order number
+            $order_number = 'ORD-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            
+            // Calculate total amount
+            $subtotal = 0;
+            foreach ($input['items'] as $item) {
+                $subtotal += $item['quantity'] * $item['unit_price'];
+            }
+            
+            $delivery = 50.00;
+            $total_amount = $subtotal + $delivery;
+            
+            // Create order
+            $stmt = $db->prepare("
+                INSERT INTO orders (user_id, order_number, total_amount, status, payment_status, payment_method, notes, order_date)
+                VALUES (?, ?, ?, 'pending', 'pending', 'cod', ?, NOW())
+            ");
+            $stmt->execute([
+                $user['id'],
+                $order_number,
+                $total_amount,
+                $input['notes'] ?? null
+            ]);
+            
+            $order_id = $db->lastInsertId();
+            
+            // Create order items
+            foreach ($input['items'] as $item) {
+                $stmt = $db->prepare("
+                    INSERT INTO order_items (order_id, product_id, quantity, unit_price, total_price)
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+                $stmt->execute([
+                    $order_id,
+                    $item['product_id'],
+                    $item['quantity'],
+                    $item['unit_price'],
+                    $item['quantity'] * $item['unit_price']
+                ]);
+            }
+            
+            // Commit transaction
+            $db->commit();
+            
+            echo json_encode([
+                'success' => true,
+                'message' => 'Order created successfully',
+                'order_id' => $order_id,
+                'order_number' => $order_number
+            ]);
+            
+        } catch (Exception $e) {
+            $db->rollBack();
+            throw $e;
+        }
+        
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'message' => 'Failed to create order: ' . $e->getMessage()]);
+    }
+}
+
 // Admin function: Get all orders
 function getAllOrders() {
     try {
@@ -422,7 +523,7 @@ function getAllOrders() {
             FROM orders o
             LEFT JOIN users u ON o.user_id = u.id
             WHERE o.status != 'cancelled'
-            AND NOT (o.status = 'pending' AND o.payment_status = 'pending')
+            AND NOT (o.status = 'pending' AND o.payment_status = 'pending' AND o.payment_method != 'cod')
             ORDER BY o.order_date DESC
         ");
         $stmt->execute();

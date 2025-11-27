@@ -6,16 +6,16 @@ let cart = [];
 let products = [];
 
 // Initialize cart when page loads
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
     loadCart();
-    
+
     // Debug: Show cart status
     if (cart.length === 0) {
         console.log('Cart is empty');
     } else {
         console.log('Cart has items:', cart);
     }
-    
+
     await loadProducts();
     displayCartItems();
     updateCartSummary();
@@ -44,7 +44,7 @@ async function loadProducts() {
     try {
         const response = await fetch('api/products.php');
         const data = await response.json();
-        
+
         if (data.success) {
             products = data.products;
             console.log('Products loaded successfully:', products);
@@ -101,10 +101,10 @@ async function loadProducts() {
 function displayCartItems() {
     const container = document.getElementById('cart-items-container');
     const summary = document.getElementById('cart-summary');
-    
+
     console.log('Cart items:', cart);
     console.log('Products loaded:', products);
-    
+
     if (cart.length === 0) {
         container.innerHTML = `
             <div class="text-center text-gray-500 py-12">
@@ -119,7 +119,7 @@ function displayCartItems() {
         summary.classList.add('hidden');
         return;
     }
-    
+
     // If products aren't loaded yet, show loading state
     if (products.length === 0) {
         container.innerHTML = `
@@ -131,21 +131,21 @@ function displayCartItems() {
         summary.classList.add('hidden');
         return;
     }
-    
+
     let html = '<div class="space-y-6">';
     let hasValidItems = false;
-    
+
     cart.forEach((item, index) => {
         // Handle both old format (id, quantity) and new format (id, name, price, image, quantity)
         const product = products.find(p => p.id === item.id);
         console.log(`Looking for product ID ${item.id}, found:`, product);
-        
+
         if (product) {
             hasValidItems = true;
-            
+
             // Get size display text
             const sizeText = item.size_name || (item.size ? item.size : 'Standard');
-            
+
             html += `
                 <div class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-6 border border-gray-200 rounded-lg bg-white shadow-sm">
                     <div class="flex items-start sm:items-center gap-4 flex-1">
@@ -188,10 +188,10 @@ function displayCartItems() {
         } else if (item.name) {
             // Handle cart items with stored product data (from products.js)
             hasValidItems = true;
-            
+
             // Get size display text
             const sizeText = item.size_name || (item.size ? item.size : 'Standard');
-            
+
             html += `
                 <div class="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-6 border border-gray-200 rounded-lg bg-white shadow-sm">
                     <div class="flex items-start sm:items-center gap-4 flex-1">
@@ -236,9 +236,9 @@ function displayCartItems() {
             cart.splice(index, 1);
         }
     });
-    
+
     html += '</div>';
-    
+
     // If no valid items remain, clear the cart
     if (!hasValidItems) {
         cart = [];
@@ -256,7 +256,7 @@ function displayCartItems() {
         summary.classList.add('hidden');
         return;
     }
-    
+
     container.innerHTML = html;
     summary.classList.remove('hidden');
 }
@@ -269,7 +269,7 @@ function updateQuantity(index, newQuantity) {
         removeFromCart(index);
         return;
     }
-    
+
     cart[index].quantity = newQuantity;
     saveCart();
     displayCartItems();
@@ -286,7 +286,7 @@ function removeFromCart(index) {
     displayCartItems();
     updateCartSummary();
     updateCartDisplay();
-    
+
     showNotification('Item removed from cart', 'success');
 }
 
@@ -295,7 +295,7 @@ function removeFromCart(index) {
  */
 function updateCartSummary() {
     let subtotal = 0;
-    
+
     cart.forEach(item => {
         // Handle both old format (id, quantity) and new format (id, name, price, image, quantity)
         if (item.price) {
@@ -309,10 +309,10 @@ function updateCartSummary() {
             }
         }
     });
-    
+
     const delivery = 50.00;
     const total = subtotal + delivery;
-    
+
     document.getElementById('cart-subtotal').textContent = `₱${subtotal.toFixed(2)}`;
     document.getElementById('cart-delivery').textContent = `₱${delivery.toFixed(2)}`;
     document.getElementById('cart-total').textContent = `₱${total.toFixed(2)}`;
@@ -348,7 +348,7 @@ function proceedToCheckout() {
         showNotification('Your cart is empty', 'warning');
         return;
     }
-    
+
     // Check if user is logged in first
     fetch('api/auth.php?action=check')
         .then(response => response.json())
@@ -379,7 +379,7 @@ function proceedToCheckout() {
 function showCheckoutModal() {
     const modal = document.getElementById('checkout-modal');
     const summary = document.getElementById('checkout-summary');
-    
+
     // Calculate totals
     const subtotal = cart.reduce((sum, item) => {
         if (item.price) {
@@ -393,7 +393,7 @@ function showCheckoutModal() {
     }, 0);
     const delivery = 50.00;
     const total = subtotal + delivery;
-    
+
     // Generate summary HTML
     let summaryHTML = `
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -402,11 +402,11 @@ function showCheckoutModal() {
                     <h4 class="font-semibold text-gray-900 mb-3">Order Items</h4>
                     <div class="space-y-2">
     `;
-    
+
     cart.forEach(item => {
         // Get size display text
         const sizeText = item.size_name || (item.size ? item.size : 'Standard');
-        
+
         if (item.name) {
             // Cart item has stored product data
             summaryHTML += `
@@ -448,7 +448,11 @@ function showCheckoutModal() {
             }
         }
     });
-    
+
+    // Get selected payment method
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+    const paymentMethodText = paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment';
+
     summaryHTML += `
                 </div>
             </div>
@@ -467,6 +471,10 @@ function showCheckoutModal() {
                             <span class="text-gray-600">Delivery Fee:</span>
                             <span class="font-medium">₱${delivery.toFixed(2)}</span>
                         </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Payment Method:</span>
+                            <span class="font-medium text-amber-600">${paymentMethodText}</span>
+                        </div>
                         <hr class="border-gray-300">
                         <div class="flex justify-between text-lg font-bold">
                             <span class="text-gray-900">Total:</span>
@@ -477,7 +485,7 @@ function showCheckoutModal() {
             </div>
         </div>
     `;
-    
+
     summary.innerHTML = summaryHTML;
     modal.classList.remove('hidden');
 }
@@ -497,7 +505,7 @@ async function confirmCheckout() {
     try {
         const authResponse = await fetch('api/auth.php?action=check');
         const authData = await authResponse.json();
-        
+
         if (!authData.success) {
             showNotification('Please log in to proceed with checkout', 'warning');
             closeCheckoutModal();
@@ -506,17 +514,19 @@ async function confirmCheckout() {
             }, 2000);
             return;
         }
-        
+
         // Show loading state
         const confirmBtn = document.querySelector('button[onclick="confirmCheckout()"]');
         const originalText = confirmBtn.innerHTML;
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing Payment...';
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing Order...';
         confirmBtn.disabled = true;
-        
-        // Prepare order data with product names for PayMongo
+
+        // Get selected payment method
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+
+        // Prepare order data
         const orderItems = cart.map(item => {
             if (item.price) {
-                // Cart item has stored price data
                 return {
                     product_id: item.id,
                     name: item.name,
@@ -524,7 +534,6 @@ async function confirmCheckout() {
                     unit_price: parseFloat(item.price)
                 };
             } else {
-                // Cart item only has id, need to find product
                 const product = products.find(p => p.id === item.id);
                 return {
                     product_id: item.id,
@@ -534,59 +543,98 @@ async function confirmCheckout() {
                 };
             }
         });
-        
-        // Calculate totals
-        let subtotal = 0;
-        cart.forEach(item => {
-            if (item.price) {
-                // Cart item has stored price data
-                subtotal += parseFloat(item.price) * item.quantity;
+
+        if (paymentMethod === 'cod') {
+            // Handle COD Order
+            const orderData = {
+                items: orderItems,
+                notes: 'Cash on Delivery Order'
+            };
+
+            const response = await fetch('api/orders.php?action=create_cod_order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Clear cart
+                cart = [];
+                saveCart();
+
+                // Store order info for success page
+                localStorage.setItem('pending_order', JSON.stringify({
+                    order_id: result.order_id,
+                    order_number: result.order_number,
+                    payment_method: 'cod'
+                }));
+
+                // Redirect to success page
+                window.location.href = 'payment-success.html';
             } else {
-                // Cart item only has id, need to find product
-                const product = products.find(p => p.id === item.id);
-                if (product) {
-                    subtotal += parseFloat(product.price) * item.quantity;
-                }
+                showNotification(`Failed to create order: ${result.message}`, 'error');
+                confirmBtn.innerHTML = originalText;
+                confirmBtn.disabled = false;
             }
-        });
-        
-        const delivery = 50.00;
-        const total = subtotal + delivery;
-        
-        // Create checkout session with PayMongo
-        const checkoutData = {
-            items: orderItems,
-            notes: `Order total: ₱${total.toFixed(2)} (Subtotal: ₱${subtotal.toFixed(2)}, Delivery: ₱${delivery.toFixed(2)})`
-        };
-        
-        const paymentResponse = await fetch('api/payment.php?action=create_checkout_session', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(checkoutData)
-        });
-        
-        const paymentResult = await paymentResponse.json();
-        
-        if (paymentResult.success) {
-            // Store order info AND checkout session ID in localStorage for success page
-            localStorage.setItem('pending_order', JSON.stringify({
-                order_id: paymentResult.order_id,
-                order_number: paymentResult.order_number,
-                checkout_session_id: paymentResult.checkout_session_id
-            }));
-            
-            // Redirect to PayMongo checkout page
-            window.location.href = paymentResult.checkout_url;
-            
+
         } else {
-            showNotification(`Failed to create payment session: ${paymentResult.message}`, 'error');
-            // Restore button state
-            confirmBtn.innerHTML = originalText;
-            confirmBtn.disabled = false;
+            // Handle Online Payment (PayMongo)
+
+            // Calculate totals for notes
+            let subtotal = 0;
+            cart.forEach(item => {
+                if (item.price) {
+                    subtotal += parseFloat(item.price) * item.quantity;
+                } else {
+                    const product = products.find(p => p.id === item.id);
+                    if (product) {
+                        subtotal += parseFloat(product.price) * item.quantity;
+                    }
+                }
+            });
+
+            const delivery = 50.00;
+            const total = subtotal + delivery;
+
+            // Create checkout session with PayMongo
+            const checkoutData = {
+                items: orderItems,
+                notes: `Order total: ₱${total.toFixed(2)} (Subtotal: ₱${subtotal.toFixed(2)}, Delivery: ₱${delivery.toFixed(2)})`
+            };
+
+            const paymentResponse = await fetch('api/payment.php?action=create_checkout_session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(checkoutData)
+            });
+
+            const paymentResult = await paymentResponse.json();
+
+            if (paymentResult.success) {
+                // Store order info AND checkout session ID in localStorage for success page
+                localStorage.setItem('pending_order', JSON.stringify({
+                    order_id: paymentResult.order_id,
+                    order_number: paymentResult.order_number,
+                    checkout_session_id: paymentResult.checkout_session_id
+                }));
+
+                // Redirect to PayMongo checkout page
+                window.location.href = paymentResult.checkout_url;
+
+            } else {
+                showNotification(`Failed to create payment session: ${paymentResult.message}`, 'error');
+                // Restore button state
+                confirmBtn.innerHTML = originalText;
+                confirmBtn.disabled = false;
+            }
         }
-        
+
     } catch (error) {
         console.error('Error during checkout:', error);
         showNotification('An error occurred during checkout. Please try again.', 'error');
@@ -600,7 +648,7 @@ async function confirmCheckout() {
 }
 
 // Add event listener for checkout button
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const checkoutBtn = document.getElementById('checkout-btn');
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', proceedToCheckout);
@@ -614,7 +662,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function updateCartDisplay() {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    
+
     // Update all cart buttons
     const cartButtons = document.querySelectorAll('a[href="cart.html"]');
     cartButtons.forEach(button => {
@@ -636,12 +684,12 @@ function showNotification(message, type = 'info') {
     const notification = document.getElementById('notification');
     const icon = document.getElementById('notification-icon');
     const messageEl = document.getElementById('notification-message');
-    
+
     // Set icon and colors based on type
     let iconClass = '';
     let bgColor = '';
-    
-    switch(type) {
+
+    switch (type) {
         case 'success':
             iconClass = 'fas fa-check-circle text-green-500';
             bgColor = 'border-l-4 border-green-500';
@@ -658,12 +706,12 @@ function showNotification(message, type = 'info') {
             iconClass = 'fas fa-info-circle text-blue-500';
             bgColor = 'border-l-4 border-blue-500';
     }
-    
+
     icon.className = iconClass;
     messageEl.textContent = message;
     notification.className = `fixed top-4 right-4 z-50 ${bgColor}`;
     notification.classList.remove('hidden');
-    
+
     // Auto hide after 5 seconds
     setTimeout(() => {
         notification.classList.add('hidden');

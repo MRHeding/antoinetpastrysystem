@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link href="css/output.css" rel="stylesheet">
     <link href="assets/css/font-awesome.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-gray-50">
     <!-- Navigation -->
     <div id="navigation-container"></div>
@@ -33,7 +35,7 @@
                 <h2 class="text-3xl font-bold text-gray-800 mb-4">Payment Successful!</h2>
                 <p class="text-gray-600 mb-2">Thank you for your order.</p>
                 <p class="text-lg font-semibold text-amber-600 mb-8">Order #<span id="order-number"></span></p>
-                
+
                 <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
                     <div class="flex items-start">
                         <i class="fas fa-info-circle text-green-600 text-xl mr-3 mt-1"></i>
@@ -50,15 +52,18 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="orders.html" class="bg-amber-600 text-white px-8 py-3 rounded-md hover:bg-amber-700 transition duration-200 font-semibold">
+                    <a href="orders.html"
+                        class="bg-amber-600 text-white px-8 py-3 rounded-md hover:bg-amber-700 transition duration-200 font-semibold">
                         <i class="fas fa-list mr-2"></i>View My Orders
                     </a>
-                    <a href="products.html" class="bg-gray-100 text-gray-700 px-8 py-3 rounded-md hover:bg-gray-200 transition duration-200 font-semibold">
+                    <a href="products.html"
+                        class="bg-gray-100 text-gray-700 px-8 py-3 rounded-md hover:bg-gray-200 transition duration-200 font-semibold">
                         <i class="fas fa-shopping-bag mr-2"></i>Continue Shopping
                     </a>
                 </div>
 
-                <p class="text-sm text-gray-500 mt-6">Redirecting to orders page in <span id="countdown">5</span> seconds...</p>
+                <p class="text-sm text-gray-500 mt-6">Redirecting to orders page in <span id="countdown">5</span>
+                    seconds...</p>
             </div>
 
             <!-- Error State -->
@@ -69,13 +74,16 @@
                     </div>
                 </div>
                 <h2 class="text-3xl font-bold text-gray-800 mb-4">Payment Verification Failed</h2>
-                <p class="text-gray-600 mb-8">We couldn't verify your payment. Please check your orders or contact support.</p>
-                
+                <p class="text-gray-600 mb-8">We couldn't verify your payment. Please check your orders or contact
+                    support.</p>
+
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="orders.html" class="bg-amber-600 text-white px-8 py-3 rounded-md hover:bg-amber-700 transition duration-200 font-semibold">
+                    <a href="orders.html"
+                        class="bg-amber-600 text-white px-8 py-3 rounded-md hover:bg-amber-700 transition duration-200 font-semibold">
                         <i class="fas fa-list mr-2"></i>Check My Orders
                     </a>
-                    <a href="contact.html" class="bg-gray-100 text-gray-700 px-8 py-3 rounded-md hover:bg-gray-200 transition duration-200 font-semibold">
+                    <a href="contact.html"
+                        class="bg-gray-100 text-gray-700 px-8 py-3 rounded-md hover:bg-gray-200 transition duration-200 font-semibold">
                         <i class="fas fa-headset mr-2"></i>Contact Support
                     </a>
                 </div>
@@ -89,28 +97,57 @@
     <script src="js/shared.js"></script>
     <script>
         // Verify payment on page load
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Check for COD order first
+            const pendingOrderJson = localStorage.getItem('pending_order');
+            let pendingOrder = null;
+
+            if (pendingOrderJson) {
+                try {
+                    pendingOrder = JSON.parse(pendingOrderJson);
+                } catch (e) {
+                    console.error('Error parsing pending order:', e);
+                }
+            }
+
+            // Handle COD Order
+            if (pendingOrder && pendingOrder.payment_method === 'cod') {
+                console.log('Processing COD order success:', pendingOrder);
+
+                // Show success state immediately for COD
+                showSuccessState(pendingOrder.order_number);
+
+                // Update success message for COD
+                const successTitle = document.querySelector('#success-state h2');
+                const successMsg = document.querySelector('#success-state p.text-gray-600');
+                if (successTitle) successTitle.textContent = 'Order Placed Successfully!';
+                if (successMsg) successMsg.textContent = 'Your order has been received. Please pay upon delivery.';
+
+                // Clear cart and pending order
+                localStorage.removeItem('cart');
+                localStorage.removeItem('pending_order');
+
+                // Update cart display
+                if (typeof updateCartDisplay === 'function') {
+                    updateCartDisplay();
+                }
+
+                // Redirect after 5 seconds
+                startRedirectCountdown();
+                return;
+            }
+
+            // Handle Online Payment (PayMongo)
             // Get session ID from URL first
             const urlParams = new URLSearchParams(window.location.search);
             let sessionId = urlParams.get('session_id');
-            
+
             console.log('URL session_id:', sessionId);
-            
+
             // If session_id is the placeholder or not found, get from localStorage
-            if (!sessionId || sessionId === '{CHECKOUT_SESSION_ID}') {
-                const pendingOrder = localStorage.getItem('pending_order');
-                console.log('Pending order from localStorage:', pendingOrder);
-                
-                if (pendingOrder) {
-                    try {
-                        const orderData = JSON.parse(pendingOrder);
-                        console.log('Parsed order data:', orderData);
-                        sessionId = orderData.checkout_session_id;
-                        console.log('Session ID from localStorage:', sessionId);
-                    } catch (e) {
-                        console.error('Error parsing pending order:', e);
-                    }
-                }
+            if ((!sessionId || sessionId === '{CHECKOUT_SESSION_ID}') && pendingOrder) {
+                sessionId = pendingOrder.checkout_session_id;
+                console.log('Session ID from localStorage:', sessionId);
             }
 
             // If still no session ID, try to get the most recent pending order from database
@@ -120,7 +157,7 @@
                     const response = await fetch('api/payment.php?action=get_latest_pending_order');
                     const data = await response.json();
                     console.log('Latest pending order response:', data);
-                    
+
                     if (data.success && data.checkout_session_id) {
                         sessionId = data.checkout_session_id;
                         console.log('Using session ID from latest pending order:', sessionId);
@@ -135,7 +172,7 @@
                 showErrorState('Could not retrieve payment information. Please check your orders page.');
                 return;
             }
-            
+
             console.log('Final session ID to verify:', sessionId);
 
             try {
@@ -148,29 +185,18 @@
                 if (data.success && data.payment_status === 'paid') {
                     // Show success state
                     showSuccessState(data.order_number);
-                    
+
                     // Clear cart
                     localStorage.removeItem('cart');
                     localStorage.removeItem('pending_order');
-                    
+
                     // Update cart display
                     if (typeof updateCartDisplay === 'function') {
                         updateCartDisplay();
                     }
-                    
+
                     // Redirect after 5 seconds
-                    let countdown = 5;
-                    const countdownEl = document.getElementById('countdown');
-                    const interval = setInterval(() => {
-                        countdown--;
-                        if (countdownEl) {
-                            countdownEl.textContent = countdown;
-                        }
-                        if (countdown <= 0) {
-                            clearInterval(interval);
-                            window.location.href = 'orders.html';
-                        }
-                    }, 1000);
+                    startRedirectCountdown();
                 } else {
                     console.error('Payment verification failed:', data);
                     showErrorState(data.message || 'Unknown error', data.debug_info);
@@ -180,6 +206,21 @@
                 showErrorState('Network error: ' + error.message);
             }
         });
+
+        function startRedirectCountdown() {
+            let countdown = 5;
+            const countdownEl = document.getElementById('countdown');
+            const interval = setInterval(() => {
+                countdown--;
+                if (countdownEl) {
+                    countdownEl.textContent = countdown;
+                }
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                    window.location.href = 'orders.html';
+                }
+            }, 1000);
+        }
 
         function showSuccessState(orderNumber) {
             document.getElementById('loading-state').classList.add('hidden');
@@ -191,13 +232,13 @@
             document.getElementById('loading-state').classList.add('hidden');
             const errorState = document.getElementById('error-state');
             errorState.classList.remove('hidden');
-            
+
             // Add detailed error message if provided
             if (errorMessage) {
                 const errorTitle = errorState.querySelector('h2');
                 const errorText = errorState.querySelector('p');
                 errorText.textContent = errorMessage;
-                
+
                 // Add debug info in console
                 if (debugInfo) {
                     console.error('Debug info:', debugInfo);
@@ -206,5 +247,5 @@
         }
     </script>
 </body>
-</html>
 
+</html>

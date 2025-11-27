@@ -1,10 +1,10 @@
 // Home page specific JavaScript
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Load navigation and footer components
     loadComponent('components/navigation.html', 'navigation-container');
     loadComponent('components/footer.html', 'footer-container');
-    
+
     // Load featured products
     loadFeaturedProducts();
 });
@@ -14,7 +14,7 @@ async function loadFeaturedProducts() {
     try {
         const response = await fetch('api/products.php');
         const products = await response.json();
-        
+
         if (products.success) {
             // Take only the first 4 products for featured section
             const featuredProducts = products.data.slice(0, 4);
@@ -32,7 +32,7 @@ async function loadFeaturedProducts() {
 // Display featured products on the home page
 function displayFeaturedProducts(products) {
     const container = document.getElementById('featured-products-container');
-    
+
     if (!products || products.length === 0) {
         container.innerHTML = `
             <div class="col-span-full text-center py-8">
@@ -42,19 +42,19 @@ function displayFeaturedProducts(products) {
         `;
         return;
     }
-    
+
     container.innerHTML = products.map(product => {
         // Determine image source
-        const imageSrc = product.image_url 
-            ? product.image_url 
+        const imageSrc = product.image_url
+            ? product.image_url
             : 'Logo.png';
-            
+
         // Determine availability status badge
         const isAvailable = product.availability_status === 'available';
-        const statusBadge = isAvailable 
+        const statusBadge = isAvailable
             ? '<div class="absolute top-3 left-3 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md flex items-center"><i class="fas fa-check-circle mr-1"></i>Available</div>'
             : '<div class="absolute top-3 left-3 bg-red-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-md flex items-center"><i class="fas fa-times-circle mr-1"></i>Unavailable</div>';
-            
+
         return `
         <div class="product-card group ${!isAvailable ? 'opacity-90' : ''}" id="product-${product.id}">
             <div class="product-card-image" onclick="viewProduct(${product.id})">

@@ -1,12 +1,12 @@
 // Shared JavaScript functionality for multi-page website
 
 // Initialize common functionality on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize scroll to top (doesn't depend on navigation)
     initScrollToTop();
-    
+
     // Handle window resize to reinitialize mobile menu when switching between desktop/mobile
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', function () {
         // Debounce the resize event
         clearTimeout(window.resizeTimeout);
         window.resizeTimeout = setTimeout(() => {
@@ -25,13 +25,13 @@ document.addEventListener('DOMContentLoaded', function() {
 function initNavigation() {
     // Handle navigation link clicks
     document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
             // Remove active class from all nav links
             document.querySelectorAll('.nav-link').forEach(navLink => {
                 navLink.classList.remove('text-amber-600', 'bg-amber-50');
                 navLink.classList.add('text-gray-800');
             });
-            
+
             // Add active class to clicked link
             this.classList.add('text-amber-600', 'bg-amber-50');
             this.classList.remove('text-gray-800');
@@ -46,41 +46,41 @@ function initMobileMenu() {
         console.log('Desktop view detected, skipping mobile menu initialization');
         return;
     }
-    
+
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
-    
+
     console.log('Initializing mobile menu...', { mobileMenuButton, mobileMenu });
-    
+
     if (mobileMenuButton && mobileMenu) {
         console.log('Mobile menu elements found, setting up event listeners');
-        
+
         // Remove any existing event listeners to prevent duplicates
         const newButton = mobileMenuButton.cloneNode(true);
         mobileMenuButton.parentNode.replaceChild(newButton, mobileMenuButton);
-        
+
         // Add click event listener
-        newButton.addEventListener('click', function(e) {
+        newButton.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             console.log('Mobile menu button clicked');
             toggleMobileMenu();
         });
-        
+
         // Close mobile menu when clicking outside
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!newButton.contains(e.target) && !mobileMenu.contains(e.target)) {
                 closeMobileMenu();
             }
         });
-        
+
         // Close mobile menu when window is resized to desktop
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
             if (window.innerWidth >= 768) {
                 closeMobileMenu();
             }
         });
-        
+
         console.log('Mobile menu initialized successfully');
     } else {
         console.log('Mobile menu elements not found, retrying...');
@@ -94,13 +94,13 @@ function initMobileMenu() {
 function toggleMobileMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuButton = document.getElementById('mobile-menu-button');
-    
+
     console.log('Toggle mobile menu called', { mobileMenu, mobileMenuButton });
-    
+
     if (mobileMenu && mobileMenuButton) {
         const isHidden = mobileMenu.classList.contains('hidden');
         console.log('Menu is hidden:', isHidden);
-        
+
         if (isHidden) {
             openMobileMenu();
         } else {
@@ -114,9 +114,9 @@ function toggleMobileMenu() {
 function openMobileMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuButton = document.getElementById('mobile-menu-button');
-    
+
     console.log('Opening mobile menu', { mobileMenu, mobileMenuButton });
-    
+
     if (mobileMenu && mobileMenuButton) {
         mobileMenu.classList.remove('hidden');
         mobileMenuButton.innerHTML = '<i class="fas fa-times text-xl"></i>';
@@ -130,9 +130,9 @@ function openMobileMenu() {
 function closeMobileMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuButton = document.getElementById('mobile-menu-button');
-    
+
     console.log('Closing mobile menu', { mobileMenu, mobileMenuButton });
-    
+
     if (mobileMenu && mobileMenuButton) {
         mobileMenu.classList.add('hidden');
         mobileMenuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
@@ -147,14 +147,14 @@ function closeMobileMenu() {
 function setActiveNavLink() {
     const currentPage = getCurrentPage();
     const activeLink = document.querySelector(`[data-page="${currentPage}"]`);
-    
+
     if (activeLink) {
         // Remove active class from all nav links
         document.querySelectorAll('.nav-link').forEach(navLink => {
             navLink.classList.remove('text-amber-600', 'bg-amber-50');
             navLink.classList.add('text-gray-800');
         });
-        
+
         // Add active class to current page link
         activeLink.classList.add('text-amber-600', 'bg-amber-50');
         activeLink.classList.remove('text-gray-800');
@@ -165,7 +165,7 @@ function setActiveNavLink() {
 function getCurrentPage() {
     const path = window.location.pathname;
     const filename = path.split('/').pop();
-    
+
     if (filename === 'index.html' || filename === '' || filename === '/') {
         return 'home';
     } else if (filename === 'products.html') {
@@ -184,7 +184,7 @@ async function initAuth() {
     try {
         const response = await fetch('api/auth.php?action=check');
         const data = await response.json();
-        
+
         if (data.success) {
             showUserMenu(data.user);
         } else {
@@ -200,37 +200,37 @@ function showUserMenu(user) {
     const userMenu = document.getElementById('user-menu');
     const userLoggedIn = document.getElementById('user-logged-in');
     const userName = document.getElementById('user-name');
-    
+
     // Mobile menu elements
     const mobileUserMenu = document.getElementById('mobile-user-menu');
     const mobileUserLoggedIn = document.getElementById('mobile-user-logged-in');
     const mobileUserName = document.getElementById('mobile-user-name');
-    
+
     if (userMenu && userLoggedIn && userName) {
         userMenu.classList.add('hidden');
         userLoggedIn.classList.remove('hidden');
         userLoggedIn.classList.add('flex');
         userName.textContent = user.first_name;
-        
+
         // Initialize profile dropdown functionality
         initProfileDropdown(user);
     }
-    
+
     // Handle mobile menu
     if (mobileUserMenu && mobileUserLoggedIn && mobileUserName) {
         mobileUserMenu.classList.add('hidden');
         mobileUserLoggedIn.classList.remove('hidden');
         mobileUserName.textContent = user.first_name;
-        
+
         // Check if user is admin for mobile menu
         if (user.role === 'admin') {
             const mobileDashboardLink = document.getElementById('mobile-dashboard-link');
             const mobileDropdown = document.getElementById('mobile-user-dropdown');
-            
+
             if (mobileDashboardLink && mobileDropdown) {
                 mobileDropdown.classList.add('hidden');
                 mobileDashboardLink.classList.remove('hidden');
-                mobileDashboardLink.onclick = function() {
+                mobileDashboardLink.onclick = function () {
                     window.location.href = 'admin/index.php';
                 };
             }
@@ -242,16 +242,16 @@ function showUserMenu(user) {
 function initProfileDropdown(user = null) {
     const dropdownBtn = document.getElementById('user-dropdown-btn');
     const dropdown = document.getElementById('user-dropdown');
-    
+
     if (!dropdownBtn || !dropdown) {
         console.log('Profile dropdown elements not found');
         return;
     }
-    
+
     // Remove any existing event listeners to prevent duplicates
     const newDropdownBtn = dropdownBtn.cloneNode(true);
     dropdownBtn.parentNode.replaceChild(newDropdownBtn, dropdownBtn);
-    
+
     // Get user info if not provided
     if (!user) {
         // Try to get user info from the displayed name
@@ -264,29 +264,29 @@ function initProfileDropdown(user = null) {
             return;
         }
     }
-    
+
     // Check if user is admin
     if (user.role === 'admin') {
         // Change button to dashboard link
         newDropdownBtn.innerHTML = '<i class="fas fa-tachometer-alt mr-2"></i>Dashboard';
-        newDropdownBtn.onclick = function() {
+        newDropdownBtn.onclick = function () {
             window.location.href = 'admin/index.php';
         };
     } else {
         // Setup user dropdown for regular users
-        newDropdownBtn.addEventListener('click', function(e) {
+        newDropdownBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             dropdown.classList.toggle('hidden');
         });
-        
+
         // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!newDropdownBtn.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.classList.add('hidden');
             }
         });
     }
-    
+
     console.log('Profile dropdown initialized successfully');
 }
 
@@ -294,31 +294,31 @@ function showLoginButton() {
     const userMenu = document.getElementById('user-menu');
     const userLoggedIn = document.getElementById('user-logged-in');
     const loginBtn = document.getElementById('login-btn');
-    
+
     // Mobile menu elements
     const mobileUserMenu = document.getElementById('mobile-user-menu');
     const mobileUserLoggedIn = document.getElementById('mobile-user-logged-in');
     const mobileLoginBtn = document.getElementById('mobile-login-btn');
-    
+
     if (userMenu && userLoggedIn) {
         userMenu.classList.remove('hidden');
         userLoggedIn.classList.add('hidden');
         userLoggedIn.classList.remove('flex');
-        
+
         if (loginBtn) {
-            loginBtn.addEventListener('click', function() {
+            loginBtn.addEventListener('click', function () {
                 window.location.href = 'auth.html';
             });
         }
     }
-    
+
     // Handle mobile menu
     if (mobileUserMenu && mobileUserLoggedIn) {
         mobileUserMenu.classList.remove('hidden');
         mobileUserLoggedIn.classList.add('hidden');
-        
+
         if (mobileLoginBtn) {
-            mobileLoginBtn.addEventListener('click', function() {
+            mobileLoginBtn.addEventListener('click', function () {
                 window.location.href = 'auth.html';
             });
         }
@@ -330,16 +330,16 @@ async function logout() {
         const response = await fetch('api/auth.php?action=logout', {
             method: 'POST'
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             // Clear cart when user logs out
             localStorage.removeItem('cart');
             showNotification('Logged out successfully', 'success');
             showLoginButton();
             updateCartDisplay();
-            
+
             // Redirect to home page after successful logout
             setTimeout(() => {
                 window.location.href = 'index.html';
@@ -359,7 +359,7 @@ async function addToCart(productId) {
     try {
         const response = await fetch('api/auth.php?action=check');
         const data = await response.json();
-        
+
         if (!data.success) {
             showNotification('Please log in to add items to your cart', 'error');
             // Redirect to login page
@@ -368,22 +368,22 @@ async function addToCart(productId) {
             }, 2000);
             return;
         }
-        
+
         // User is logged in, proceed with adding to cart
         let cart = JSON.parse(localStorage.getItem('cart') || '[]');
         const existingItem = cart.find(item => item.id === productId);
-        
+
         if (existingItem) {
             existingItem.quantity += 1;
         } else {
             cart.push({ id: productId, quantity: 1 });
         }
-        
+
         localStorage.setItem('cart', JSON.stringify(cart));
-        
+
         // Update cart display immediately
         updateCartDisplay();
-        
+
         // Show success message
         showNotification('Product added to cart!', 'success');
     } catch (error) {
@@ -399,7 +399,7 @@ function updateCartDisplay() {
     // Get cart from localStorage and update display
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    
+
     // Update all cart buttons
     const cartButtons = document.querySelectorAll('a[href="cart.html"]');
     cartButtons.forEach(button => {
@@ -417,10 +417,10 @@ function updateCartDisplay() {
 // Scroll to top functionality
 function initScrollToTop() {
     const scrollToTopButton = document.getElementById('scroll-to-top');
-    
+
     if (scrollToTopButton) {
         // Show/hide button based on scroll position
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             if (window.pageYOffset > 300) {
                 scrollToTopButton.classList.remove('opacity-0', 'invisible');
                 scrollToTopButton.classList.add('opacity-100', 'visible');
@@ -429,9 +429,9 @@ function initScrollToTop() {
                 scrollToTopButton.classList.remove('opacity-100', 'visible');
             }
         });
-        
+
         // Scroll to top when clicked
-        scrollToTopButton.addEventListener('click', function() {
+        scrollToTopButton.addEventListener('click', function () {
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
@@ -443,31 +443,29 @@ function initScrollToTop() {
 // Notification system
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
-    notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${
-        type === 'success' ? 'bg-green-500 text-white' :
-        type === 'error' ? 'bg-red-500 text-white' :
-        'bg-blue-500 text-white'
-    }`;
+    notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-green-500 text-white' :
+            type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+        }`;
     notification.innerHTML = `
         <div class="flex items-center">
-            <i class="fas ${
-                type === 'success' ? 'fa-check-circle' :
-                type === 'error' ? 'fa-exclamation-circle' :
+            <i class="fas ${type === 'success' ? 'fa-check-circle' :
+            type === 'error' ? 'fa-exclamation-circle' :
                 'fa-info-circle'
-            } mr-2"></i>
+        } mr-2"></i>
             <span>${message}</span>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
 }
 
 // Global function to manually initialize mobile menu (for debugging)
-window.initMobileMenuManually = function() {
+window.initMobileMenuManually = function () {
     console.log('Manually initializing mobile menu...');
     if (window.innerWidth < 768) {
         initMobileMenu();
@@ -477,7 +475,7 @@ window.initMobileMenuManually = function() {
 };
 
 // Global function to manually initialize navigation (for debugging)
-window.initNavigationManually = function() {
+window.initNavigationManually = function () {
     console.log('Manually initializing navigation...');
     initializeNavigationFunctionality();
 };
@@ -499,10 +497,10 @@ async function loadComponent(componentPath, targetElementId) {
         const response = await fetch(componentPath);
         const html = await response.text();
         const targetElement = document.getElementById(targetElementId);
-        
+
         if (targetElement) {
             targetElement.innerHTML = html;
-            
+
             // Initialize shared functionality after loading components
             // Use a longer delay to ensure DOM is fully updated
             setTimeout(() => {
@@ -518,27 +516,27 @@ async function loadComponent(componentPath, targetElementId) {
 function initializeNavigationFunctionality() {
     // Initialize navigation
     initNavigation();
-    
+
     // Initialize authentication
     initAuth();
-    
+
     // Initialize cart display
     updateCartDisplay();
-    
+
     // Set active navigation link
     setActiveNavLink();
-    
+
     // Initialize mobile menu
     initMobileMenu();
-    
+
     // Re-initialize profile dropdown functionality
     initProfileDropdown();
-    
+
     // Mark navigation container as initialized
     const navContainer = document.getElementById('navigation-container');
     if (navContainer) {
         navContainer.setAttribute('data-initialized', 'true');
     }
-    
+
     console.log('Navigation functionality initialized successfully');
 }

@@ -51,7 +51,7 @@ try {
         SELECT COUNT(*) as total 
         FROM orders 
         WHERE status != 'cancelled' 
-        AND NOT (status = 'pending' AND payment_status = 'pending')
+        AND NOT (status = 'pending' AND payment_status = 'pending' AND payment_method != 'cod')
     ");
     $totalOrders = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
@@ -70,7 +70,7 @@ try {
         FROM orders o
         LEFT JOIN users u ON o.user_id = u.id
         WHERE o.status != 'cancelled'
-        AND NOT (o.status = 'pending' AND o.payment_status = 'pending')
+        AND NOT (o.status = 'pending' AND o.payment_status = 'pending' AND o.payment_method != 'cod')
         ORDER BY o.order_date DESC
         LIMIT 5
     ");
