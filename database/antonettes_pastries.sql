@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 27, 2025 at 05:25 PM
+-- Generation Time: Dec 11, 2025 at 09:31 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -49,7 +49,9 @@ INSERT INTO `audit_log` (`id`, `user_id`, `action`, `action_description`, `ip_ad
 (5, 1, 'update_order_status', 'Updated order status from \'preparing\' to \'completed\' for order ID 35', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '2025-11-27 03:41:44'),
 (6, 1, 'update_order_status', 'Updated order status from \'pending\' to \'ready\' for order ID 41', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0', '2025-11-27 15:15:06'),
 (7, 1, 'update_order_status', 'Updated order status from \'ready\' to \'completed\' for order ID 41', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0', '2025-11-27 15:15:58'),
-(8, 1, 'update_payment_status', 'Updated payment status from \'pending\' to \'paid\' for order ID 41', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0', '2025-11-27 15:16:19');
+(8, 1, 'update_payment_status', 'Updated payment status from \'pending\' to \'paid\' for order ID 41', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0', '2025-11-27 15:16:19'),
+(9, 1, 'update_order_status', 'Updated order status from \'pending\' to \'completed\' for order ID 44', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', '2025-12-11 06:13:26'),
+(10, 1, 'delete_order', 'Deleted order #ORD-20251211-2519 (ID: 45)', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', '2025-12-11 07:46:01');
 
 -- --------------------------------------------------------
 
@@ -179,7 +181,14 @@ INSERT INTO `orders` (`id`, `user_id`, `customer_id`, `order_number`, `total_amo
 (37, 27, NULL, 'ORD-20251127-8841', 100.00, 'cancelled', 'pending', 'COD', NULL, NULL, NULL, '2025-11-27 05:11:40', NULL, 'Order total: ₱100.00 (Subtotal: ₱50.00, Delivery: ₱50.00). Payment Method: Cash on Delivery (COD)', '2025-11-27 05:11:40', '2025-11-27 15:14:47'),
 (38, 27, NULL, 'ORD-20251127-2294', 60.00, 'cancelled', 'pending', NULL, NULL, 'cs_xwLfRYAnLkeUfzcPsdcUHD4q', NULL, '2025-11-27 05:35:48', NULL, 'Order total: ₱60.00 (Subtotal: ₱10.00, Delivery: ₱50.00)', '2025-11-27 05:35:48', '2025-11-27 05:35:55'),
 (40, 27, NULL, 'ORD-20251127-7479', 100.00, 'cancelled', 'pending', 'cod', NULL, NULL, NULL, '2025-11-27 15:07:27', NULL, 'Cash on Delivery Order', '2025-11-27 15:07:27', '2025-11-27 15:14:45'),
-(41, 27, NULL, 'ORD-20251127-1391', 80.00, 'completed', 'paid', 'cod', NULL, NULL, '2025-11-27 23:16:19', '2025-11-27 15:09:40', NULL, 'Cash on Delivery Order', '2025-11-27 15:09:40', '2025-11-27 15:16:19');
+(41, 27, NULL, 'ORD-20251127-1391', 80.00, 'completed', 'paid', 'cod', NULL, NULL, '2025-11-27 23:16:19', '2025-11-27 15:09:40', NULL, 'Cash on Delivery Order', '2025-11-27 15:09:40', '2025-11-27 15:16:19'),
+(44, 27, NULL, 'ORD-20251211-3920', 100.00, 'completed', 'paid', 'gcash', 'pi_SxMsW5HX1SnThKj1T1Q1nCJX', 'cs_F9hDbZHLVouhrN5wU1unBqiJ', '2025-12-11 13:55:46', '2025-12-11 05:54:51', NULL, 'Order total: ₱100.00 (Subtotal: ₱50.00, Delivery: ₱50.00)', '2025-12-11 05:54:51', '2025-12-11 06:13:26'),
+(46, 27, NULL, 'ORD-20251211-7971', 250.00, 'pending', 'pending', 'cod', NULL, NULL, NULL, '2025-12-11 07:49:13', NULL, 'Cash on Delivery Order\nBarangay: Bolong\nLandmark: Azura Beach\nContact: 09918195487', '2025-12-11 07:49:13', '2025-12-11 07:49:13'),
+(47, 27, NULL, 'ORD-20251211-6237', 95.00, 'pending', 'pending', NULL, NULL, 'cs_85M85P2x122s7avF572qdVDW', NULL, '2025-12-11 07:57:07', NULL, 'Online Payment Order\nBarangay: Camino Nuevo\nLandmark: Azura Beach\nContact: 09918195487', '2025-12-11 07:57:07', '2025-12-11 07:57:08'),
+(48, 27, NULL, 'ORD-20251211-8471', 95.00, 'pending', 'pending', NULL, NULL, 'cs_SoGaP5qJBrfTYPd7mgczqMoo', NULL, '2025-12-11 08:00:21', NULL, 'Online Payment Order\nBarangay: Sinunuc\nLandmark: Peace Compound\nContact: 09918195487', '2025-12-11 08:00:21', '2025-12-11 08:00:21'),
+(49, 27, NULL, 'ORD-20251211-4474', 95.00, 'pending', 'paid', 'gcash', 'pi_qgCyqJ6hQWP1tFNt7GZNt4oR', 'cs_ZSfFbc6wTgpxaHvebQZFdCEs', '2025-12-11 16:01:58', '2025-12-11 08:01:22', NULL, 'Online Payment Order\nBarangay: Sinunuc\nLandmark: Peace Compound\nContact: 09918195487', '2025-12-11 08:01:22', '2025-12-11 08:01:58'),
+(50, 27, NULL, 'ORD-20251211-1694', 195.00, 'pending', 'paid', 'gcash', 'pi_NrkVW6VstLcX1fM3gJzyGM1k', 'cs_bDiugEHYE3bm71Vbz2ceiv1x', '2025-12-11 16:15:21', '2025-12-11 08:14:41', NULL, 'Online Payment Order\nBarangay: Sinunuc\nLandmark: Peace Compound 1\nContact: 09918195487', '2025-12-11 08:14:41', '2025-12-11 08:15:21'),
+(51, 27, NULL, 'ORD-20251211-0192', 425.00, 'pending', 'paid', 'gcash', 'pi_QWh4EAezp6kyJtMnVNQjHdxo', 'cs_L7T576aH6HxsUVKug2wGm1r5', '2025-12-11 16:27:24', '2025-12-11 08:26:52', NULL, 'Online Payment Order\nBarangay: La Paz\nLandmark: Peace Compound 1\nContact: 09918195487', '2025-12-11 08:26:52', '2025-12-11 08:27:24');
 
 -- --------------------------------------------------------
 
@@ -208,7 +217,15 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `size_code`, `quantit
 (49, 37, 23, NULL, 1, 50.00, 50.00, '2025-11-27 05:11:40'),
 (50, 38, 21, NULL, 1, 10.00, 10.00, '2025-11-27 05:35:48'),
 (52, 40, 23, NULL, 1, 50.00, 50.00, '2025-11-27 15:07:27'),
-(53, 41, 20, NULL, 1, 30.00, 30.00, '2025-11-27 15:09:40');
+(53, 41, 20, NULL, 1, 30.00, 30.00, '2025-11-27 15:09:40'),
+(56, 44, 24, NULL, 2, 25.00, 50.00, '2025-12-11 05:54:51'),
+(59, 46, 23, NULL, 2, 50.00, 100.00, '2025-12-11 07:49:13'),
+(60, 47, 24, NULL, 1, 25.00, 25.00, '2025-12-11 07:57:07'),
+(61, 48, 24, NULL, 1, 25.00, 25.00, '2025-12-11 08:00:21'),
+(62, 49, 24, NULL, 1, 25.00, 25.00, '2025-12-11 08:01:22'),
+(63, 50, 24, NULL, 5, 25.00, 125.00, '2025-12-11 08:14:41'),
+(64, 51, 23, NULL, 3, 50.00, 150.00, '2025-12-11 08:26:52'),
+(65, 51, 24, NULL, 5, 25.00, 125.00, '2025-12-11 08:26:52');
 
 -- --------------------------------------------------------
 
@@ -221,6 +238,7 @@ CREATE TABLE `products` (
   `name` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
   `price` decimal(10,2) NOT NULL,
+  `min_order` int(11) DEFAULT 1,
   `category` varchar(100) DEFAULT 'General',
   `size` enum('S','M','L','XL') DEFAULT 'M',
   `image_url` varchar(500) DEFAULT NULL,
@@ -237,13 +255,37 @@ CREATE TABLE `products` (
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`id`, `name`, `description`, `price`, `category`, `size`, `image_url`, `is_active`, `availability_status`, `unavailable_reason`, `status_updated_at`, `status_updated_by`, `created_at`, `updated_at`) VALUES
-(19, 'Hot Pandesal', 'Our best hot pandesal best combine with hot coffee the best in town', 2.50, 'Bread', 'M', 'uploads/products/1760778180_images (6).jpg', 0, 'unavailable', NULL, NULL, NULL, '2025-10-18 09:03:00', '2025-10-26 16:09:32'),
-(20, 'Pandesal Choco', 'Our Best Selling Pandesal', 5.00, 'Bread', 'M', 'uploads/products/1760876922_PandeSalcopy.jpg', 0, 'available', NULL, NULL, NULL, '2025-10-19 12:28:42', '2025-11-27 15:40:41'),
-(21, 'Hot Croissant', 'Buttery, flaky, crescent-shaped French pastry made from a laminated yeast', 10.00, 'Croissants', 'M', 'uploads/products/1760877121_Vegan-Croissants-1.jpg', 0, 'available', NULL, NULL, NULL, '2025-10-19 12:32:01', '2025-11-27 15:40:39'),
-(22, 'Banana Cake', 'Our very delicious banana cake', 150.00, 'Cakes', 'M', 'uploads/products/1760877245_Banan.jpg', 0, 'unavailable', 'no stock', '2025-10-29 06:09:01', 1, '2025-10-19 12:34:05', '2025-11-27 15:40:36'),
-(23, 'Choco Cookie', 'Choco cookie delicious and yummy', 15.00, 'Cookies', 'M', 'uploads/products/1760877326_images.jpg', 1, 'available', NULL, '2025-10-29 16:29:40', 1, '2025-10-19 12:35:26', '2025-11-27 15:40:51'),
-(24, 'Pandesal', 'Delicious Pandesal', 2.50, 'Bread', 'M', 'uploads/products/1764258321_pandesal-5.jpg', 1, 'available', NULL, NULL, NULL, '2025-11-27 15:45:21', '2025-11-27 15:47:50');
+INSERT INTO `products` (`id`, `name`, `description`, `price`, `min_order`, `category`, `size`, `image_url`, `is_active`, `availability_status`, `unavailable_reason`, `status_updated_at`, `status_updated_by`, `created_at`, `updated_at`) VALUES
+(19, 'Hot Pandesal', 'Our best hot pandesal best combine with hot coffee the best in town', 2.50, 1, 'Bread', 'M', 'uploads/products/1760778180_images (6).jpg', 0, 'unavailable', NULL, NULL, NULL, '2025-10-18 09:03:00', '2025-10-26 16:09:32'),
+(20, 'Pandesal Choco', 'Our Best Selling Pandesal', 5.00, 3, 'Bread', 'M', 'uploads/products/1760876922_PandeSalcopy.jpg', 0, 'available', NULL, NULL, NULL, '2025-10-19 12:28:42', '2025-12-11 08:07:33'),
+(21, 'Hot Croissant', 'Buttery, flaky, crescent-shaped French pastry made from a laminated yeast', 10.00, 1, 'Croissants', 'M', 'uploads/products/1760877121_Vegan-Croissants-1.jpg', 0, 'available', NULL, NULL, NULL, '2025-10-19 12:32:01', '2025-11-27 15:40:39'),
+(22, 'Banana Cake', 'Our very delicious banana cake', 150.00, 1, 'Cakes', 'M', 'uploads/products/1760877245_Banan.jpg', 0, 'unavailable', 'no stock', '2025-10-29 06:09:01', 1, '2025-10-19 12:34:05', '2025-11-27 15:40:36'),
+(23, 'Choco Cookie', 'Choco cookie delicious and yummy', 15.00, 3, 'Cookies', 'M', 'uploads/products/1760877326_images.jpg', 1, 'available', NULL, '2025-10-29 16:29:40', 1, '2025-10-19 12:35:26', '2025-12-11 08:22:00'),
+(24, 'Pandesal', 'Delicious Pandesal', 2.50, 5, 'Bread', 'M', 'uploads/products/1764258321_pandesal-5.jpg', 1, 'available', NULL, NULL, NULL, '2025-11-27 15:45:21', '2025-12-11 08:09:54');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `product_reviews`
+--
+
+CREATE TABLE `product_reviews` (
+  `id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `rating` int(11) NOT NULL CHECK (`rating` >= 1 and `rating` <= 5),
+  `comment` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `product_reviews`
+--
+
+INSERT INTO `product_reviews` (`id`, `product_id`, `user_id`, `rating`, `comment`, `created_at`, `updated_at`) VALUES
+(1, 23, 27, 5, 'Test', '2025-12-11 06:11:30', '2025-12-11 06:11:30'),
+(2, 24, 27, 5, 'Testing Rating buttons', '2025-12-11 06:36:26', '2025-12-11 06:36:26');
 
 -- --------------------------------------------------------
 
@@ -281,10 +323,10 @@ INSERT INTO `product_sizes` (`id`, `product_id`, `size_name`, `size_code`, `pric
 (11, 22, 'Medium (8 inches)', 'M', 150.00, 1, 2, '2025-10-29 08:25:33', '2025-10-29 08:25:33'),
 (12, 22, 'Large (10 inches)', 'L', 200.00, 1, 3, '2025-10-29 08:25:33', '2025-10-29 08:25:33'),
 (13, 22, 'Extra Large (12 inches)', 'XL', 280.00, 1, 4, '2025-10-29 08:25:33', '2025-10-29 08:25:33'),
-(14, 23, 'Small (6 pcs) - 8cm', 'S', 50.00, 1, 1, '2025-10-29 08:25:33', '2025-11-27 15:40:51'),
-(15, 23, 'Medium (12 pcs) - 8cm', 'M', 90.00, 1, 2, '2025-10-29 08:25:33', '2025-11-27 15:40:51'),
-(16, 23, 'Large (24 pcs) - 8cm', 'L', 160.00, 1, 3, '2025-10-29 08:25:33', '2025-11-27 15:40:51'),
-(17, 24, 'Small (10 pcs) - 8cm', 'S', 25.00, 1, 1, '2025-11-27 15:45:21', '2025-11-27 15:47:50');
+(14, 23, 'Small (6 pcs) - 8cm', 'S', 50.00, 1, 1, '2025-10-29 08:25:33', '2025-12-11 08:22:00'),
+(15, 23, 'Medium (12 pcs) - 8cm', 'M', 90.00, 1, 2, '2025-10-29 08:25:33', '2025-12-11 08:22:00'),
+(16, 23, 'Large (24 pcs) - 8cm', 'L', 160.00, 1, 3, '2025-10-29 08:25:33', '2025-12-11 08:22:00'),
+(17, 24, 'Small (10 pcs) - 8cm', 'S', 25.00, 1, 1, '2025-11-27 15:45:21', '2025-12-11 08:09:54');
 
 -- --------------------------------------------------------
 
@@ -374,7 +416,9 @@ INSERT INTO `user_sessions` (`id`, `user_id`, `session_token`, `expires_at`, `cr
 (76, 1, '904d019dcd1b2db1840082aec69a5fe5878c136ec6ae60464cf59bd9c3c0ebe0', '2025-11-05 02:13:47', '2025-10-29 09:13:47'),
 (94, 1, '1fb2fda41aa142e6e0799807af2e47247bb9e2a7a3d7cbcf872877f0966b2cce', '2025-11-09 05:16:58', '2025-11-02 12:16:58'),
 (99, 27, '0603a0173d3787d02c39a952c1ad7a6d0e7b8744396a7ecbddf23b046d3d5bb6', '2025-12-03 20:47:51', '2025-11-27 03:47:51'),
-(114, 27, 'ff7004eef0c46bead334c6f51e279d7db7c8f14654a8fb24095cc1c35cd041bc', '2025-12-04 09:14:25', '2025-11-27 16:14:25');
+(114, 27, 'ff7004eef0c46bead334c6f51e279d7db7c8f14654a8fb24095cc1c35cd041bc', '2025-12-04 09:14:25', '2025-11-27 16:14:25'),
+(122, 1, 'b5ca2e11c72eae07c3dac2dd7918c6c3ca3364eeffc5292d43fae6c675629f08', '2025-12-18 00:38:08', '2025-12-11 07:38:08'),
+(133, 1, '5fbcf9cec1fbd82088e98b442d9b4ac04f35e7a4d8a8b563bcf726290b5ed9ed', '2025-12-18 01:27:35', '2025-12-11 08:27:35');
 
 --
 -- Indexes for dumped tables
@@ -454,6 +498,16 @@ ALTER TABLE `products`
   ADD KEY `idx_availability_status` (`availability_status`);
 
 --
+-- Indexes for table `product_reviews`
+--
+ALTER TABLE `product_reviews`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_user_product_review` (`product_id`,`user_id`),
+  ADD KEY `idx_product_id` (`product_id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_created_at` (`created_at`);
+
+--
 -- Indexes for table `product_sizes`
 --
 ALTER TABLE `product_sizes`
@@ -498,7 +552,7 @@ ALTER TABLE `user_sessions`
 -- AUTO_INCREMENT for table `audit_log`
 --
 ALTER TABLE `audit_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -528,19 +582,25 @@ ALTER TABLE `customers`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+
+--
+-- AUTO_INCREMENT for table `product_reviews`
+--
+ALTER TABLE `product_reviews`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `product_sizes`
@@ -564,7 +624,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_sessions`
 --
 ALTER TABLE `user_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=115;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
 
 --
 -- Constraints for dumped tables
@@ -607,6 +667,13 @@ ALTER TABLE `order_items`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `fk_products_status_updated_by` FOREIGN KEY (`status_updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `product_reviews`
+--
+ALTER TABLE `product_reviews`
+  ADD CONSTRAINT `product_reviews_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `product_reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `product_sizes`
