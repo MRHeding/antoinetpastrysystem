@@ -133,6 +133,7 @@ function createProduct() {
                 $name = $_POST['name'] ?? '';
                 $description = $_POST['description'] ?? '';
                 $price = $_POST['price'] ?? 0;
+                $min_order = $_POST['min_order'] ?? 1;
                 $category = $_POST['category'] ?? 'General';
                 $size = $_POST['size'] ?? 'M';
                 $imageUrl = 'uploads/products/' . $fileName; // Relative path for storage
@@ -156,14 +157,15 @@ function createProduct() {
                 
                 try {
                     $stmt = $pdo->prepare("
-                        INSERT INTO products (name, description, price, category, size, image_url, availability_status, is_active, created_at) 
-                        VALUES (?, ?, ?, ?, ?, ?, 'available', 1, NOW())
+                        INSERT INTO products (name, description, price, min_order, category, size, image_url, availability_status, is_active, created_at) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, 'available', 1, NOW())
                     ");
                     
                     $stmt->execute([
                         $name,
                         $description,
                         $price,
+                        $min_order,
                         $category,
                         $size,
                         $imageUrl
@@ -217,14 +219,15 @@ function createProduct() {
         
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO products (name, description, price, category, size, image_url, availability_status, is_active, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?, 'available', 1, NOW())
+                INSERT INTO products (name, description, price, min_order, category, size, image_url, availability_status, is_active, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'available', 1, NOW())
             ");
             
             $stmt->execute([
                 $input['name'],
                 $input['description'],
                 $input['price'],
+                $input['min_order'] ?? 1,
                 $input['category'] ?? 'General',
                 $size,
                 $input['image_url'] ?? null
@@ -281,6 +284,7 @@ function updateProduct() {
                     $name = $_POST['name'] ?? '';
                     $description = $_POST['description'] ?? '';
                     $price = $_POST['price'] ?? 0;
+                    $min_order = $_POST['min_order'] ?? 1;
                     $category = $_POST['category'] ?? 'General';
                     $size = $_POST['size'] ?? 'M';
                     $imageUrl = 'uploads/products/' . $fileName; // Relative path for storage
@@ -305,7 +309,7 @@ function updateProduct() {
                     try {
                         $stmt = $pdo->prepare("
                             UPDATE products 
-                            SET name = ?, description = ?, price = ?, category = ?, size = ?, image_url = ?, updated_at = NOW()
+                            SET name = ?, description = ?, price = ?, min_order = ?, category = ?, size = ?, image_url = ?, updated_at = NOW()
                             WHERE id = ?
                         ");
                         
@@ -313,6 +317,7 @@ function updateProduct() {
                             $name,
                             $description,
                             $price,
+                            $min_order,
                             $category,
                             $size,
                             $imageUrl,
@@ -347,6 +352,7 @@ function updateProduct() {
             $name = $_POST['name'] ?? '';
             $description = $_POST['description'] ?? '';
             $price = $_POST['price'] ?? 0;
+            $min_order = $_POST['min_order'] ?? 1;
             $category = $_POST['category'] ?? 'General';
             $size = $_POST['size'] ?? 'M';
             
@@ -370,7 +376,7 @@ function updateProduct() {
             try {
                 $stmt = $pdo->prepare("
                     UPDATE products 
-                    SET name = ?, description = ?, price = ?, category = ?, size = ?, updated_at = NOW()
+                    SET name = ?, description = ?, price = ?, min_order = ?, category = ?, size = ?, updated_at = NOW()
                     WHERE id = ?
                 ");
                 
@@ -378,6 +384,7 @@ function updateProduct() {
                     $name,
                     $description,
                     $price,
+                    $min_order,
                     $category,
                     $size,
                     $id
@@ -413,6 +420,10 @@ function updateProduct() {
             if (isset($input['price'])) {
                 $fields[] = 'price = ?';
                 $values[] = $input['price'];
+            }
+            if (isset($input['min_order'])) {
+                $fields[] = 'min_order = ?';
+                $values[] = $input['min_order'];
             }
             if (isset($input['category'])) {
                 $fields[] = 'category = ?';

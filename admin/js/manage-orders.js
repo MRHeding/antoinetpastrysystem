@@ -2,11 +2,11 @@
 let allOrders = [];
 let filteredOrders = [];
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadOrders();
-    
+
     // Setup event listeners
-    document.getElementById('search-input').addEventListener('keypress', function(e) {
+    document.getElementById('search-input').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             applyFilters();
         }
@@ -20,7 +20,7 @@ async function loadOrders() {
             credentials: 'include'
         });
         const data = await response.json();
-        
+
         if (data.success) {
             allOrders = data.orders;
             filteredOrders = [...allOrders];
@@ -39,7 +39,7 @@ async function loadOrders() {
 function displayOrders() {
     const container = document.getElementById('orders-list');
     const countElement = document.getElementById('orders-count');
-    
+
     if (!filteredOrders || filteredOrders.length === 0) {
         container.innerHTML = `
             <div class="text-center text-gray-500 py-12">
@@ -51,9 +51,9 @@ function displayOrders() {
         countElement.textContent = '0 orders';
         return;
     }
-    
+
     countElement.textContent = `${filteredOrders.length} order${filteredOrders.length !== 1 ? 's' : ''}`;
-    
+
     container.innerHTML = filteredOrders.map(order => {
         const statusColors = {
             'pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -63,13 +63,13 @@ function displayOrders() {
             'completed': 'bg-green-100 text-green-800 border-green-200',
             'cancelled': 'bg-red-100 text-red-800 border-red-200'
         };
-        
+
         const paymentStatusColors = {
             'paid': 'bg-green-100 text-green-800',
             'pending': 'bg-yellow-100 text-yellow-800',
             'failed': 'bg-red-100 text-red-800'
         };
-        
+
         const statusIcons = {
             'pending': 'fa-clock',
             'confirmed': 'fa-check',
@@ -78,7 +78,7 @@ function displayOrders() {
             'completed': 'fa-check-circle',
             'cancelled': 'fa-times-circle'
         };
-        
+
         return `
             <div class="border border-gray-200 rounded-lg p-6 mb-4 hover:shadow-md transition-shadow bg-white">
                 <div class="flex flex-col lg:flex-row justify-between gap-4">
@@ -187,7 +187,7 @@ function updateStatistics() {
             .filter(o => o.payment_status === 'paid')
             .reduce((sum, o) => sum + parseFloat(o.total_amount), 0)
     };
-    
+
     document.getElementById('stat-total').textContent = stats.total;
     document.getElementById('stat-pending').textContent = stats.pending;
     document.getElementById('stat-preparing').textContent = stats.preparing;
@@ -200,18 +200,18 @@ function applyFilters() {
     const statusFilter = document.getElementById('status-filter').value.toLowerCase();
     const paymentFilter = document.getElementById('payment-filter').value.toLowerCase();
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    
+
     filteredOrders = allOrders.filter(order => {
         const matchesStatus = !statusFilter || order.status.toLowerCase() === statusFilter;
         const matchesPayment = !paymentFilter || order.payment_status.toLowerCase() === paymentFilter;
-        const matchesSearch = !searchTerm || 
+        const matchesSearch = !searchTerm ||
             order.order_number.toLowerCase().includes(searchTerm) ||
             (order.customer_name && order.customer_name.toLowerCase().includes(searchTerm)) ||
             (order.customer_email && order.customer_email.toLowerCase().includes(searchTerm));
-        
+
         return matchesStatus && matchesPayment && matchesSearch;
     });
-    
+
     displayOrders();
 }
 
@@ -227,13 +227,13 @@ function resetFilters() {
 // View order details
 async function viewOrderDetails(orderId) {
     document.getElementById('order-details-modal').classList.remove('hidden');
-    
+
     try {
         const response = await fetch(`../api/orders.php?action=get_order_details&order_id=${orderId}`, {
             credentials: 'include'
         });
         const data = await response.json();
-        
+
         if (data.success) {
             displayOrderDetails(data.order);
         } else {
@@ -248,7 +248,7 @@ async function viewOrderDetails(orderId) {
 // Display order details in modal
 function displayOrderDetails(order) {
     const container = document.getElementById('order-details-content');
-    
+
     const statusColors = {
         'pending': 'bg-yellow-100 text-yellow-800',
         'confirmed': 'bg-blue-100 text-blue-800',
@@ -257,16 +257,20 @@ function displayOrderDetails(order) {
         'completed': 'bg-green-100 text-green-800',
         'cancelled': 'bg-red-100 text-red-800'
     };
-    
+
     const paymentStatusColors = {
         'paid': 'bg-green-100 text-green-800',
         'pending': 'bg-yellow-100 text-yellow-800',
         'failed': 'bg-red-100 text-red-800'
     };
-    
+
+    let subtotal = 0;
     let itemsHTML = '';
     if (order.items && order.items.length > 0) {
-        itemsHTML = order.items.map(item => `
+        itemsHTML = order.items.map(item => {
+            const itemTotal = parseFloat(item.total_price);
+            subtotal += itemTotal;
+            return `
             <div class="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
                 <img src="../${item.product_image || 'uploads/products/placeholder.jpg'}" 
                      alt="${item.product_name}" 
@@ -279,14 +283,17 @@ function displayOrderDetails(order) {
                     <p class="text-sm text-gray-600">Unit Price: ₱${parseFloat(item.unit_price).toFixed(2)}</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-lg font-bold text-gray-900">₱${parseFloat(item.total_price).toFixed(2)}</p>
+                    <p class="text-lg font-bold text-gray-900">₱${itemTotal.toFixed(2)}</p>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
     } else {
         itemsHTML = '<p class="text-center text-gray-500 py-4">No items found</p>';
     }
-    
+
+    const deliveryFee = parseFloat(order.total_amount) - subtotal;
+
     container.innerHTML = `
         <!-- Order Header -->
         <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 mb-6">
@@ -387,6 +394,15 @@ function displayOrderDetails(order) {
         
         <!-- Order Summary -->
         <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg p-4 border border-amber-200">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-600">Subtotal</span>
+                <span class="font-medium text-gray-900">₱${subtotal.toFixed(2)}</span>
+            </div>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-600">Delivery Fee</span>
+                <span class="font-medium text-gray-900">₱${deliveryFee.toFixed(2)}</span>
+            </div>
+            <hr class="border-amber-200 mb-2">
             <div class="flex justify-between items-center">
                 <span class="text-lg font-semibold text-gray-900">Order Total</span>
                 <span class="text-2xl font-bold text-amber-600">₱${parseFloat(order.total_amount).toFixed(2)}</span>
@@ -403,14 +419,14 @@ function hideOrderDetailsModal() {
 // Update order status
 async function updateOrderStatus(orderId, newStatus) {
     if (!newStatus) return;
-    
+
     // Reset the select dropdown
     event.target.value = '';
-    
+
     if (!confirm(`Are you sure you want to change the order status to "${newStatus}"?`)) {
         return;
     }
-    
+
     try {
         const response = await fetch(`../api/orders.php?action=update_status`, {
             method: 'POST',
@@ -423,9 +439,9 @@ async function updateOrderStatus(orderId, newStatus) {
                 status: newStatus
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             showNotification(`Order status updated to ${newStatus}`, 'success');
             loadOrders(); // Reload orders
@@ -443,7 +459,7 @@ async function markAsPaid(orderId) {
     if (!confirm('Are you sure you want to mark this order as paid?')) {
         return;
     }
-    
+
     try {
         const response = await fetch(`../api/orders.php?action=update_payment_status`, {
             method: 'POST',
@@ -456,9 +472,9 @@ async function markAsPaid(orderId) {
                 payment_status: 'paid'
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             showNotification('Order marked as paid successfully', 'success');
             loadOrders(); // Reload orders
@@ -488,24 +504,22 @@ function displayError(message) {
 // Show notification
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
-    notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${
-        type === 'success' ? 'bg-green-500 text-white' :
+    notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-green-500 text-white' :
         type === 'error' ? 'bg-red-500 text-white' :
-        'bg-blue-500 text-white'
-    }`;
+            'bg-blue-500 text-white'
+        }`;
     notification.innerHTML = `
         <div class="flex items-center">
-            <i class="fas ${
-                type === 'success' ? 'fa-check-circle' :
-                type === 'error' ? 'fa-exclamation-circle' :
+            <i class="fas ${type === 'success' ? 'fa-check-circle' :
+            type === 'error' ? 'fa-exclamation-circle' :
                 'fa-info-circle'
-            } mr-2"></i>
+        } mr-2"></i>
             <span>${message}</span>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
@@ -519,9 +533,9 @@ async function adminLogout() {
                 method: 'POST',
                 credentials: 'include'
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 showNotification('Logged out successfully', 'success');
                 setTimeout(() => {

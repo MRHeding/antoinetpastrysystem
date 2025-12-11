@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Check admin status and disable cart functionality if needed
     checkAdminStatus();
+
+    // Initialize review system
+    initReviewSystem();
 });
 
 // Check admin status and update UI accordingly
@@ -73,8 +76,11 @@ function initModalControls() {
     if (decreaseBtn && increaseBtn && quantityInput) {
         decreaseBtn.addEventListener('click', function () {
             const currentValue = parseInt(quantityInput.value);
-            if (currentValue > 1) {
+            const minOrder = parseInt(quantityInput.getAttribute('min')) || 1;
+            if (currentValue > minOrder) {
                 quantityInput.value = currentValue - 1;
+            } else {
+                showNotification(`Minimum order is ${minOrder}`, 'warning');
             }
         });
 
@@ -87,10 +93,12 @@ function initModalControls() {
             }
         });
 
-        // Ensure quantity is always at least 1 and at most 10
+        // Ensure quantity is always at least min_order and at most 10
         quantityInput.addEventListener('change', function () {
-            if (this.value < 1 || !this.value) {
-                this.value = 1;
+            const minOrder = parseInt(this.getAttribute('min')) || 1;
+            if (this.value < minOrder || !this.value) {
+                this.value = minOrder;
+                showNotification(`Minimum order is ${minOrder}`, 'warning');
             } else if (this.value > 10) {
                 this.value = 10;
                 showNotification('Maximum quantity limit is 10 per item', 'warning');
@@ -266,23 +274,27 @@ function displayProducts() {
                                 <div class="product-card-price-section">
                     ${getPriceDisplay(product)}
                 </div>
-                <div class="product-card-buttons">
+                <div class="product-card-buttons flex flex-wrap gap-2 mt-4">
                     ${window.isAdmin ?
-                `<button disabled class="w-32 bg-gray-400 text-white py-2.5 px-4 rounded-md cursor-not-allowed opacity-50">
-                            <i class="fas fa-ban mr-2"></i>Admin Mode
+                `<button disabled class="flex-1 bg-gray-400 text-white py-2 px-3 rounded-md cursor-not-allowed opacity-50 text-sm">
+                            <i class="fas fa-ban mr-1"></i>Admin
                         </button>` :
                 !isAvailable ?
-                    `<button disabled class="w-32 bg-gray-400 text-white py-2.5 px-4 rounded-md cursor-not-allowed opacity-50">
-                            <i class="fas fa-times mr-2"></i>Unavailable
+                    `<button disabled class="flex-1 bg-gray-400 text-white py-2 px-3 rounded-md cursor-not-allowed opacity-50 text-sm">
+                            <i class="fas fa-times mr-1"></i>Unavailable
                         </button>` :
                     `<button onclick="addToCart(${product.id})" 
-                                class="w-32 bg-amber-600 text-white py-2.5 px-4 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105">
-                            <i class="fas fa-cart-plus mr-2"></i>Add to Cart
+                                class="flex-1 bg-amber-600 text-white py-2 px-3 rounded-md hover:bg-amber-700 transition-all duration-200 transform hover:scale-105 text-sm whitespace-nowrap">
+                            <i class="fas fa-cart-plus mr-1"></i>Add
                         </button>`
             }
                     <button onclick="viewProductDetails(${product.id})" 
-                            class="bg-gray-200 text-gray-700 py-2.5 px-4 rounded-md hover:bg-gray-300 transition-colors">
-                        <i class="fas fa-eye mr-1"></i>View
+                            class="bg-gray-200 text-gray-700 py-2 px-3 rounded-md hover:bg-gray-300 transition-colors text-sm" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button onclick="openReviewsModal(${product.id})" 
+                            class="bg-amber-100 text-amber-700 py-2 px-3 rounded-md hover:bg-amber-200 transition-colors text-sm" title="Reviews">
+                        <i class="fas fa-star"></i>
                     </button>
                 </div>
             </div>
@@ -472,8 +484,11 @@ async function viewProductDetails(productId) {
             `;
         }
 
-        // Reset quantity to 1
-        document.getElementById('product-quantity').value = 1;
+        // Reset quantity to min_order
+        const minOrder = product.min_order || 1;
+        const quantityInput = document.getElementById('product-quantity');
+        quantityInput.value = minOrder;
+        quantityInput.setAttribute('min', minOrder);
 
         // Set up add to cart button
         const addToCartBtn = document.getElementById('add-to-cart-btn');
@@ -622,6 +637,12 @@ async function addToCartWithQuantity(productId, quantity, size = null) {
         return;
     }
 
+    const minOrder = product.min_order || 1;
+    if (quantity < minOrder) {
+        showNotification(`Minimum order for this product is ${minOrder}`, 'warning');
+        return;
+    }
+
     // Determine price based on size
     let price = product.price;
     let sizeName = 'Standard';
@@ -666,7 +687,8 @@ async function addToCartWithQuantity(productId, quantity, size = null) {
             image: product.image_url || 'Logo.png',
             quantity: quantity,
             size: size,
-            size_name: sizeName
+            size_name: sizeName,
+            min_order: product.min_order || 1
         });
     }
 
@@ -801,4 +823,143 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         notification.remove();
     }, 3000);
+}
+
+// Initialize review functionality
+function initReviewSystem() {
+    // Review form submission
+    const reviewForm = document.getElementById('review-form');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', submitReview);
+    }
+}
+
+
+
+async function openReviewsModal(productId) {
+    const product = allProducts.find(p => p.id == productId);
+    if (!product) return;
+
+    document.getElementById('reviews-product-name').textContent = product.name;
+    document.getElementById('review-product-id').value = productId;
+    document.getElementById('reviews-modal').classList.remove('hidden');
+
+    // Reset form
+    document.getElementById('review-form').reset();
+    // Ensure all radio buttons are unchecked (reset() should do this, but just in case)
+    document.querySelectorAll('input[name="rating"]').forEach(rb => rb.checked = false);
+
+    // Load reviews
+    await loadReviews(productId);
+
+    // Check eligibility
+    await checkReviewEligibility(productId);
+}
+
+function closeReviewsModal() {
+    document.getElementById('reviews-modal').classList.add('hidden');
+}
+
+async function loadReviews(productId) {
+    const list = document.getElementById('reviews-list');
+    list.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Loading reviews...</div>';
+
+    try {
+        const response = await fetch(`api/reviews.php?action=get_reviews&product_id=${productId}`);
+        const data = await response.json();
+
+        if (data.success) {
+            if (data.reviews.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-4">No reviews yet. Be the first to review!</p>';
+                return;
+            }
+
+            list.innerHTML = data.reviews.map(review => `
+                <div class="border-b border-gray-100 pb-4 last:border-0">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="font-semibold text-gray-800">${review.first_name} ${review.last_name.charAt(0)}.</span>
+                                <span class="font-medium text-amber-600">Rating: ${review.rating}/5</span>
+                        </div>
+                        <span class="text-xs text-gray-500">${new Date(review.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">${review.comment}</p>
+                </div>
+            `).join('');
+        } else {
+            list.innerHTML = '<p class="text-red-500 text-center">Failed to load reviews.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+        list.innerHTML = '<p class="text-red-500 text-center">Error loading reviews.</p>';
+    }
+}
+
+
+
+async function checkReviewEligibility(productId) {
+    const writeSection = document.getElementById('write-review-section');
+    const messageDiv = document.getElementById('review-eligibility-message');
+
+    try {
+        const response = await fetch(`api/reviews.php?action=check_eligibility&product_id=${productId}`);
+        const data = await response.json();
+
+        writeSection.classList.add('hidden');
+        messageDiv.classList.remove('hidden');
+
+        if (data.success) {
+            if (data.can_review) {
+                writeSection.classList.remove('hidden');
+                messageDiv.classList.add('hidden');
+            } else {
+                messageDiv.innerHTML = `<i class="fas fa-info-circle mr-1"></i> ${data.message || 'You cannot review this product.'}`;
+            }
+        } else {
+            messageDiv.innerHTML = `<i class="fas fa-info-circle mr-1"></i> ${data.message || 'Please log in to review.'}`;
+        }
+    } catch (error) {
+        console.error('Error checking eligibility:', error);
+    }
+}
+
+async function submitReview(e) {
+    e.preventDefault();
+
+    const productId = document.getElementById('review-product-id').value;
+    const ratingInput = document.querySelector('input[name="rating"]:checked');
+    const rating = ratingInput ? ratingInput.value : null;
+    const comment = document.getElementById('review-comment').value;
+
+    if (!rating) {
+        showNotification('Please select a rating', 'warning');
+        return;
+    }
+
+    try {
+        const response = await fetch('api/reviews.php?action=add_review', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                rating: rating,
+                comment: comment
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('Review submitted successfully', 'success');
+            document.getElementById('write-review-section').classList.add('hidden');
+            loadReviews(productId); // Reload reviews
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        showNotification('Error submitting review', 'error');
+    }
 }

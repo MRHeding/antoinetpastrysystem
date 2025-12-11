@@ -4,6 +4,7 @@ $currentAdmin = requireAdminAuth();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@ $currentAdmin = requireAdminAuth();
     <link href="../css/output.css" rel="stylesheet">
     <link href="../assets/css/font-awesome.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-gray-100 min-h-screen">
     <!-- Navigation -->
     <nav class="bg-white shadow-lg">
@@ -23,46 +25,58 @@ $currentAdmin = requireAdminAuth();
                 <div class="flex items-center space-x-2 sm:space-x-4">
                     <div class="flex items-center text-gray-600">
                         <i class="fas fa-user-shield mr-2"></i>
-                        <span class="text-sm hidden sm:inline">Welcome, <strong><?php echo htmlspecialchars($currentAdmin['first_name']); ?></strong></span>
+                        <span class="text-sm hidden sm:inline">Welcome, <strong>
+                                <?php echo htmlspecialchars($currentAdmin['first_name']); ?>
+                            </strong></span>
                     </div>
                     <!-- Navigation Links -->
                     <div class="hidden md:flex items-center space-x-4">
-                        <a href="../index.html" class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <a href="../index.html"
+                            class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                             <i class="fas fa-home mr-2"></i>Home
                         </a>
-                        <a href="../products.html" class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <a href="../products.html"
+                            class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                             <i class="fas fa-utensils mr-2"></i>Products
                         </a>
-                        <a href="../about.html" class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <a href="../about.html"
+                            class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                             <i class="fas fa-info-circle mr-2"></i>About
                         </a>
-                        <a href="../contact.html" class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <a href="../contact.html"
+                            class="text-gray-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                             <i class="fas fa-envelope mr-2"></i>Contact
                         </a>
                     </div>
                     <!-- Mobile menu button -->
-                    <button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-amber-600 focus:outline-none focus:text-amber-600 p-2">
+                    <button id="mobile-menu-button"
+                        class="md:hidden text-gray-600 hover:text-amber-600 focus:outline-none focus:text-amber-600 p-2">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    <button onclick="adminLogout()" class="bg-red-600 text-white px-2 sm:px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-sm sm:text-base">
+                    <button onclick="adminLogout()"
+                        class="bg-red-600 text-white px-2 sm:px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-sm sm:text-base">
                         <i class="fas fa-sign-out-alt sm:mr-2"></i><span class="hidden sm:inline">Logout</span>
                     </button>
                 </div>
             </div>
-            
+
             <!-- Mobile menu -->
             <div id="mobile-menu" class="hidden md:hidden">
                 <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-                    <a href="../index.html" class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
+                    <a href="../index.html"
+                        class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-home mr-2"></i>Home
                     </a>
-                    <a href="../products.html" class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
+                    <a href="../products.html"
+                        class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-utensils mr-2"></i>Products
                     </a>
-                    <a href="../about.html" class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
+                    <a href="../about.html"
+                        class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-info-circle mr-2"></i>About
                     </a>
-                    <a href="../contact.html" class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
+                    <a href="../contact.html"
+                        class="text-gray-600 hover:text-amber-600 block px-3 py-2 rounded-md text-base font-medium">
                         <i class="fas fa-envelope mr-2"></i>Contact
                     </a>
                 </div>
@@ -84,7 +98,7 @@ $currentAdmin = requireAdminAuth();
                     </div>
                 </div>
             </div>
-            
+
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-green-100 text-green-600">
@@ -96,7 +110,7 @@ $currentAdmin = requireAdminAuth();
                     </div>
                 </div>
             </div>
-            
+
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-purple-100 text-purple-600">
@@ -108,7 +122,7 @@ $currentAdmin = requireAdminAuth();
                     </div>
                 </div>
             </div>
-            
+
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-amber-100 text-amber-600">
@@ -126,34 +140,35 @@ $currentAdmin = requireAdminAuth();
         <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-8">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                <a href="#add-product" onclick="document.getElementById('add-product-modal').classList.remove('hidden')" 
-                   class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <a href="#add-product" onclick="document.getElementById('add-product-modal').classList.remove('hidden')"
+                    class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                     <i class="fas fa-plus-circle text-green-600 text-lg sm:text-xl mr-3 flex-shrink-0"></i>
                     <span class="font-medium text-gray-900 text-sm sm:text-base">Add New Product</span>
                 </a>
-                <a href="support.html" 
-                   class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors relative">
+                <a href="support.html"
+                    class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors relative">
                     <i class="fas fa-comments text-amber-600 text-lg sm:text-xl mr-3 flex-shrink-0"></i>
                     <span class="font-medium text-gray-900 text-sm sm:text-base">Customer Chat</span>
-                    <span id="admin-chat-badge" class="hidden absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 font-bold">0</span>
+                    <span id="admin-chat-badge"
+                        class="hidden absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 font-bold">0</span>
                 </a>
-                <a href="audit-log.html" 
-                   class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <a href="audit-log.html"
+                    class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                     <i class="fas fa-clipboard-list text-blue-600 text-lg sm:text-xl mr-3 flex-shrink-0"></i>
                     <span class="font-medium text-gray-900 text-sm sm:text-base">View Audit Log</span>
                 </a>
-                <a href="manage-orders.html" 
-                   class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <a href="manage-orders.html"
+                    class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                     <i class="fas fa-shopping-bag text-purple-600 text-lg sm:text-xl mr-3 flex-shrink-0"></i>
                     <span class="font-medium text-gray-900 text-sm sm:text-base">Manage Orders</span>
                 </a>
-                <a href="monthly-sales.html" 
-                   class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <a href="monthly-sales.html"
+                    class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                     <i class="fas fa-chart-line text-orange-600 text-lg sm:text-xl mr-3 flex-shrink-0"></i>
                     <span class="font-medium text-gray-900 text-sm sm:text-base">Monthly Sales Report</span>
                 </a>
-                <a href="#users" onclick="showUsersSection()" 
-                   class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <a href="#users" onclick="showUsersSection()"
+                    class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                     <i class="fas fa-users text-indigo-600 text-lg sm:text-xl mr-3 flex-shrink-0"></i>
                     <span class="font-medium text-gray-900 text-sm sm:text-base">View User Profiles</span>
                 </a>
@@ -166,9 +181,11 @@ $currentAdmin = requireAdminAuth();
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-lg shadow">
                     <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+                        <div
+                            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
                             <h2 class="text-lg font-semibold text-gray-900">Product Management</h2>
-                            <button onclick="showAddProductModal()" class="bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 text-sm sm:text-base w-full sm:w-auto">
+                            <button onclick="showAddProductModal()"
+                                class="bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 text-sm sm:text-base w-full sm:w-auto">
                                 <i class="fas fa-plus mr-2"></i>Add Product
                             </button>
                         </div>
@@ -212,73 +229,92 @@ $currentAdmin = requireAdminAuth();
                 </div>
                 <div class="max-h-[50vh] min-h-[300px] overflow-y-auto modal-scroll">
                     <form id="add-product-form" class="p-6" enctype="multipart/form-data">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
-                        <input type="text" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                        <textarea name="description" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Price</label>
-                        <input type="number" name="price" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                        <select name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                            <option value="Croissants">Croissants</option>
-                            <option value="Cakes">Cakes</option>
-                            <option value="Cookies">Cookies</option>
-                            <option value="Tarts">Tarts</option>
-                            <option value="Bread">Bread</option>
-                            <option value="Seasonal">Seasonal</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Availability Status</label>
-                        <select name="availability_status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                            <option value="available">Available</option>
-                            <option value="unavailable">Unavailable</option>
-                        </select>
-                    </div>
-                    <div class="mb-6" id="unavailable-reason-container" style="display: none;">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Unavailability (Optional)</label>
-                        <input type="text" name="unavailable_reason" placeholder="e.g., Out of stock, Seasonal item" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
-                        <div class="flex items-center space-x-2">
-                            <label class="flex flex-col items-center px-4 py-2 bg-white text-amber-600 rounded-md border border-amber-500 cursor-pointer hover:bg-amber-50">
-                                <span class="text-base leading-normal"><i class="fas fa-upload mr-2"></i>Select Image</span>
-                                <input type="file" name="product_image" accept="image/*" class="hidden" id="product-image-input">
-                            </label>
-                            <span id="file-name-display" class="text-sm text-gray-500">No file selected</span>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                            <input type="text" name="name" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
-                        <div id="image-preview-container" class="mt-3 hidden">
-                            <img id="image-preview" class="h-32 w-32 object-cover rounded-md border border-gray-300" src="" alt="Image preview">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea name="description" rows="3" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
                         </div>
-                    </div>
-                    
-                    <!-- Product Sizes Section -->
-                    <div class="mb-6 border-t pt-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <label class="block text-sm font-medium text-gray-700">Product Sizes & Prices</label>
-                            <button type="button" onclick="addSizeRow('add')" class="text-xs bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600">
-                                <i class="fas fa-plus mr-1"></i>Add Size
-                            </button>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                            <input type="number" name="price" step="0.01" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
-                        <div id="add-sizes-container" class="space-y-2">
-                            <!-- Size rows will be added here dynamically -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Order</label>
+                            <input type="number" name="min_order" value="1" min="1" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Add different sizes with their respective prices</p>
-                    </div>
-                    
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                            <select name="category" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <option value="Croissants">Croissants</option>
+                                <option value="Cakes">Cakes</option>
+                                <option value="Cookies">Cookies</option>
+                                <option value="Tarts">Tarts</option>
+                                <option value="Bread">Bread</option>
+                                <option value="Seasonal">Seasonal</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Availability Status</label>
+                            <select name="availability_status"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <option value="available">Available</option>
+                                <option value="unavailable">Unavailable</option>
+                            </select>
+                        </div>
+                        <div class="mb-6" id="unavailable-reason-container" style="display: none;">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Unavailability
+                                (Optional)</label>
+                            <input type="text" name="unavailable_reason" placeholder="e.g., Out of stock, Seasonal item"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                            <div class="flex items-center space-x-2">
+                                <label
+                                    class="flex flex-col items-center px-4 py-2 bg-white text-amber-600 rounded-md border border-amber-500 cursor-pointer hover:bg-amber-50">
+                                    <span class="text-base leading-normal"><i class="fas fa-upload mr-2"></i>Select
+                                        Image</span>
+                                    <input type="file" name="product_image" accept="image/*" class="hidden"
+                                        id="product-image-input">
+                                </label>
+                                <span id="file-name-display" class="text-sm text-gray-500">No file selected</span>
+                            </div>
+                            <div id="image-preview-container" class="mt-3 hidden">
+                                <img id="image-preview" class="h-32 w-32 object-cover rounded-md border border-gray-300"
+                                    src="" alt="Image preview">
+                            </div>
+                        </div>
+
+                        <!-- Product Sizes Section -->
+                        <div class="mb-6 border-t pt-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="block text-sm font-medium text-gray-700">Product Sizes & Prices</label>
+                                <button type="button" onclick="addSizeRow('add')"
+                                    class="text-xs bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600">
+                                    <i class="fas fa-plus mr-1"></i>Add Size
+                                </button>
+                            </div>
+                            <div id="add-sizes-container" class="space-y-2">
+                                <!-- Size rows will be added here dynamically -->
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Add different sizes with their respective prices</p>
+                        </div>
+
                         <div class="flex justify-end space-x-3">
-                            <button type="button" onclick="hideAddProductModal()" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                            <button type="button" onclick="hideAddProductModal()"
+                                class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
                                 Cancel
                             </button>
-                            <button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
+                            <button type="submit"
+                                class="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
                                 Add Product
                             </button>
                         </div>
@@ -297,74 +333,95 @@ $currentAdmin = requireAdminAuth();
                 </div>
                 <div class="max-h-[50vh] min-h-[300px] overflow-y-auto modal-scroll">
                     <form id="edit-product-form" class="p-6" enctype="multipart/form-data">
-                    <input type="hidden" name="product_id" id="edit-product-id">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
-                        <input type="text" name="name" id="edit-product-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                        <textarea name="description" id="edit-product-description" rows="3" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Price</label>
-                        <input type="number" name="price" id="edit-product-price" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                        <select name="category" id="edit-product-category" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                            <option value="Croissants">Croissants</option>
-                            <option value="Cakes">Cakes</option>
-                            <option value="Cookies">Cookies</option>
-                            <option value="Tarts">Tarts</option>
-                            <option value="Bread">Bread</option>
-                            <option value="Seasonal">Seasonal</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Availability Status</label>
-                        <select name="availability_status" id="edit-product-status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                            <option value="available">Available</option>
-                            <option value="unavailable">Unavailable</option>
-                        </select>
-                    </div>
-                    <div class="mb-6" id="edit-unavailable-reason-container" style="display: none;">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Unavailability (Optional)</label>
-                        <input type="text" name="unavailable_reason" id="edit-product-reason" placeholder="e.g., Out of stock, Seasonal item" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
-                        <div class="flex items-center space-x-2">
-                            <label class="flex flex-col items-center px-4 py-2 bg-white text-amber-600 rounded-md border border-amber-500 cursor-pointer hover:bg-amber-50">
-                                <span class="text-base leading-normal"><i class="fas fa-upload mr-2"></i>Select Image</span>
-                                <input type="file" name="product_image" accept="image/*" class="hidden" id="edit-product-image-input">
-                            </label>
-                            <span id="edit-file-name-display" class="text-sm text-gray-500">No file selected</span>
+                        <input type="hidden" name="product_id" id="edit-product-id">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                            <input type="text" name="name" id="edit-product-name" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
-                        <div id="edit-image-preview-container" class="mt-3">
-                            <img id="edit-image-preview" class="h-32 w-32 object-cover rounded-md border border-gray-300" src="" alt="Image preview">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea name="description" id="edit-product-description" rows="3" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
                         </div>
-                    </div>
-                    
-                    <!-- Product Sizes Section -->
-                    <div class="mb-6 border-t pt-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <label class="block text-sm font-medium text-gray-700">Product Sizes & Prices</label>
-                            <button type="button" onclick="addSizeRow('edit')" class="text-xs bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600">
-                                <i class="fas fa-plus mr-1"></i>Add Size
-                            </button>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                            <input type="number" name="price" id="edit-product-price" step="0.01" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
-                        <div id="edit-sizes-container" class="space-y-2">
-                            <!-- Size rows will be added here dynamically -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Order</label>
+                            <input type="number" name="min_order" id="edit-product-min-order" min="1" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Add different sizes with their respective prices</p>
-                    </div>
-                    
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                            <select name="category" id="edit-product-category" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <option value="Croissants">Croissants</option>
+                                <option value="Cakes">Cakes</option>
+                                <option value="Cookies">Cookies</option>
+                                <option value="Tarts">Tarts</option>
+                                <option value="Bread">Bread</option>
+                                <option value="Seasonal">Seasonal</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Availability Status</label>
+                            <select name="availability_status" id="edit-product-status"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <option value="available">Available</option>
+                                <option value="unavailable">Unavailable</option>
+                            </select>
+                        </div>
+                        <div class="mb-6" id="edit-unavailable-reason-container" style="display: none;">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Unavailability
+                                (Optional)</label>
+                            <input type="text" name="unavailable_reason" id="edit-product-reason"
+                                placeholder="e.g., Out of stock, Seasonal item"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                            <div class="flex items-center space-x-2">
+                                <label
+                                    class="flex flex-col items-center px-4 py-2 bg-white text-amber-600 rounded-md border border-amber-500 cursor-pointer hover:bg-amber-50">
+                                    <span class="text-base leading-normal"><i class="fas fa-upload mr-2"></i>Select
+                                        Image</span>
+                                    <input type="file" name="product_image" accept="image/*" class="hidden"
+                                        id="edit-product-image-input">
+                                </label>
+                                <span id="edit-file-name-display" class="text-sm text-gray-500">No file selected</span>
+                            </div>
+                            <div id="edit-image-preview-container" class="mt-3">
+                                <img id="edit-image-preview"
+                                    class="h-32 w-32 object-cover rounded-md border border-gray-300" src=""
+                                    alt="Image preview">
+                            </div>
+                        </div>
+
+                        <!-- Product Sizes Section -->
+                        <div class="mb-6 border-t pt-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="block text-sm font-medium text-gray-700">Product Sizes & Prices</label>
+                                <button type="button" onclick="addSizeRow('edit')"
+                                    class="text-xs bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600">
+                                    <i class="fas fa-plus mr-1"></i>Add Size
+                                </button>
+                            </div>
+                            <div id="edit-sizes-container" class="space-y-2">
+                                <!-- Size rows will be added here dynamically -->
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Add different sizes with their respective prices</p>
+                        </div>
+
                         <div class="flex justify-end space-x-3">
-                            <button type="button" onclick="hideEditProductModal()" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                            <button type="button" onclick="hideEditProductModal()"
+                                class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
                                 Cancel
                             </button>
-                            <button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
+                            <button type="submit"
+                                class="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700">
                                 Update Product
                             </button>
                         </div>
@@ -386,10 +443,13 @@ $currentAdmin = requireAdminAuth();
                 </div>
                 <div class="p-4 sm:p-6">
                     <!-- Filter by role -->
-                    <div class="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:space-x-4 w-full sm:w-auto">
+                    <div
+                        class="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                        <div
+                            class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:space-x-4 w-full sm:w-auto">
                             <label class="text-sm font-medium text-gray-700">Filter by Role:</label>
-                            <select id="user-role-filter" onchange="filterUsersByRole()" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <select id="user-role-filter" onchange="filterUsersByRole()"
+                                class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
                                 <option value="">All Users</option>
                                 <option value="customer">Customers</option>
                                 <option value="admin">Admins</option>
@@ -399,7 +459,7 @@ $currentAdmin = requireAdminAuth();
                             Total Users: <span id="total-users-count" class="font-semibold">0</span>
                         </div>
                     </div>
-                    
+
                     <!-- Users List -->
                     <div id="users-list" class="space-y-4 max-h-[60vh] overflow-y-auto">
                         <div class="text-center text-gray-500 py-8">
@@ -433,7 +493,7 @@ $currentAdmin = requireAdminAuth();
     </div>
 
     <script src="js/admin.js"></script>
-    
+
     <script>
         // Check for unread chat messages
         async function updateChatBadge() {
@@ -442,7 +502,7 @@ $currentAdmin = requireAdminAuth();
                     credentials: 'include'
                 });
                 const data = await response.json();
-                
+
                 if (data.success) {
                     const badge = document.getElementById('admin-chat-badge');
                     if (badge && data.unread_count > 0) {
@@ -456,12 +516,11 @@ $currentAdmin = requireAdminAuth();
                 console.error('Error updating chat badge:', error);
             }
         }
-        
+
         // Update badge on load and periodically
         updateChatBadge();
         setInterval(updateChatBadge, 10000); // Check every 10 seconds
     </script>
 </body>
+
 </html>
-
-

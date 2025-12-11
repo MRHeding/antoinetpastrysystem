@@ -165,7 +165,15 @@ function displayCartItems() {
                     </div>
                     <div class="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
                         <div class="flex items-center space-x-3">
-                            <span class="w-10 sm:w-12 text-center font-semibold text-base sm:text-lg">Qty: ${item.quantity}</span>
+                            <div class="flex items-center border border-gray-300 rounded-md">
+                                <button onclick="updateQuantity(${index}, ${item.quantity - 1})" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-amber-600 rounded-l-md transition-colors" aria-label="Decrease quantity">
+                                    <i class="fas fa-minus text-xs"></i>
+                                </button>
+                                <span class="w-10 text-center font-semibold text-gray-800">${item.quantity}</span>
+                                <button onclick="updateQuantity(${index}, ${item.quantity + 1})" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-amber-600 rounded-r-md transition-colors" aria-label="Increase quantity">
+                                    <i class="fas fa-plus text-xs"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="text-right">
                             <p class="text-lg sm:text-xl font-bold text-gray-800 mb-2">₱${(parseFloat(product.price) * item.quantity).toFixed(2)}</p>
@@ -202,7 +210,15 @@ function displayCartItems() {
                     </div>
                     <div class="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
                         <div class="flex items-center space-x-3">
-                            <span class="w-10 sm:w-12 text-center font-semibold text-base sm:text-lg">Qty: ${item.quantity}</span>
+                            <div class="flex items-center border border-gray-300 rounded-md">
+                                <button onclick="updateQuantity(${index}, ${item.quantity - 1})" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-amber-600 rounded-l-md transition-colors" aria-label="Decrease quantity">
+                                    <i class="fas fa-minus text-xs"></i>
+                                </button>
+                                <span class="w-10 text-center font-semibold text-gray-800">${item.quantity}</span>
+                                <button onclick="updateQuantity(${index}, ${item.quantity + 1})" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-amber-600 rounded-r-md transition-colors" aria-label="Increase quantity">
+                                    <i class="fas fa-plus text-xs"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="text-right">
                             <p class="text-lg sm:text-xl font-bold text-gray-800 mb-2">₱${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
@@ -249,8 +265,20 @@ function displayCartItems() {
  * Update quantity of an item
  */
 function updateQuantity(index, newQuantity) {
-    if (newQuantity <= 0) {
-        removeFromCart(index);
+    // Check for minimum order
+    const item = cart[index];
+    let minOrder = item.min_order || 1;
+
+    // If min_order not in item, try to find in products
+    if (!item.min_order && products.length > 0) {
+        const product = products.find(p => p.id === item.id);
+        if (product) {
+            minOrder = product.min_order || 1;
+        }
+    }
+
+    if (newQuantity < minOrder) {
+        showNotification(`Minimum order for this item is ${minOrder}`, 'warning');
         return;
     }
 
@@ -380,7 +408,7 @@ function showCheckoutModal() {
             return sum + (product ? parseFloat(product.price) * item.quantity : 0);
         }
     }, 0);
-    const delivery = 50.00;
+    const delivery = 70.00;
     const total = subtotal + delivery;
 
     // Generate summary HTML
@@ -442,6 +470,24 @@ function showCheckoutModal() {
     const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
     const paymentMethodText = paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment';
 
+    // Zamboanga City Barangays
+    const barangays = [
+        "Arena Blanco", "Ayala", "Baliwasan", "Baluno", "Boalan", "Bolong", "Buenavista", "Bunguiao", "Busay",
+        "Cabaluay", "Cabatangan", "Cacao", "Calabasa", "Calarian", "Camino Nuevo", "Campo Islam", "Canelar",
+        "Capisan", "Cawit", "Culianan", "Curuan", "Dita", "Divisoria", "Dulian Bunguiao", "Dulian Pasonanca",
+        "Guisao", "Guiwan", "Kasanyangan", "La Paz", "Labuan", "Lamisahan", "Landang Gua", "Landang Laum",
+        "Lanzones", "Lapakan", "Latuan", "Licomo", "Limaong", "Limpapa", "Lower Calarian", "Lubigan", "Lumayang",
+        "Lumbangan", "Lunzuran", "Maasin", "Malagutay", "Mampang", "Manalipa", "Mangusu", "Manicahan", "Mariki",
+        "Mercedes", "Muti", "Pamucutan", "Pangaputan", "Panubigan", "Pasilmanta", "Pasonanca", "Pasobolong",
+        "Patalon", "Putik", "Quiniput", "Recodo", "Rio Hondo", "Salaan", "San Jose Cawa-Cawa", "San Jose Gusu",
+        "San Ramon", "San Roque", "Sangali", "Sibulao", "Sinubong", "Sinunuc", "Sta. Barbara", "Sta. Maria",
+        "Sto. Niño", "Suterville", "Tagasilay", "Taguiti", "Talabaan", "Talisayan", "Talon-Talon", "Taluksangay",
+        "Tetuan", "Tictabon", "Tictapul", "Tigbalabag", "Tolosa", "Tugbungan", "Tulungatung", "Tumaga", "Victoria",
+        "Vitali", "Zambowood", "Zone I", "Zone II", "Zone III", "Zone IV"
+    ].sort();
+
+    const barangayOptions = barangays.map(b => `<option value="${b}">${b}</option>`).join('');
+
     summaryHTML += `
                 </div>
             </div>
@@ -458,7 +504,7 @@ function showCheckoutModal() {
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Delivery Fee:</span>
-                            <span class="font-medium">₱${delivery.toFixed(2)}</span>
+                            <span id="modal-delivery-fee" class="font-medium">₱${delivery.toFixed(2)}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Payment Method:</span>
@@ -467,7 +513,29 @@ function showCheckoutModal() {
                         <hr class="border-gray-300">
                         <div class="flex justify-between text-lg font-bold">
                             <span class="text-gray-900">Total:</span>
-                            <span class="text-amber-600">₱${total.toFixed(2)}</span>
+                            <span id="modal-total" class="text-amber-600">₱${total.toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery Details -->
+                <div class="mt-4 bg-amber-50 rounded-lg p-4 border border-amber-100">
+                    <h4 class="font-semibold text-gray-900 mb-3">Delivery Details</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label for="cod-barangay" class="block text-sm font-medium text-gray-700 mb-1">Barangay (Zamboanga City)</label>
+                            <select id="cod-barangay" onchange="updateDeliveryFee(this.value, ${subtotal})" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500 text-sm">
+                                <option value="" disabled selected>Select Barangay</option>
+                                ${barangayOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="cod-landmark" class="block text-sm font-medium text-gray-700 mb-1">Landmark / Sketch</label>
+                            <input type="text" id="cod-landmark" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500 text-sm" placeholder="e.g., Near Barangay Hall, Blue Gate">
+                        </div>
+                        <div>
+                            <label for="cod-contact" class="block text-sm font-medium text-gray-700 mb-1">Active Contact Number</label>
+                            <input type="tel" id="cod-contact" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500 text-sm" placeholder="e.g., 09123456789" required>
                         </div>
                     </div>
                 </div>
@@ -533,11 +601,33 @@ async function confirmCheckout() {
             }
         });
 
+        // Common Validation for Delivery Details
+        const barangay = document.getElementById('cod-barangay').value;
+        const landmark = document.getElementById('cod-landmark').value;
+        const contact = document.getElementById('cod-contact').value;
+
+        if (!barangay) {
+            showNotification('Please select a barangay', 'warning');
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+            return;
+        }
+
+        if (!contact) {
+            showNotification('Please provide a contact number', 'warning');
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+            return;
+        }
+
         if (paymentMethod === 'cod') {
             // Handle COD Order
             const orderData = {
                 items: orderItems,
-                notes: 'Cash on Delivery Order'
+                notes: 'Cash on Delivery Order',
+                barangay: barangay,
+                landmark: landmark,
+                contact_number: contact
             };
 
             const response = await fetch('api/orders.php?action=create_cod_order', {
@@ -586,13 +676,13 @@ async function confirmCheckout() {
                 }
             });
 
-            const delivery = 50.00;
-            const total = subtotal + delivery;
-
             // Create checkout session with PayMongo
             const checkoutData = {
                 items: orderItems,
-                notes: `Order total: ₱${total.toFixed(2)} (Subtotal: ₱${subtotal.toFixed(2)}, Delivery: ₱${delivery.toFixed(2)})`
+                notes: `Online Payment Order`,
+                barangay: barangay,
+                landmark: landmark,
+                contact_number: contact
             };
 
             const paymentResponse = await fetch('api/payment.php?action=create_checkout_session', {
@@ -705,4 +795,31 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         notification.classList.add('hidden');
     }, 5000);
+}
+
+/**
+ * Update delivery fee based on barangay
+ */
+function updateDeliveryFee(barangay, subtotal) {
+    // Far Barangays (Higher Delivery Fee)
+    const farBarangays = [
+        "Bunguiao", "Buenavista", "Bolong", "Cabaluay", "Curuan", "Dita", "Dulian Bunguiao", "Guisao",
+        "La Paz", "Labuan", "Lamisahan", "Latuan", "Licomo", "Limaong", "Limpapa", "Lubigan", "Lumayang", "Mangusu",
+        "Manicahan", "Muti", "Pamucutan", "Panubigan", "Patalon", "Quiniput", "Sangali", "Sibulao",
+        "Sinubong", "Tagasilay", "Taguiti", "Tictapul", "Tigbalabag", "Tolosa", "Vitali"
+    ];
+
+    let deliveryFee = 70.00; // Base fee
+    if (farBarangays.includes(barangay)) {
+        deliveryFee = 150.00; // Far barangay fee
+    }
+
+    const total = subtotal + deliveryFee;
+
+    // Update DOM
+    const deliveryEl = document.getElementById('modal-delivery-fee');
+    const totalEl = document.getElementById('modal-total');
+
+    if (deliveryEl) deliveryEl.textContent = `₱${deliveryFee.toFixed(2)}`;
+    if (totalEl) totalEl.textContent = `₱${total.toFixed(2)}`;
 }

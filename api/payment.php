@@ -113,8 +113,32 @@ function createCheckoutSession() {
                 $subtotal += $item['quantity'] * $item['unit_price'];
             }
             
-            $delivery = 50.00;
+            // Far Barangays (Higher Delivery Fee)
+            $farBarangays = [
+                "Bunguiao", "Buenavista", "Bolong", "Cabaluay", "Curuan", "Dita", "Dulian Bunguiao", "Guisao", 
+                "La Paz", "Labuan", "Lamisahan", "Latuan", "Licomo", "Limaong", "Limpapa", "Lubigan", "Lumayang", "Mangusu", 
+                "Manicahan", "Muti", "Pamucutan", "Panubigan", "Patalon", "Quiniput", "Sangali", "Sibulao", 
+                "Sinubong", "Tagasilay", "Taguiti", "Tictapul", "Tigbalabag", "Tolosa", "Vitali"
+            ];
+
+            $delivery = 70.00; // Base fee
+            if (isset($input['barangay']) && in_array($input['barangay'], $farBarangays)) {
+                $delivery = 150.00; // Far barangay fee
+            }
+            
             $total = $subtotal + $delivery;
+
+            // Prepare notes with additional details
+            $notes = $input['notes'] ?? '';
+            if (!empty($input['barangay'])) {
+                $notes .= "\nBarangay: " . $input['barangay'];
+            }
+            if (!empty($input['landmark'])) {
+                $notes .= "\nLandmark: " . $input['landmark'];
+            }
+            if (!empty($input['contact_number'])) {
+                $notes .= "\nContact: " . $input['contact_number'];
+            }
             
             // Create order with pending payment status
             $stmt = $db->prepare("
@@ -125,7 +149,7 @@ function createCheckoutSession() {
                 $user['id'],
                 $order_number,
                 $total,
-                $input['notes'] ?? null
+                $notes
             ]);
             
             $order_id = $db->lastInsertId();

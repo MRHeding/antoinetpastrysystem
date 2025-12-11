@@ -1,40 +1,40 @@
 // Admin Dashboard JavaScript
 let productSizes = { add: [], edit: [] }; // Store sizes for add and edit modals
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Only load dashboard-specific functions if we're on the dashboard page
     const isDashboardPage = document.getElementById('total-products') !== null;
-    
+
     if (isDashboardPage) {
         loadDashboardData();
         loadProducts();
         loadRecentOrders();
-        
+
         // Setup form submission
         const addProductForm = document.getElementById('add-product-form');
         if (addProductForm) {
             addProductForm.addEventListener('submit', handleAddProduct);
         }
-        
+
         // Setup status change handlers
         setupStatusChangeHandlers();
     }
-    
+
     // Load monthly sales if on monthly sales page
     const isMonthlySalesPage = document.getElementById('monthly-sales-container') !== null;
     if (isMonthlySalesPage) {
         loadMonthlySales();
-        
+
         // Setup year selector for sales report
         const yearSelect = document.getElementById('sales-year-select');
         if (yearSelect) {
             populateYearSelector();
-            yearSelect.addEventListener('change', function() {
+            yearSelect.addEventListener('change', function () {
                 loadMonthlySales(this.value);
             });
         }
     }
-    
+
     // Initialize mobile menu (available on all admin pages)
     initAdminMobileMenu();
 });
@@ -44,13 +44,13 @@ async function loadMonthlySales(year = null) {
     if (!year) {
         year = new Date().getFullYear();
     }
-    
+
     try {
         const response = await fetch(`../api/admin-stats.php?action=monthly_sales&year=${year}`, {
             credentials: 'include'
         });
         const data = await response.json();
-        
+
         if (data.success) {
             displayMonthlySales(data.data);
         } else {
@@ -72,7 +72,7 @@ function displayMonthlySales(salesData) {
     const prevMonthOrders = document.getElementById('prev-month-orders');
     const salesGrowth = document.getElementById('sales-growth');
     const growthIndicator = document.getElementById('growth-indicator');
-    
+
     if (currentMonthSales) {
         currentMonthSales.textContent = '₱' + salesData.current_month.sales.toFixed(2);
     }
@@ -96,11 +96,11 @@ function displayMonthlySales(salesData) {
         growthIndicator.innerHTML = `<i class="fas ${icon}"></i> vs previous month`;
         growthIndicator.className = 'text-xs ' + (growth >= 0 ? 'text-green-600' : 'text-red-600') + ' mt-1';
     }
-    
+
     // Display monthly sales table
     const tableBody = document.getElementById('monthly-sales-table');
     if (!tableBody) return;
-    
+
     if (!salesData.monthly_sales || salesData.monthly_sales.length === 0) {
         tableBody.innerHTML = `
             <tr>
@@ -112,7 +112,7 @@ function displayMonthlySales(salesData) {
         `;
         return;
     }
-    
+
     // Create array with all 12 months, filling in missing months with 0
     const allMonths = [];
     for (let i = 1; i <= 12; i++) {
@@ -120,8 +120,8 @@ function displayMonthlySales(salesData) {
         if (monthData) {
             allMonths.push(monthData);
         } else {
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                              'July', 'August', 'September', 'October', 'November', 'December'];
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
             allMonths.push({
                 month: i,
                 month_name: monthNames[i - 1],
@@ -130,12 +130,12 @@ function displayMonthlySales(salesData) {
             });
         }
     }
-    
+
     tableBody.innerHTML = allMonths.map(month => {
-        const avgOrder = month.order_count > 0 
+        const avgOrder = month.order_count > 0
             ? (parseFloat(month.total_sales) / month.order_count).toFixed(2)
             : '0.00';
-        
+
         return `
             <tr class="hover:bg-gray-50">
                 <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -174,10 +174,10 @@ function displayMonthlySalesError() {
 function populateYearSelector() {
     const yearSelect = document.getElementById('sales-year-select');
     if (!yearSelect) return;
-    
+
     const currentYear = new Date().getFullYear();
     const startYear = currentYear - 5; // Show last 5 years
-    
+
     yearSelect.innerHTML = '';
     for (let year = currentYear; year >= startYear; year--) {
         const option = document.createElement('option');
@@ -193,59 +193,59 @@ function populateYearSelector() {
 // Export sales report
 function exportSalesReport() {
     const year = document.getElementById('sales-year-select')?.value || new Date().getFullYear();
-    
+
     // Fetch data and create CSV
     fetch(`../api/admin-stats.php?action=monthly_sales&year=${year}`, {
         credentials: 'include'
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Create CSV content
-            let csv = 'Month,Orders,Total Sales,Average Order\n';
-            
-            const allMonths = [];
-            for (let i = 1; i <= 12; i++) {
-                const monthData = data.data.monthly_sales.find(m => m.month == i);
-                if (monthData) {
-                    allMonths.push(monthData);
-                } else {
-                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                                      'July', 'August', 'September', 'October', 'November', 'December'];
-                    allMonths.push({
-                        month: i,
-                        month_name: monthNames[i - 1],
-                        order_count: 0,
-                        total_sales: 0
-                    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Create CSV content
+                let csv = 'Month,Orders,Total Sales,Average Order\n';
+
+                const allMonths = [];
+                for (let i = 1; i <= 12; i++) {
+                    const monthData = data.data.monthly_sales.find(m => m.month == i);
+                    if (monthData) {
+                        allMonths.push(monthData);
+                    } else {
+                        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'];
+                        allMonths.push({
+                            month: i,
+                            month_name: monthNames[i - 1],
+                            order_count: 0,
+                            total_sales: 0
+                        });
+                    }
                 }
+
+                allMonths.forEach(month => {
+                    const avgOrder = month.order_count > 0
+                        ? (parseFloat(month.total_sales) / month.order_count).toFixed(2)
+                        : '0.00';
+                    csv += `${month.month_name},${month.order_count},${parseFloat(month.total_sales).toFixed(2)},${avgOrder}\n`;
+                });
+
+                // Download CSV
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sales-report-${year}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } else {
+                alert('Failed to export sales report');
             }
-            
-            allMonths.forEach(month => {
-                const avgOrder = month.order_count > 0 
-                    ? (parseFloat(month.total_sales) / month.order_count).toFixed(2)
-                    : '0.00';
-                csv += `${month.month_name},${month.order_count},${parseFloat(month.total_sales).toFixed(2)},${avgOrder}\n`;
-            });
-            
-            // Download CSV
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `sales-report-${year}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        } else {
+        })
+        .catch(error => {
+            console.error('Error exporting sales report:', error);
             alert('Failed to export sales report');
-        }
-    })
-    .catch(error => {
-        console.error('Error exporting sales report:', error);
-        alert('Failed to export sales report');
-    });
+        });
 }
 
 // Load dashboard statistics
@@ -255,7 +255,7 @@ async function loadDashboardData() {
             credentials: 'include'
         });
         const data = await response.json();
-        
+
         if (data.success) {
             const stats = data.data;
             document.getElementById('total-products').textContent = stats.total_products;
@@ -287,7 +287,7 @@ async function loadProducts() {
             credentials: 'include'
         });
         const data = await response.json();
-        
+
         if (data.success) {
             displayProducts(data.data);
         } else {
@@ -302,10 +302,10 @@ async function loadProducts() {
 // Display products in admin interface
 function displayProducts(products) {
     const container = document.getElementById('products-list');
-    
+
     // Check if container exists (might not exist on non-dashboard pages)
     if (!container) return;
-    
+
     if (!products || products.length === 0) {
         container.innerHTML = `
             <div class="text-center text-gray-500 py-8">
@@ -315,18 +315,18 @@ function displayProducts(products) {
         `;
         return;
     }
-    
+
     container.innerHTML = products.map(product => {
         // Determine image source
-        const imageSrc = product.image_url 
-            ? `../${product.image_url}` 
+        const imageSrc = product.image_url
+            ? `../${product.image_url}`
             : 'https://via.placeholder.com/150?text=No+Image';
-        
+
         // Determine status badge
-        const statusBadge = product.availability_status === 'available' 
+        const statusBadge = product.availability_status === 'available'
             ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1"></i>Available</span>'
             : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"><i class="fas fa-times-circle mr-1"></i>Unavailable</span>';
-            
+
         return `
         <div class="border border-gray-200 rounded-lg p-4 sm:p-6 mb-4 hover:shadow-md transition-shadow bg-white">
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -377,7 +377,7 @@ async function loadRecentOrders() {
             credentials: 'include'
         });
         const data = await response.json();
-        
+
         if (data.success && data.data.recent_orders) {
             displayRecentOrders(data.data.recent_orders);
         } else {
@@ -391,10 +391,10 @@ async function loadRecentOrders() {
 
 function displayRecentOrders(orders) {
     const container = document.getElementById('recent-orders');
-    
+
     // Check if container exists (might not exist on non-dashboard pages)
     if (!container) return;
-    
+
     if (!orders || orders.length === 0) {
         container.innerHTML = `
             <div class="text-center text-gray-500 py-8">
@@ -404,7 +404,7 @@ function displayRecentOrders(orders) {
         `;
         return;
     }
-    
+
     container.innerHTML = orders.map(order => `
         <div class="border-b border-gray-200 pb-3 mb-3 last:border-b-0">
             <div class="flex justify-between items-start">
@@ -413,15 +413,14 @@ function displayRecentOrders(orders) {
                     <p class="text-sm text-gray-600">${order.customer_name || 'Guest Customer'}</p>
                     <p class="text-sm text-gray-500">₱${parseFloat(order.total_amount).toFixed(2)}</p>
                 </div>
-                <span class="px-2 py-1 text-xs rounded-full ${
-                    order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
-                    order.status === 'preparing' ? 'bg-orange-100 text-orange-800' :
+                <span class="px-2 py-1 text-xs rounded-full ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+            order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
+                order.status === 'preparing' ? 'bg-orange-100 text-orange-800' :
                     order.status === 'ready' ? 'bg-green-100 text-green-800' :
-                    order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                    'bg-gray-100 text-gray-800'
-                }">
+                        order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                'bg-gray-100 text-gray-800'
+        }">
                     ${order.status}
                 </span>
             </div>
@@ -431,10 +430,10 @@ function displayRecentOrders(orders) {
 
 function displayRecentOrdersError(message) {
     const container = document.getElementById('recent-orders');
-    
+
     // Check if container exists (might not exist on non-dashboard pages)
     if (!container) return;
-    
+
     container.innerHTML = `
         <div class="text-center text-red-500 py-8">
             <i class="fas fa-exclamation-circle text-4xl mb-4"></i>
@@ -450,11 +449,11 @@ function displayRecentOrdersError(message) {
 function addSizeRow(modalType) {
     const container = document.getElementById(`${modalType}-sizes-container`);
     const index = productSizes[modalType].length;
-    
+
     const sizeRow = document.createElement('div');
     sizeRow.className = 'flex items-center space-x-2 bg-gray-50 p-2 rounded';
     sizeRow.setAttribute('data-index', index);
-    
+
     sizeRow.innerHTML = `
         <input type="text" placeholder="Size name (e.g., Small, Medium)" 
                class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md" 
@@ -470,7 +469,7 @@ function addSizeRow(modalType) {
             <i class="fas fa-trash"></i>
         </button>
     `;
-    
+
     container.appendChild(sizeRow);
     productSizes[modalType].push({ size_name: '', size_code: '', price: 0 });
 }
@@ -503,13 +502,13 @@ function getSizesFromForm(modalType) {
     const container = document.getElementById(`${modalType}-sizes-container`);
     const rows = container.querySelectorAll('[data-index]');
     const sizes = [];
-    
+
     rows.forEach(row => {
         const size_name = row.querySelector('[data-field="size_name"]').value;
         const size_code = row.querySelector('[data-field="size_code"]').value;
         const price = row.querySelector('[data-field="price"]').value;
         const id = row.getAttribute('data-size-id');
-        
+
         if (size_name && size_code && price) {
             const sizeData = {
                 size_name: size_name,
@@ -517,15 +516,15 @@ function getSizesFromForm(modalType) {
                 price: parseFloat(price),
                 is_available: 1
             };
-            
+
             if (id) {
                 sizeData.id = id;
             }
-            
+
             sizes.push(sizeData);
         }
     });
-    
+
     return sizes;
 }
 
@@ -538,7 +537,7 @@ function showAddProductModal() {
         imagePreviewContainer.classList.add('hidden');
     }
     document.getElementById('file-name-display').textContent = 'No file selected';
-    
+
     // Reset sizes
     productSizes.add = [];
     document.getElementById('add-sizes-container').innerHTML = '';
@@ -555,15 +554,15 @@ function hideAddProductModal() {
 // Handle add product form submission
 async function handleAddProduct(e) {
     e.preventDefault();
-    
+
     const formData = new FormData(e.target);
-    
+
     // Check if we have an image file
     const hasImageFile = formData.get('product_image') && formData.get('product_image').size > 0;
-    
+
     try {
         let response;
-        
+
         if (hasImageFile) {
             // Use FormData directly for file upload
             response = await fetch('../api/products.php', {
@@ -577,16 +576,17 @@ async function handleAddProduct(e) {
                 name: formData.get('name'),
                 description: formData.get('description'),
                 price: parseFloat(formData.get('price')),
+                min_order: parseInt(formData.get('min_order')) || 1,
                 category: formData.get('category'),
                 availability_status: formData.get('availability_status')
             };
-            
+
             // Add unavailable reason if status is unavailable
             const status = formData.get('availability_status');
             if (status === 'unavailable') {
                 productData.unavailable_reason = formData.get('unavailable_reason');
             }
-            
+
             response = await fetch('../api/products.php', {
                 method: 'POST',
                 headers: {
@@ -596,16 +596,16 @@ async function handleAddProduct(e) {
                 body: JSON.stringify(productData)
             });
         }
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             // Save product sizes
             const sizes = getSizesFromForm('add');
             if (sizes.length > 0) {
                 await saveProductSizes(result.id, sizes);
             }
-            
+
             showNotification('Product added successfully!', 'success');
             hideAddProductModal();
             loadProducts();
@@ -627,7 +627,7 @@ async function saveProductSizes(productId, sizes) {
                 product_id: productId,
                 ...size
             };
-            
+
             if (size.id) {
                 // Update existing size
                 await fetch(`../api/product-sizes.php?id=${size.id}`, {
@@ -656,10 +656,10 @@ async function saveProductSizes(productId, sizes) {
 }
 
 // Initialize image preview functionality
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Only set up forms if we're on the dashboard page
     const isDashboardPage = document.getElementById('total-products') !== null;
-    
+
     if (isDashboardPage) {
         // Setup form submission - ensure this is properly attached
         const addProductForm = document.getElementById('add-product-form');
@@ -668,7 +668,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             console.error('Add product form not found!');
         }
-        
+
         // Setup edit product form submission
         const editProductForm = document.getElementById('edit-product-form');
         if (editProductForm) {
@@ -676,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             console.error('Edit product form not found!');
         }
-        
+
         // Setup image preview
         initImagePreview();
     }
@@ -688,16 +688,16 @@ function initImagePreview() {
     const fileNameDisplay = document.getElementById('file-name-display');
     const imagePreviewContainer = document.getElementById('image-preview-container');
     const imagePreview = document.getElementById('image-preview');
-    
+
     if (imageInput) {
-        imageInput.addEventListener('change', function() {
+        imageInput.addEventListener('change', function () {
             if (this.files && this.files[0]) {
                 const file = this.files[0];
                 fileNameDisplay.textContent = file.name;
-                
+
                 // Show image preview
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     imagePreview.src = e.target.result;
                     imagePreviewContainer.classList.remove('hidden');
                 };
@@ -717,23 +717,24 @@ async function editProduct(productId) {
             credentials: 'include'
         });
         const result = await response.json();
-        
+
         if (result.success && result.data) {
             const product = result.data;
-            
+
             // Populate form fields
             document.getElementById('edit-product-id').value = product.id;
             document.getElementById('edit-product-name').value = product.name;
             document.getElementById('edit-product-description').value = product.description;
             document.getElementById('edit-product-price').value = product.price;
+            document.getElementById('edit-product-min-order').value = product.min_order || 1;
             document.getElementById('edit-product-category').value = product.category;
-            
+
             // Set availability status
             const statusSelect = document.getElementById('edit-product-status');
             if (statusSelect) {
                 statusSelect.value = product.availability_status || 'available';
             }
-            
+
             // Handle unavailable reason
             const reasonField = document.getElementById('edit-unavailable-reason-container');
             const reasonInput = document.getElementById('edit-product-reason');
@@ -744,7 +745,7 @@ async function editProduct(productId) {
                 if (reasonField) reasonField.style.display = 'none';
                 if (reasonInput) reasonInput.value = '';
             }
-            
+
             // Handle image preview
             const imagePreview = document.getElementById('edit-image-preview');
             if (product.image_url) {
@@ -755,13 +756,13 @@ async function editProduct(productId) {
                 imagePreview.src = 'https://via.placeholder.com/150?text=No+Image';
                 document.getElementById('edit-file-name-display').textContent = 'No image';
             }
-            
+
             // Load product sizes
             await loadProductSizesForEdit(productId);
-            
+
             // Show modal
             document.getElementById('edit-product-modal').classList.remove('hidden');
-            
+
             // Setup image preview for new uploads
             initEditImagePreview();
         } else {
@@ -780,12 +781,12 @@ async function loadProductSizesForEdit(productId) {
             credentials: 'include'
         });
         const result = await response.json();
-        
+
         // Reset sizes container
         productSizes.edit = [];
         const container = document.getElementById('edit-sizes-container');
         container.innerHTML = '';
-        
+
         if (result.success && result.data && result.data.length > 0) {
             // Add existing sizes
             result.data.forEach(size => {
@@ -794,7 +795,7 @@ async function loadProductSizesForEdit(productId) {
                 sizeRow.className = 'flex items-center space-x-2 bg-gray-50 p-2 rounded';
                 sizeRow.setAttribute('data-index', index);
                 sizeRow.setAttribute('data-size-id', size.id);
-                
+
                 sizeRow.innerHTML = `
                     <input type="text" placeholder="Size name (e.g., Small, Medium)" 
                            value="${size.size_name}"
@@ -813,7 +814,7 @@ async function loadProductSizesForEdit(productId) {
                         <i class="fas fa-trash"></i>
                     </button>
                 `;
-                
+
                 container.appendChild(sizeRow);
                 productSizes.edit.push({ ...size });
             });
@@ -834,16 +835,16 @@ function initEditImagePreview() {
     const fileNameDisplay = document.getElementById('edit-file-name-display');
     const imagePreviewContainer = document.getElementById('edit-image-preview-container');
     const imagePreview = document.getElementById('edit-image-preview');
-    
+
     if (imageInput) {
-        imageInput.addEventListener('change', function() {
+        imageInput.addEventListener('change', function () {
             if (this.files && this.files[0]) {
                 const file = this.files[0];
                 fileNameDisplay.textContent = file.name;
-                
+
                 // Show image preview
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     imagePreview.src = e.target.result;
                     imagePreviewContainer.classList.remove('hidden');
                 };
@@ -861,16 +862,16 @@ function hideEditProductModal() {
 // Handle edit product form submission
 async function handleEditProduct(e) {
     e.preventDefault();
-    
+
     const formData = new FormData(e.target);
     const productId = formData.get('product_id');
-    
+
     // Check if we have an image file
     const hasImageFile = formData.get('product_image') && formData.get('product_image').size > 0;
-    
+
     try {
         let response;
-        
+
         if (hasImageFile) {
             // Use FormData directly for file upload
             formData.append('_method', 'PUT'); // Simulate PUT request
@@ -886,16 +887,17 @@ async function handleEditProduct(e) {
                 name: formData.get('name'),
                 description: formData.get('description'),
                 price: parseFloat(formData.get('price')),
+                min_order: parseInt(formData.get('min_order')) || 1,
                 category: formData.get('category'),
                 availability_status: formData.get('availability_status')
             };
-            
+
             // Add unavailable reason if status is unavailable
             const status = formData.get('availability_status');
             if (status === 'unavailable') {
                 productData.unavailable_reason = formData.get('unavailable_reason');
             }
-            
+
             response = await fetch(`../api/products.php?id=${productId}`, {
                 method: 'PUT',
                 headers: {
@@ -905,16 +907,16 @@ async function handleEditProduct(e) {
                 body: JSON.stringify(productData)
             });
         }
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             // Save product sizes
             const sizes = getSizesFromForm('edit');
             if (sizes.length > 0) {
                 await saveProductSizes(productId, sizes);
             }
-            
+
             showNotification('Product updated successfully!', 'success');
             hideEditProductModal();
             loadProducts();
@@ -932,15 +934,15 @@ async function deleteProduct(productId) {
     if (!confirm('Are you sure you want to delete this product?')) {
         return;
     }
-    
+
     try {
         const response = await fetch(`../api/products.php?id=${productId}`, {
             method: 'DELETE',
             credentials: 'include'
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             showNotification('Product deleted successfully!', 'success');
             loadProducts();
@@ -957,10 +959,10 @@ async function deleteProduct(productId) {
 // Display error message
 function displayError(message) {
     const container = document.getElementById('products-list');
-    
+
     // Check if container exists (might not exist on non-dashboard pages)
     if (!container) return;
-    
+
     container.innerHTML = `
         <div class="text-center text-red-500 py-8">
             <i class="fas fa-exclamation-circle text-4xl mb-4"></i>
@@ -975,24 +977,22 @@ function displayError(message) {
 // Show notification
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
-    notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${
-        type === 'success' ? 'bg-green-500 text-white' :
-        type === 'error' ? 'bg-red-500 text-white' :
-        'bg-blue-500 text-white'
-    }`;
+    notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-green-500 text-white' :
+            type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+        }`;
     notification.innerHTML = `
         <div class="flex items-center">
-            <i class="fas ${
-                type === 'success' ? 'fa-check-circle' :
-                type === 'error' ? 'fa-exclamation-circle' :
+            <i class="fas ${type === 'success' ? 'fa-check-circle' :
+            type === 'error' ? 'fa-exclamation-circle' :
                 'fa-info-circle'
-            } mr-2"></i>
+        } mr-2"></i>
             <span>${message}</span>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
@@ -1006,9 +1006,9 @@ async function adminLogout() {
                 method: 'POST',
                 credentials: 'include'
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
                 showNotification('Logged out successfully', 'success');
                 setTimeout(() => {
@@ -1028,23 +1028,23 @@ async function adminLogout() {
 function initAdminMobileMenu() {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
-    
+
     if (mobileMenuButton && mobileMenu) {
-        mobileMenuButton.addEventListener('click', function(e) {
+        mobileMenuButton.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
             toggleAdminMobileMenu();
         });
-        
+
         // Close mobile menu when clicking outside
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!mobileMenuButton.contains(e.target) && !mobileMenu.contains(e.target)) {
                 closeAdminMobileMenu();
             }
         });
-        
+
         // Close mobile menu when window is resized to desktop
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
             if (window.innerWidth >= 768) {
                 closeAdminMobileMenu();
             }
@@ -1055,10 +1055,10 @@ function initAdminMobileMenu() {
 function toggleAdminMobileMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuButton = document.getElementById('mobile-menu-button');
-    
+
     if (mobileMenu && mobileMenuButton) {
         const isHidden = mobileMenu.classList.contains('hidden');
-        
+
         if (isHidden) {
             openAdminMobileMenu();
         } else {
@@ -1070,7 +1070,7 @@ function toggleAdminMobileMenu() {
 function openAdminMobileMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuButton = document.getElementById('mobile-menu-button');
-    
+
     if (mobileMenu && mobileMenuButton) {
         mobileMenu.classList.remove('hidden');
         mobileMenuButton.innerHTML = '<i class="fas fa-times text-xl"></i>';
@@ -1081,7 +1081,7 @@ function openAdminMobileMenu() {
 function closeAdminMobileMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuButton = document.getElementById('mobile-menu-button');
-    
+
     if (mobileMenu && mobileMenuButton) {
         mobileMenu.classList.add('hidden');
         mobileMenuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
@@ -1094,9 +1094,9 @@ function setupStatusChangeHandlers() {
     // Handle status dropdown changes in modals
     const addStatusSelect = document.getElementById('add-availability-status');
     const editStatusSelect = document.getElementById('edit-availability-status');
-    
+
     if (addStatusSelect) {
-        addStatusSelect.addEventListener('change', function() {
+        addStatusSelect.addEventListener('change', function () {
             const reasonField = document.getElementById('add-unavailable-reason-field');
             if (this.value === 'unavailable') {
                 reasonField.classList.remove('hidden');
@@ -1106,9 +1106,9 @@ function setupStatusChangeHandlers() {
             }
         });
     }
-    
+
     if (editStatusSelect) {
-        editStatusSelect.addEventListener('change', function() {
+        editStatusSelect.addEventListener('change', function () {
             const reasonField = document.getElementById('edit-unavailable-reason-field');
             if (this.value === 'unavailable') {
                 reasonField.classList.remove('hidden');
@@ -1124,7 +1124,7 @@ function setupStatusChangeHandlers() {
 async function toggleProductStatus(productId, currentStatus) {
     const newStatus = currentStatus === 'available' ? 'unavailable' : 'available';
     let reason = '';
-    
+
     // If marking as unavailable, prompt for reason
     if (newStatus === 'unavailable') {
         reason = prompt('Please provide a reason for marking this product as unavailable:');
@@ -1134,7 +1134,7 @@ async function toggleProductStatus(productId, currentStatus) {
             return;
         }
     }
-    
+
     // Show loading state
     const statusButton = document.querySelector(`[onclick="toggleProductStatus(${productId}, '${currentStatus}')"]`);
     const originalText = statusButton ? statusButton.innerHTML : '';
@@ -1142,7 +1142,7 @@ async function toggleProductStatus(productId, currentStatus) {
         statusButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Updating...';
         statusButton.disabled = true;
     }
-    
+
     try {
         const requestData = {
             status: newStatus
@@ -1150,7 +1150,7 @@ async function toggleProductStatus(productId, currentStatus) {
         if (reason) {
             requestData.reason = reason;
         }
-        
+
         const response = await fetch(`../api/products.php?id=${productId}&action=status`, {
             method: 'PUT',
             headers: {
@@ -1159,12 +1159,12 @@ async function toggleProductStatus(productId, currentStatus) {
             body: JSON.stringify(requestData),
             credentials: 'include'
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             showNotification(`Product status updated to ${newStatus}`, 'success');
-            
+
             // Broadcast status change to other tabs/windows
             if (typeof BroadcastChannel !== 'undefined') {
                 const channel = new BroadcastChannel('product_status_updates');
@@ -1175,7 +1175,7 @@ async function toggleProductStatus(productId, currentStatus) {
                     reason: reason
                 });
             }
-            
+
             loadProducts(); // Refresh the product list
         } else {
             throw new Error(result.message || 'Failed to update product status');
@@ -1183,7 +1183,7 @@ async function toggleProductStatus(productId, currentStatus) {
     } catch (error) {
         console.error('Error updating product status:', error);
         showNotification(`Network error updating product status: ${error.message}`, 'error');
-        
+
         // Restore button state
         if (statusButton) {
             statusButton.innerHTML = originalText;
@@ -1197,7 +1197,7 @@ async function toggleProductStatus(productId, currentStatus) {
 // Listen for real-time status updates from other tabs/windows
 if (typeof BroadcastChannel !== 'undefined') {
     const statusChannel = new BroadcastChannel('product_status_updates');
-    statusChannel.addEventListener('message', function(event) {
+    statusChannel.addEventListener('message', function (event) {
         if (event.data.type === 'status_update') {
             // Update the product in the local array
             const productIndex = products.findIndex(p => p.id == event.data.productId);
@@ -1205,10 +1205,10 @@ if (typeof BroadcastChannel !== 'undefined') {
                 products[productIndex].availability_status = event.data.status;
                 products[productIndex].unavailable_reason = event.data.reason || null;
                 products[productIndex].status_updated_at = new Date().toISOString();
-                
+
                 // Refresh the display
                 displayProducts();
-                
+
                 // Show notification
                 showNotification(`Product status updated to ${event.data.status} by another admin`, 'info');
             }
@@ -1239,7 +1239,7 @@ async function loadAllUsers(role = '') {
             credentials: 'include'
         });
         const data = await response.json();
-        
+
         if (data.success) {
             displayUsers(data.data);
         } else {
@@ -1255,9 +1255,9 @@ async function loadAllUsers(role = '') {
 function displayUsers(users) {
     const container = document.getElementById('users-list');
     const countElement = document.getElementById('total-users-count');
-    
+
     countElement.textContent = users.length;
-    
+
     if (!users || users.length === 0) {
         container.innerHTML = `
             <div class="text-center text-gray-500 py-8">
@@ -1267,16 +1267,16 @@ function displayUsers(users) {
         `;
         return;
     }
-    
+
     container.innerHTML = users.map(user => {
-        const statusBadge = user.is_active == 1 
+        const statusBadge = user.is_active == 1
             ? '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1"></i>Active</span>'
             : '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800"><i class="fas fa-times-circle mr-1"></i>Inactive</span>';
-        
+
         const roleBadge = user.role === 'admin'
             ? '<span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800"><i class="fas fa-shield-alt mr-1"></i>Admin</span>'
             : '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"><i class="fas fa-user mr-1"></i>Customer</span>';
-        
+
         return `
             <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
                 <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -1327,11 +1327,11 @@ function filterUsersByRole() {
 async function toggleUserStatus(userId, currentStatus) {
     const newStatus = currentStatus == 1 ? 0 : 1;
     const action = newStatus == 1 ? 'activate' : 'deactivate';
-    
+
     if (!confirm(`Are you sure you want to ${action} this user?`)) {
         return;
     }
-    
+
     try {
         const response = await fetch(`../api/users.php?user_id=${userId}`, {
             method: 'PUT',
@@ -1343,9 +1343,9 @@ async function toggleUserStatus(userId, currentStatus) {
                 is_active: newStatus
             })
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             showNotification(`User ${action}d successfully`, 'success');
             // Reload users with current filter
@@ -1364,13 +1364,13 @@ async function toggleUserStatus(userId, currentStatus) {
 async function viewUserProfile(userId) {
     // Show profile modal
     document.getElementById('user-profile-modal').classList.remove('hidden');
-    
+
     try {
         const response = await fetch(`../api/users.php?action=profile&user_id=${userId}`, {
             credentials: 'include'
         });
         const data = await response.json();
-        
+
         if (data.success) {
             displayUserProfile(data.data);
         } else {
@@ -1388,9 +1388,9 @@ function displayUserProfile(profileData) {
     const orders = profileData.recent_orders;
     const orderStats = profileData.order_stats;
     const lastLogin = profileData.last_login;
-    
+
     const container = document.getElementById('user-profile-content');
-    
+
     // Build order statistics HTML
     let statsHTML = '';
     if (orderStats && orderStats.length > 0) {
@@ -1403,7 +1403,7 @@ function displayUserProfile(profileData) {
                 'completed': 'bg-green-100 text-green-800',
                 'cancelled': 'bg-red-100 text-red-800'
             };
-            
+
             return `
                 <div class="p-4 border border-gray-200 rounded-lg ${statusColors[stat.status] || 'bg-gray-100 text-gray-800'}">
                     <div class="text-sm font-medium capitalize">${stat.status}</div>
@@ -1413,7 +1413,7 @@ function displayUserProfile(profileData) {
             `;
         }).join('');
     }
-    
+
     // Build recent orders HTML
     let ordersHTML = '';
     if (orders && orders.length > 0) {
@@ -1426,7 +1426,7 @@ function displayUserProfile(profileData) {
                 'completed': 'bg-green-100 text-green-800',
                 'cancelled': 'bg-red-100 text-red-800'
             };
-            
+
             return `
                 <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
                     <div class="flex justify-between items-start">
@@ -1453,7 +1453,7 @@ function displayUserProfile(profileData) {
     } else {
         ordersHTML = '<div class="text-center text-gray-500 py-8">No orders found</div>';
     }
-    
+
     container.innerHTML = `
         <!-- User Info Section -->
         <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-6">
@@ -1463,10 +1463,10 @@ function displayUserProfile(profileData) {
                     <p class="text-gray-600">@${user.username}</p>
                 </div>
                 <div class="text-right">
-                    ${user.role === 'admin' 
-                        ? '<span class="px-3 py-1 rounded-full bg-purple-100 text-purple-800 font-semibold"><i class="fas fa-shield-alt mr-1"></i>Admin</span>'
-                        : '<span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-semibold"><i class="fas fa-user mr-1"></i>Customer</span>'
-                    }
+                    ${user.role === 'admin'
+            ? '<span class="px-3 py-1 rounded-full bg-purple-100 text-purple-800 font-semibold"><i class="fas fa-shield-alt mr-1"></i>Admin</span>'
+            : '<span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-semibold"><i class="fas fa-user mr-1"></i>Customer</span>'
+        }
                 </div>
             </div>
             
